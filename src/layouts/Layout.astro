@@ -22,6 +22,19 @@ const { description, title } = Astro.props
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <script>
+      ;(() => {
+        try {
+          const stored = localStorage.getItem("theme") ?? "system"
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+          const isDark = stored === "dark" || (stored === "system" && prefersDark)
+          document.documentElement.dataset.theme = stored
+          document.documentElement.classList[isDark ? "add" : "remove"]("dark")
+        } catch (e) {
+          /* Si no hay localStorage disponible, se usa el tema por defecto */
+        }
+      })()
+    </script>
     <ViewTransitions />
   </head>
 

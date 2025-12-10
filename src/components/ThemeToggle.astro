@@ -9,7 +9,7 @@ const THEMES = ["Light", "Dark", "System"]
 <div class="relative ml-1 mr-1">
   <button
     id="theme-toggle-btn"
-    class="appearance-none border-none flex hover:scale-125 transition"
+    class="appearance-none border-none flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-sm ring-1 ring-black/5 transition hover:scale-105 hover:text-yellow-500 hover:ring-yellow-200/80 dark:bg-gray-800/90 dark:text-gray-100 dark:ring-white/10 dark:hover:text-yellow-200 dark:hover:ring-yellow-300/80"
   >
     <span class="sr-only">Elige el tema</span>
     <SunIcon id="light" class="theme-toggle-icon size-5 transition-all" />
@@ -29,7 +29,7 @@ const THEMES = ["Light", "Dark", "System"]
     <ul>
       {
         THEMES.map((theme) => (
-          <li class="themes-menu-option px-2 py-1.5 cursor-default hover:bg-neutral-400/40 dark:hover:bg-gray-500/50 rounded-sm">
+          <li class="themes-menu-option px-2 py-1.5 cursor-default hover:bg-neutral-400/40 dark:hover:bg-gray-500/50 rounded-sm" data-theme={theme.toLowerCase()}>
             {theme}
           </li>
         ))
@@ -57,59 +57,71 @@ const THEMES = ["Light", "Dark", "System"]
   }
 </style>
 
+<style>
+  .theme-toggle-icon {
+    transform: scale(0);
+    transition: transform 150ms ease;
+  }
+  html[data-theme="light"] .theme-toggle-icon#light,
+  html[data-theme="dark"] .theme-toggle-icon#dark,
+  html[data-theme="system"] .theme-toggle-icon#system {
+    transform: scale(1);
+  }
+</style>
+
 <script is:inline>
-  let remove = null
-  const matchMedia = window.matchMedia("(prefers-color-scheme: dark)")
-  const themesMenu = document.getElementById("themes-menu")
+  ;(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)")
 
-  const getThemePreference = () => {
-    if (typeof localStorage !== "undefined") {
-      return localStorage.getItem("theme") ?? "system"
+    const getStoredTheme = () => localStorage.getItem("theme") ?? "system"
+
+    const applyTheme = (pref) => {
+      localStorage.setItem("theme", pref)
+      document.documentElement.dataset.theme = pref
+      const isDark = pref === "dark" || (pref === "system" && media.matches)
+      document.documentElement.classList[isDark ? "add" : "remove"]("dark")
     }
 
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light"
-  }
+    const setup = () => {
+      const button = document.getElementById("theme-toggle-btn")
+      const themesMenu = document.getElementById("themes-menu")
+      const options = themesMenu?.querySelectorAll(".themes-menu-option") ?? []
+      if (!button || !themesMenu || options.length === 0) return
+      if (button.dataset.bound === "true") return
+      button.dataset.bound = "true"
 
-  const updateIcon = (themePreference) => {
-    document.querySelectorAll(".theme-toggle-icon").forEach((element) => {
-      element.style.scale = element.id === themePreference ? "1" : "0"
+      applyTheme(getStoredTheme())
+
+      media.addEventListener("change", () => {
+        if (getStoredTheme() === "system") applyTheme("system")
+      })
+
+      document.addEventListener("click", () => themesMenu.classList.remove("open"))
+
+      button.addEventListener("click", (e) => {
+        e.stopPropagation()
+        themesMenu.classList.toggle("open")
+      })
+
+      options.forEach((option) => {
+        option.addEventListener("click", (e) => {
+          e.stopPropagation()
+          const pref = option.dataset.theme ?? option.innerText.toLowerCase().trim()
+          applyTheme(pref)
+          themesMenu.classList.remove("open")
+        })
+      })
+    }
+
+    document.addEventListener("astro:page-load", () => {
+      applyTheme(getStoredTheme())
+      setup()
     })
-  }
-
-  const updateTheme = () => {
-    if (remove != null) {
-      remove()
-    }
-    matchMedia.addEventListener("change", updateTheme)
-    remove = () => {
-      matchMedia.removeEventListener("change", updateTheme)
-    }
-
-    const themePreference = getThemePreference()
-    const isDark =
-      themePreference === "dark" ||
-      (themePreference === "system" && matchMedia.matches)
-
-    updateIcon(themePreference)
-    document.documentElement.classList[isDark ? "add" : "remove"]("dark")
-  }
-
-  updateTheme()
-
-  document.addEventListener("click", () => themesMenu.classList.remove("open"))
-
-  document.getElementById("theme-toggle-btn").addEventListener("click", (e) => {
-    e.stopPropagation()
-    const isClosed = !themesMenu.classList.contains("open")
-    themesMenu.classList[isClosed ? "add" : "remove"]("open")
-  })
-
-  document.querySelectorAll(".themes-menu-option").forEach((element) => {
-    element.addEventListener("click", (e) => {
-      localStorage.setItem("theme", e.target.innerText.toLowerCase().trim())
-      updateTheme()
+    document.addEventListener("astro:after-swap", () => {
+      applyTheme(getStoredTheme())
+      setup()
     })
-  })
+
+    setup()
+  })()
 </script>
