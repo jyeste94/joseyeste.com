@@ -1,20 +1,22 @@
 ---
-import Layout from "@/layouts/Layout.astro"
-import LinkButton from "@/components/LinkButton.astro"
-import SectionContainer from "@/components/SectionContainer.astro"
-import { getAllPosts, getPostBySlug } from "@/data/posts"
+import Layout from "@/layouts/Layout.astro";
+import LinkButton from "@/components/LinkButton.astro";
+import SectionContainer from "@/components/SectionContainer.astro";
+import { getCollection } from "astro:content";
 
-export function getStaticPaths() {
-  return getAllPosts().map((post) => ({
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
     params: { slug: post.slug },
-  }))
+    props: { post },
+  }));
 }
 
-const { slug } = Astro.params
-const post = getPostBySlug(slug ?? "")
+const { post } = Astro.props;
+const { Content } = await post.render();
 
 if (!post) {
-  return Astro.redirect("/blog")
+  return Astro.redirect("/blog");
 }
 
 const formatDate = (date: string) =>
@@ -22,53 +24,65 @@ const formatDate = (date: string) =>
     day: "2-digit",
     month: "long",
     year: "numeric",
-  })
+  });
 ---
 
 <Layout
-  title={`${post.title} | Blog de Jose Yeste`}
-  description={post.summary}
+  title={`${post.data.title} | Blog de Jose Yeste`}
+  description={post.data.summary}
 >
   <main class="px-4">
     <SectionContainer id="blog" class="py-16 md:py-24 space-y-10">
       <div class="space-y-4">
-        <a href="/blog" class="inline-flex items-center gap-2 text-sm font-semibold text-yellow-600 transition hover:gap-3 dark:text-yellow-200">
+        <a
+          href="/blog"
+          class="inline-flex items-center gap-2 text-sm font-semibold text-yellow-600 transition hover:gap-3 dark:text-yellow-200"
+        >
           ← Volver al blog
         </a>
-        <span class="rounded-full bg-gray-900 px-4 py-1 text-xs font-semibold uppercase tracking-[0.15rem] text-yellow-300 dark:bg-gray-100 dark:text-gray-900">
-          {post.category}
+        <span
+          class="rounded-full bg-gray-900 px-4 py-1 text-xs font-semibold uppercase tracking-[0.15rem] text-yellow-300 dark:bg-gray-100 dark:text-gray-900"
+        >
+          {post.data.category}
         </span>
         <h1 class="text-4xl font-bold text-gray-900 dark:text-white">
-          {post.title}
+          {post.data.title}
         </h1>
-        <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
-          <span>{formatDate(post.date)}</span>
+        <div
+          class="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-300"
+        >
+          <span>{formatDate(post.data.date.toString())}</span>
           <span class="text-gray-400">·</span>
-          <span>{post.readingTime}</span>
+          <span>{post.data.readingTime}</span>
           <span class="text-gray-400">·</span>
           <ul class="flex flex-wrap gap-2">
-            {post.tags.map((tag) => (
-              <li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200">
-                {tag}
-              </li>
-            ))}
+            {
+              post.data.tags.map((tag) => (
+                <li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                  {tag}
+                </li>
+              ))
+            }
           </ul>
         </div>
       </div>
 
-      <article class="prose prose-lg max-w-none text-gray-800 prose-headings:text-gray-900 prose-a:text-yellow-600 dark:prose-invert dark:text-gray-50">
-        {
-          post.body.map((paragraph) => (
-            <p>{paragraph}</p>
-          ))
-        }
+      <article
+        class="prose prose-lg mx-auto mt-6 text-gray-800 prose-headings:text-gray-900 prose-a:text-yellow-600 dark:prose-invert dark:text-gray-50 dark:prose-headings:text-white dark:prose-a:text-yellow-300"
+      >
+        <Content />
       </article>
 
-      <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-dashed border-gray-300 bg-white/70 p-6 dark:border-gray-800 dark:bg-gray-900/60">
+      <div
+        class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-dashed border-gray-300 bg-white/70 p-6 dark:border-gray-800 dark:bg-gray-900/60"
+      >
         <div>
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">¿Quieres comentar algo?</h2>
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+            ¿Quieres comentar algo?
+          </h2>
           <p class="text-gray-700 dark:text-gray-200">
-            Escríbeme si quieres que amplíe alguno de estos temas o tienes curiosidad por el código.
+            Escríbeme si quieres que amplíe alguno de estos temas o tienes
+            curiosidad por el código.
           </p>
         </div>
         <LinkButton href="mailto:jose.yeste@gmail.com">Abrir email</LinkButton>
