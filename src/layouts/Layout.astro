@@ -1,16 +1,16 @@
 ---
-import "@fontsource-variable/onest"
+import "@fontsource-variable/onest";
 
-import Header from "../components/Header.astro"
-import Footer from "../components/Footer.astro"
-import { ViewTransitions } from "astro:transitions"
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { ViewTransitions } from "astro:transitions";
 
 interface Props {
-  title: string
-  description: string
+  title: string;
+  description: string;
 }
 
-const { description, title } = Astro.props
+const { description, title } = Astro.props;
 ---
 
 <!doctype html>
@@ -21,19 +21,41 @@ const { description, title } = Astro.props
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2QM8VN7Y8F"
+    ></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-2QM8VN7Y8F");
+
+      document.addEventListener("astro:page-load", () => {
+        gtag("config", "G-2QM8VN7Y8F", {
+          page_path: window.location.pathname,
+          page_title: document.title,
+        });
+      });
+    </script>
     <title>{title}</title>
     <script>
-      ;(() => {
+      (() => {
         try {
-          const stored = localStorage.getItem("theme") ?? "system"
-          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-          const isDark = stored === "dark" || (stored === "system" && prefersDark)
-          document.documentElement.dataset.theme = stored
-          document.documentElement.classList[isDark ? "add" : "remove"]("dark")
+          const stored = localStorage.getItem("theme") ?? "system";
+          const prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+          ).matches;
+          const isDark =
+            stored === "dark" || (stored === "system" && prefersDark);
+          document.documentElement.dataset.theme = stored;
+          document.documentElement.classList[isDark ? "add" : "remove"]("dark");
         } catch (e) {
           /* Si no hay localStorage disponible, se usa el tema por defecto */
         }
-      })()
+      })();
     </script>
     <ViewTransitions />
   </head>

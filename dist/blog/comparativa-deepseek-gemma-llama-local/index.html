@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="es"> <head><meta charset="UTF-8"><meta name="description" content="Análisis técnico pero en cristiano: cómo la cuantización extrema y trucos como el Sparse Attention han logrado meter LLMs gigantes en tu portátil sin que salga ardiendo."><meta name="viewport" content="width=device-width"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="generator" content="Astro v4.4.5"><!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-2QM8VN7Y8F"></script><script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-2QM8VN7Y8F");
+
+      document.addEventListener("astro:page-load", () => {
+        gtag("config", "G-2QM8VN7Y8F", {
+          page_path: window.location.pathname,
+          page_title: document.title,
+        });
+      });
+    </script><title>DeepSeek-R2, Gemma 3 y Llama 4 Scout frente a frente: La IA que ya puedes correr en tu PC | Blog de Jose Yeste</title><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><link rel="stylesheet" href="/_astro/_slug_.CmWBKdNP.css" /><script type="module" src="/_astro/hoisted.CApH8CiZ.js"></script></head> <body class="relative text-black dark:text-white"> <div class="absolute top-0 bottom-0 z-[-2] min-h-screen w-full bg-gray-50 dark:bg-gray-950
+      bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(217,216,255,0.5),rgba(255,255,255,0.9))]
+      dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div> <header class="fixed top-0 z-10 flex items-center justify-center w-full mx-auto mt-2" data-astro-cid-3ef6ksr2> <nav class="flex items-center gap-2 px-4 py-2 text-base font-semibold rounded-full text-gray-800 dark:text-gray-100 bg-white/90 dark:bg-gray-900/80 shadow-lg ring-1 ring-black/5 dark:ring-white/10 backdrop-blur-md" data-astro-cid-3ef6ksr2> <a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 " aria-label="experiencia" href="/#experiencia" data-astro-cid-3ef6ksr2> Experiencia </a><a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 " aria-label="proyectos" href="/#proyectos" data-astro-cid-3ef6ksr2> Proyectos </a><a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 text-yellow-500" aria-label="blog" href="/blog" data-astro-cid-3ef6ksr2> Blog </a><a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 " aria-label="sobre-mi" href="/#sobre-mi" data-astro-cid-3ef6ksr2> Sobre mí </a><a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 " aria-label="contacto" href="mailto:jose.yeste@gmail.com" data-astro-cid-3ef6ksr2> Contacto </a> <div class="relative ml-1 mr-1" data-astro-cid-x3pjskd3> <button id="theme-toggle-btn" class="appearance-none border-none flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-sm ring-1 ring-black/5 transition hover:scale-105 hover:text-yellow-500 hover:ring-yellow-200/80 dark:bg-gray-800/90 dark:text-gray-100 dark:ring-white/10 dark:hover:text-yellow-200 dark:hover:ring-yellow-300/80" data-astro-cid-x3pjskd3> <span class="sr-only" data-astro-cid-x3pjskd3>Elige el tema</span> <svg id="light" class="theme-toggle-icon size-5 transition-all" data-astro-cid-x3pjskd3 width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path> <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"></path> </svg> <svg id="dark" class="theme-toggle-icon absolute size-5 transition-all" data-astro-cid-x3pjskd3 width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> </svg> <svg id="system" class="theme-toggle-icon absolute size-5 transition-all" data-astro-cid-x3pjskd3 width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-10z"></path> <path d="M7 20h10"></path> <path d="M9 16v4"></path> <path d="M15 16v4"></path> </svg> </button> <div id="themes-menu" class="absolute hidden scale-80 top-8 right-0 text-sm p-1 min-w-[8rem] rounded-md border border-gray-100 bg-white/90 dark:bg-gray-900/90 dark:border-gray-500/20 shadow-[0_3px_10px_rgb(0,0,0,0.2)] backdrop-blur-md" data-astro-cid-x3pjskd3> <ul data-astro-cid-x3pjskd3> <li class="themes-menu-option px-2 py-1.5 cursor-default hover:bg-neutral-400/40 dark:hover:bg-gray-500/50 rounded-sm" data-theme="light" data-astro-cid-x3pjskd3> Light </li><li class="themes-menu-option px-2 py-1.5 cursor-default hover:bg-neutral-400/40 dark:hover:bg-gray-500/50 rounded-sm" data-theme="dark" data-astro-cid-x3pjskd3> Dark </li><li class="themes-menu-option px-2 py-1.5 cursor-default hover:bg-neutral-400/40 dark:hover:bg-gray-500/50 rounded-sm" data-theme="system" data-astro-cid-x3pjskd3> System </li> </ul> </div> </div>   <script>
+  ;(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)")
+
+    const getStoredTheme = () => localStorage.getItem("theme") ?? "system"
+
+    const applyTheme = (pref) => {
+      localStorage.setItem("theme", pref)
+      document.documentElement.dataset.theme = pref
+      const isDark = pref === "dark" || (pref === "system" && media.matches)
+      document.documentElement.classList[isDark ? "add" : "remove"]("dark")
+    }
+
+    const setup = () => {
+      const button = document.getElementById("theme-toggle-btn")
+      const themesMenu = document.getElementById("themes-menu")
+      const options = themesMenu?.querySelectorAll(".themes-menu-option") ?? []
+      if (!button || !themesMenu || options.length === 0) return
+      if (button.dataset.bound === "true") return
+      button.dataset.bound = "true"
+
+      applyTheme(getStoredTheme())
+
+      media.addEventListener("change", () => {
+        if (getStoredTheme() === "system") applyTheme("system")
+      })
+
+      document.addEventListener("click", () => themesMenu.classList.remove("open"))
+
+      button.addEventListener("click", (e) => {
+        e.stopPropagation()
+        themesMenu.classList.toggle("open")
+      })
+
+      options.forEach((option) => {
+        option.addEventListener("click", (e) => {
+          e.stopPropagation()
+          const pref = option.dataset.theme ?? option.innerText.toLowerCase().trim()
+          applyTheme(pref)
+          themesMenu.classList.remove("open")
+        })
+      })
+    }
+
+    document.addEventListener("astro:page-load", () => {
+      applyTheme(getStoredTheme())
+      setup()
+    })
+    document.addEventListener("astro:after-swap", () => {
+      applyTheme(getStoredTheme())
+      setup()
+    })
+
+    setup()
+  })()
+</script> </nav> </header>    <main class="px-4"> <section id="blog" data-section="blog" class="section py-16 md:py-24 space-y-10 scroll-m-20 w-full mx-auto container lg:max-w-4xl md:max-w-2xl">  <div class="space-y-4"> <a href="/blog" class="inline-flex items-center gap-2 text-sm font-semibold text-yellow-600 transition hover:gap-3 dark:text-yellow-200">
+← Volver al blog
+</a> <span class="rounded-full bg-gray-900 px-4 py-1 text-xs font-semibold uppercase tracking-[0.15rem] text-yellow-300 dark:bg-gray-100 dark:text-gray-900"> IA </span> <h1 class="text-4xl font-bold text-gray-900 dark:text-white"> DeepSeek-R2, Gemma 3 y Llama 4 Scout frente a frente: La IA que ya puedes correr en tu PC </h1> <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-300"> <span>27 de marzo de 2026</span> <span class="text-gray-400">·</span> <span>6 min</span> <span class="text-gray-400">·</span> <ul class="flex flex-wrap gap-2"> <li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> IA Local </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> DeepSeek </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> Gemma 3 </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> Llama 4 </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> Rendimiento </li> </ul> </div> </div> <article class="prose prose-lg mx-auto mt-6 text-gray-800 prose-headings:text-gray-900 prose-a:text-yellow-600 dark:prose-invert dark:text-gray-50 dark:prose-headings:text-white dark:prose-a:text-yellow-300"> <p>Si en 2024 nos hubieran dicho que lograríamos correr bichos con arquitectura <em>Mixture of Experts</em> (MoE) en un portátil mientras seguimos compilando cosas de fondo, nos habría dado la risa floja. Pero bienvenidos a 2026. La mentalidad de la industria ha dado un volantazo de 180 grados: ya no se trata de a ver quién la tiene más grande (hablando de trillones de parámetros, malpensados), sino de quién consigue la mejor <strong>eficiencia y compresión</strong>.</p>
+<p>Toda esta magia negra ocurre gracias a técnicas como el <strong>KV Cache Quantization</strong> a 2-bit, el <strong>Sparse Attention</strong> ultraligero y el <strong>NPU Offloading</strong>. En castellano: trucos para exprimir la memoria de vídeo (VRAM) al máximo, hacer que la IA solo se fije en lo verdaderamente necesario, y exprimir los procesadores neuronales que ya vienen de serie en los Mac y portátiles Windows modernos. Suma a eso algoritmos de compresión bestiales como <em>TurboQuant</em> de Google, y el resultado es que hoy, un modelo “pequeñajo” de 7 a 12 billones de parámetros se merienda con patatas a los gigantes intocables de hace solo un par de años.</p>
+<p>Llevo unas semanas quemando los ventiladores de mi equipo para poner a prueba los tres grandes modelos gratuitos en <code>localhost</code>. Aquí tenéis la disección de <strong>DeepSeek-R2</strong>, <strong>Gemma 3</strong> y <strong>Llama 4 Scout</strong>. Vamos al lío.</p>
+<h2 id="el-rey-de-los-bugs-que-enamora-a-las-gpus-modestas-deepseek-r27b-mini">El “Rey de los Bugs” que enamora a las GPUs modestas: DeepSeek-R2:7B-Mini</h2>
+<p>Los chicos de DeepSeek siguen demostrando por qué son los amos absolutos optimizando matemáticas. Si el antiguo R1 ya nos dejó con el culo torcido, este <strong>R2:7B-Mini</strong> es una obra de ingeniería bruta para exprimir al máximo esas gráficas de gama de entrada o portátiles apurados que cuentan con apenas 6 u 8 GB de VRAM.</p>
+<p>Su plato fuerte es su mejora en la famosa <strong>Chain of Thought (CoT)</strong>, es decir, su capacidad para razonar paso a paso. Antes, si la cosa se ponía muy compleja, el modelo empezaba a alucinar. Ahora, el R2 incorpora una especie de pepito grillo interno que auto-verifica todo: si detecta que la lógica se está yendo al garete, corrige el rumbo antes de escupir siquiera la primera línea de código.</p>
+<ul>
+<li><strong>Lo mejor:</strong> Es una mala bestia detectando y levantando bugs encadenados en C++ y Rust.</li>
+<li><strong>Lo peor:</strong> Si le metes un contexto abismal (más de 16k tokens) y lo tienes muy comprimido para ahorrar memoria, se le empieza a ir un poco el santo al cielo y olvida las primeras instrucciones.</li>
+</ul>
+<h2 id="todo-el-ecosistema-de-google-a-dieta-estricta-gemma-3-12b">Todo el ecosistema de Google a dieta estricta: Gemma 3 (12B)</h2>
+<p>Google por fin ha hecho los deberes empaquetando todo el músculo de su familia Gemini en un espacio hiper-reducido. <strong>Gemma 3 (12B)</strong> no es solo un lorito que repite texto; ha unificado el “ver y leer” de forma nativa.</p>
+<p>Cero adaptadores raros ni parches. Gemma 3 inyecta la información de las imágenes directamente en sus neuronas. ¿El resultado en la vida real? Hazle una captura de pantalla a ese log de consola sangrante, pégale un trozo del ticket de Jira, y el bicho lo entiende de una pasada sin rechistar.</p>
+<ul>
+<li><strong>Lo mejor:</strong> La integración directa que tiene con Google Cloud y Vertex AI si te quedas corto en local, y que viene comiendo imágenes directamente desde la caja.</li>
+<li><strong>Lo peor:</strong> Necesita sus buenos 12-16GB de memoria unificada. En un Mac moderno con procesador Apple Silicon va a volar, pero a una RTX 3060 de PC normal de toda la vida, la hará sudar sangre.</li>
+</ul>
+<h2 id="llama-4-scout-un-monstruo-fragmentado-en-tu-mochila">Llama 4 Scout: Un monstruo fragmentado en tu mochila</h2>
+<p>Meta ha soltado una pedrada en el tejado de la IA. <strong>Llama 4 Scout</strong> escondía trampa: es en realidad un mastodonte <strong>MoE de 109B parámetros en total</strong>. La verdadera sacada de chorra de sus ingenieros es que, de esos 109 billones, <strong>solo usa 8 billones activos a la vez</strong> por cada token que procesa.</p>
+<p>Lo han optimizado de forma enfermiza para que funcione en nuestras humildes GPUs caseras. Si ve que tu VRAM se ahoga, reparte el peso como un campeón tirando de la RAM tradicional de la placa base sin que el sistema colapse demasiado.</p>
+<ul>
+<li><strong>Lo mejor:</strong> La coherencia absurda que tiene para proyectos largos. Le pasas bases enteras de código y te sabe proponer rediseños como si llevara tres años picando código en tu empresa.</li>
+<li><strong>Lo peor:</strong> Prepara tu SSD. Esos 109B pesan en el almacenamiento, así que vas a tener que descargar casi 60 GB de modelo aunque luego para funcionar solo “arranque” un trocito a la vez.</li>
+</ul>
+<hr>
+<h2 id="comparativa-de-rendimiento-al-tostadero-entorno-m3-max--rtx-4070-ti">Comparativa de Rendimiento al Tostadero (Entorno: M3 Max / RTX 4070 Ti)</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="left">El Bicho</th><th align="left">¿Qué entrañas lleva?</th><th align="left">Aciertos en Programación</th><th align="left">Velocidad (Tokens/seg)</th><th align="left">Lo que traga de tu VRAM</th></tr></thead><tbody><tr><td align="left"><strong>DeepSeek-R2</strong></td><td align="left">Modelo denso ultrarrápido</td><td align="left">78.4%</td><td align="left"><strong>~90 t/s</strong></td><td align="left"><strong>~5.5 GB</strong></td></tr><tr><td align="left"><strong>Gemma 3</strong></td><td align="left">Multimodal nativo puro</td><td align="left">82.1%</td><td align="left">~65 t/s</td><td align="left">~8.9 GB</td></tr><tr><td align="left"><strong>Llama 4 Scout</strong></td><td align="left">MoE (El gigante dormido)</td><td align="left"><strong>85.3%</strong></td><td align="left">~75 t/s</td><td align="left">~9.2 GB</td></tr></tbody></table>
+<hr>
+<h2 id="casos-de-uso-con-cuál-nos-quedamos">Casos de Uso: ¿Con cuál nos quedamos?</h2>
+<ol>
+<li><strong>Como copiloto mientras picas código:</strong> <strong>DeepSeek-R2</strong>. Aquí manda la velocidad, y a 90 tokens por segundo escupe funciones completas a la velocidad de la luz.</li>
+<li><strong>Para hacerte un asistente inteligente con ojos:</strong> <strong>Gemma 3</strong>. Si vas a trastear con AutoGen y quieres que una IA te lea la pantalla, haga clics y se entienda con tus Docs, no hay rival.</li>
+<li><strong>Para auditar toda la estructura de tu proyecto:</strong> <strong>Llama 4 Scout</strong>. Tírale a la cara el código de tus microservicios y pídele que te optimice el flujo de red. Su nivel de análisis al procesar toneladas de texto es simplemente magia oscura.</li>
+</ol>
+<h2 id="conclusión-el-poder-vuelve-a-nuestros-trastos">Conclusión: El poder vuelve a nuestros trastos</h2>
+<p>No hay que tomar a la ligera el golpe sobre la mesa que estamos viendo en 2026. Correr estas salvajadas algorítmicas sin depender del ronzal de OpenAI o Google en la nube significa que recuperamos, por fin, la privacidad total de nuestro código propietario.</p>
+<p>Tener un Llama 4 Scout metido en tu PC de escritorio de gama media, aprovechando el NPU para no fundir los ventiladores, es la mayor victoria del código abierto de la última década. La clave ya no es pagar miles de pavos al mes a servidores externos, sino saber jugar con el modelo adecuado, domarlo y enchufarlo a tu entorno de la forma más guarra y perfecta posible para facilitarte la vida de desarrollador.</p>
+<p>Y oye, ver tu gráfica ponerse al 100% calentando la habitación en invierno mientras arregla ese código tedioso que tú llevas postergando dos meses… sigue siendo alucinante.</p> </article> <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-dashed border-gray-300 bg-white/70 p-6 dark:border-gray-800 dark:bg-gray-900/60"> <div> <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+¿Quieres comentar algo?
+</h2> <p class="text-gray-700 dark:text-gray-200">
+Escríbeme si quieres que amplíe alguno de estos temas o tienes
+            curiosidad por el código.
+</p> </div> <a href="mailto:jose.yeste@gmail.com" role="link" class="inline-flex items-center justify-center gap-2 px-3 py-2 space-x-2 text-base text-white transition bg-gray-800 border border-gray-600 focus-visible:ring-yellow-500/80 text-md hover:bg-gray-800 hover:border-gray-900 group max-w-fit rounded-xl hover:text-white focus:outline-none focus-visible:outline-none focus-visible:ring focus-visible:ring-white focus-visible:ring-offset-2 active:bg-black"> Abrir email </a> </div>  </section> </main>  <footer class="opacity-80 m-4 mt-16 w-full mx-auto container lg:max-w-4xl md:max-w-2xl mb-10 flex justify-center"> <div class="rounded-lg w-full max-w-screen-xl mx-auto md:flex md:items-center md:justify-between py-4"> <span class="text-sm sm:text-center text-zinc-800/90 dark:text-zinc-200/90">飧 2026 <a href="https://joseyeste.com/" class="hover:underline">Jose Yeste</a>. Casi
+      todos los derechos reservados
+</span> <ul class="flex flex-wrap items-center mt-3 text-sm font-medium dark:text-white/90 sm:mt-0"> <li> <a href="/#sobre-mi" class="hover:underline me-4 md:me-6">Sobre mí</a> </li> <li> <a href="/blog" class="hover:underline me-4 md:me-6">Blog</a> </li> <li> <a id="contacto" href="mailto:jose.yeste@gmail.com" class="hover:underline">Contacto</a> </li> </ul> </div> </footer>  </body> </html>
