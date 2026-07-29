@@ -4,6 +4,7 @@ import "@fontsource-variable/onest";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { ViewTransitions } from "astro:transitions";
+import Analytics from "@vercel/analytics/astro";
 
 interface Props {
   title: string;
@@ -58,6 +59,7 @@ const { description, title } = Astro.props;
       })();
     </script>
     <ViewTransitions />
+    <Analytics />
   </head>
 
   <body class="relative text-black dark:text-white">
