@@ -1,0 +1,268 @@
+<!DOCTYPE html><html lang="es"> <head><meta charset="UTF-8"><meta name="description" content="Análisis técnico de un ataque de cero clics (zero-click): profundizamos en el desbordamiento de memoria DNG (CVE-2025-43300), cadenas ROP y ejecución remota de código en iOS."><meta name="viewport" content="width=device-width"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="generator" content="Astro v4.4.5"><!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtag/js?id=G-2QM8VN7Y8F"></script><script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-2QM8VN7Y8F");
+
+      document.addEventListener("astro:page-load", () => {
+        gtag("config", "G-2QM8VN7Y8F", {
+          page_path: window.location.pathname,
+          page_title: document.title,
+        });
+      });
+    </script><title>El Ataque Invisible: Cómo una simple imagen de WhatsApp podía tomar el control total de tu iPhone | Blog de Jose Yeste</title><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><link rel="stylesheet" href="/_astro/_slug_.CjTU3GNs.css" /><script type="module" src="/_astro/hoisted.DA22etMU.js"></script></head> <body class="relative text-black dark:text-white"> <div class="absolute top-0 bottom-0 z-[-2] min-h-screen w-full bg-gray-50 dark:bg-gray-950
+      bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(217,216,255,0.5),rgba(255,255,255,0.9))]
+      dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div> <header class="fixed top-0 z-10 flex items-center justify-center w-full mx-auto mt-2" data-astro-cid-3ef6ksr2> <nav class="flex items-center gap-2 px-4 py-2 text-base font-semibold rounded-full text-gray-800 dark:text-gray-100 bg-white/90 dark:bg-gray-900/80 shadow-lg ring-1 ring-black/5 dark:ring-white/10 backdrop-blur-md" data-astro-cid-3ef6ksr2> <a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 " aria-label="experiencia" href="/#experiencia" data-astro-cid-3ef6ksr2> Experiencia </a><a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 " aria-label="proyectos" href="/#proyectos" data-astro-cid-3ef6ksr2> Proyectos </a><a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 text-yellow-500" aria-label="blog" href="/blog" data-astro-cid-3ef6ksr2> Blog </a><a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 " aria-label="sobre-mi" href="/#sobre-mi" data-astro-cid-3ef6ksr2> Sobre mí </a><a class="relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 " aria-label="contacto" href="mailto:jose.yeste@gmail.com" data-astro-cid-3ef6ksr2> Contacto </a> <div class="relative ml-1 mr-1" data-astro-cid-x3pjskd3> <button id="theme-toggle-btn" class="appearance-none border-none flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-sm ring-1 ring-black/5 transition hover:scale-105 hover:text-yellow-500 hover:ring-yellow-200/80 dark:bg-gray-800/90 dark:text-gray-100 dark:ring-white/10 dark:hover:text-yellow-200 dark:hover:ring-yellow-300/80" data-astro-cid-x3pjskd3> <span class="sr-only" data-astro-cid-x3pjskd3>Elige el tema</span> <svg id="light" class="theme-toggle-icon size-5 transition-all" data-astro-cid-x3pjskd3 width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path> <path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"></path> </svg> <svg id="dark" class="theme-toggle-icon absolute size-5 transition-all" data-astro-cid-x3pjskd3 width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path> </svg> <svg id="system" class="theme-toggle-icon absolute size-5 transition-all" data-astro-cid-x3pjskd3 width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"> <path stroke="none" d="M0 0h24v24H0z" fill="none"></path> <path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-10z"></path> <path d="M7 20h10"></path> <path d="M9 16v4"></path> <path d="M15 16v4"></path> </svg> </button> <div id="themes-menu" class="absolute hidden scale-80 top-8 right-0 text-sm p-1 min-w-[8rem] rounded-md border border-gray-100 bg-white/90 dark:bg-gray-900/90 dark:border-gray-500/20 shadow-[0_3px_10px_rgb(0,0,0,0.2)] backdrop-blur-md" data-astro-cid-x3pjskd3> <ul data-astro-cid-x3pjskd3> <li class="themes-menu-option px-2 py-1.5 cursor-default hover:bg-neutral-400/40 dark:hover:bg-gray-500/50 rounded-sm" data-theme="light" data-astro-cid-x3pjskd3> Light </li><li class="themes-menu-option px-2 py-1.5 cursor-default hover:bg-neutral-400/40 dark:hover:bg-gray-500/50 rounded-sm" data-theme="dark" data-astro-cid-x3pjskd3> Dark </li><li class="themes-menu-option px-2 py-1.5 cursor-default hover:bg-neutral-400/40 dark:hover:bg-gray-500/50 rounded-sm" data-theme="system" data-astro-cid-x3pjskd3> System </li> </ul> </div> </div>   <script>
+  ;(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)")
+
+    const getStoredTheme = () => localStorage.getItem("theme") ?? "system"
+
+    const applyTheme = (pref) => {
+      localStorage.setItem("theme", pref)
+      document.documentElement.dataset.theme = pref
+      const isDark = pref === "dark" || (pref === "system" && media.matches)
+      document.documentElement.classList[isDark ? "add" : "remove"]("dark")
+    }
+
+    const setup = () => {
+      const button = document.getElementById("theme-toggle-btn")
+      const themesMenu = document.getElementById("themes-menu")
+      const options = themesMenu?.querySelectorAll(".themes-menu-option") ?? []
+      if (!button || !themesMenu || options.length === 0) return
+      if (button.dataset.bound === "true") return
+      button.dataset.bound = "true"
+
+      applyTheme(getStoredTheme())
+
+      media.addEventListener("change", () => {
+        if (getStoredTheme() === "system") applyTheme("system")
+      })
+
+      document.addEventListener("click", () => themesMenu.classList.remove("open"))
+
+      button.addEventListener("click", (e) => {
+        e.stopPropagation()
+        themesMenu.classList.toggle("open")
+      })
+
+      options.forEach((option) => {
+        option.addEventListener("click", (e) => {
+          e.stopPropagation()
+          const pref = option.dataset.theme ?? option.innerText.toLowerCase().trim()
+          applyTheme(pref)
+          themesMenu.classList.remove("open")
+        })
+      })
+    }
+
+    document.addEventListener("astro:page-load", () => {
+      applyTheme(getStoredTheme())
+      setup()
+    })
+    document.addEventListener("astro:after-swap", () => {
+      applyTheme(getStoredTheme())
+      setup()
+    })
+
+    setup()
+  })()
+</script> </nav> </header>    <main class="px-4"> <section id="blog" data-section="blog" class="section py-16 md:py-24 space-y-10 scroll-m-20 w-full mx-auto container lg:max-w-4xl md:max-w-2xl">  <div class="space-y-4"> <a href="/blog" class="inline-flex items-center gap-2 text-sm font-semibold text-yellow-600 transition hover:gap-3 dark:text-yellow-200">
+← Volver al blog
+</a> <span class="rounded-full bg-gray-900 px-4 py-1 text-xs font-semibold uppercase tracking-[0.15rem] text-yellow-300 dark:bg-gray-100 dark:text-gray-900"> Ciberseguridad </span> <h1 class="text-4xl font-bold text-gray-900 dark:text-white"> El Ataque Invisible: Cómo una simple imagen de WhatsApp podía tomar el control total de tu iPhone </h1> <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-300"> <span>29 de julio de 2026</span> <span class="text-gray-400">·</span> <span>10 min</span> <span class="text-gray-400">·</span> <ul class="flex flex-wrap gap-2"> <li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> Ciberseguridad </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> iOS </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> WhatsApp </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> Zero-Click </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> CVE </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> Buffer Overflow </li><li class="rounded-full bg-gray-100 px-3 py-1 font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200"> ROP </li> </ul> </div> </div> <article class="prose prose-lg mx-auto mt-6 text-gray-800 prose-headings:text-gray-900 prose-a:text-yellow-600 dark:prose-invert dark:text-gray-50 dark:prose-headings:text-white dark:prose-a:text-yellow-300"> <blockquote>
+<p><em>“No necesitas hacer clic en nada. No necesitas abrir el mensaje. Solo recibirlo basta.”</em></p>
+</blockquote>
+<hr>
+<h2 id="-el-resumen-para-los-que-tienen-prisa">🎯 El Resumen (para los que tienen prisa)</h2>
+<p>En agosto de 2025, se descubrió una cadena de ataque <strong>de “cero clics”</strong> (<em>zero-click</em>) contra WhatsApp en iOS. Esto significa que <strong>con solo conocer tu número de teléfono</strong>, un atacante podía comprometer el dispositivo <strong>sin que el usuario hiciera nada</strong>: ni abrir el chat, ni descargar la imagen, ni hacer clic en ningún enlace.</p>
+<p>La cadena de ataque combinaba <strong>dos vulnerabilidades encadenadas</strong>:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="left">Vulnerabilidad</th><th align="left">Componente</th><th align="left">Mecanismo de explotación</th></tr></thead><tbody><tr><td align="left"><strong>CVE-2025-55177</strong></td><td align="left">WhatsApp (iOS/Mac)</td><td align="left">Sincronización falsa que fuerza la descarga en segundo plano</td></tr><tr><td align="left"><strong>CVE-2025-43300</strong></td><td align="left">Apple ImageIO (<code>RawCamera.bundle</code>)</td><td align="left">Desbordamiento de búfer en el <em>heap</em> al procesar metadatos DNG</td></tr></tbody></table>
+<p>Ambas fueron parcheadas por WhatsApp y Apple. Sin embargo, analizar la arquitectura de este exploit es fascinante para entender la ingeniería detrás de los ataques modernos en sistemas móviles.</p>
+<hr>
+<h2 id="-los-fundamentos-qué-es-un-ataque-de-cero-clics">🧩 Los Fundamentos: ¿Qué es un ataque de “cero clics”?</h2>
+<p>En la mayoría de vectores de ataque tradicionales (phishing, enlaces maliciosos, troyanos), se requiere la interacción de la víctima. En un ataque de <strong>cero clics</strong> (<em>zero-click</em>), la superficie de entrada se activa automáticamente al recibir el paquete de datos en segundo plano.</p>
+<p>El flujo de explotación funcionaba como una <strong>cadena de dos eslabones</strong>:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span>1. Recepción de mensaje de sincronización manipulado (WhatsApp)</span></span>
+<span class="line"><span>                        ↓</span></span>
+<span class="line"><span>2. WhatsApp valida erróneamente el origen y descarga la imagen DNG</span></span>
+<span class="line"><span>                        ↓</span></span>
+<span class="line"><span>3. El demonio de procesamiento de imágenes de iOS indexa la imagen</span></span>
+<span class="line"><span>                        ↓</span></span>
+<span class="line"><span>4. Desbordamiento de memoria (Buffer Overflow) y ejecución de código (RCE)</span></span></code></pre>
+<hr>
+<h2 id="-el-primer-eslabón-sincronización-de-dispositivos-cve-2025-55177">🔗 El Primer Eslabón: Sincronización de Dispositivos (CVE-2025-55177)</h2>
+<h3 id="el-fallo-de-autenticación-en-la-sincronización">El fallo de autenticación en la sincronización</h3>
+<p>WhatsApp permite vincular múltiples dispositivos (WhatsApp Web, escritorio, iPad) compartiendo claves de sesión. Para mantener los chats al día, el sistema intercambia peticiones de sincronización en segundo plano.</p>
+<p>La vulnerabilidad residía en que <strong>WhatsApp para iOS no validaba adecuadamente la firma de origen</strong> en las peticiones de sincronización de medios entrantes.</p>
+<h3 id="el-vector-de-descarga-forzada">El vector de descarga forzada</h3>
+<p>Un atacante podía forjar un mensaje de protocolo indicando:</p>
+<blockquote>
+<p><em>“Este mensaje proviene de tu cliente secundario vinculado. Descarga de inmediato el recurso multimedia de esta URL para pre-procesar su miniatura.”</em></p>
+</blockquote>
+<p>Al no verificar si la petición provenía realmente de un dispositivo autorizado de la cuenta, WhatsApp <strong>descargaba automáticamente el archivo multimedia</strong> y lo entregaba al subsistema de procesamiento multimedia del sistema operativo.</p>
+<p><strong>Versiones afectadas</strong>:</p>
+<ul>
+<li>WhatsApp para iOS <code>&#x3C; 2.25.21.73</code></li>
+<li>WhatsApp Business para iOS <code>&#x3C; 2.25.21.78</code></li>
+<li>WhatsApp para Mac <code>&#x3C; 2.25.21.78</code></li>
+</ul>
+<hr>
+<h2 id="-el-segundo-eslabón-la-imagen-que-explota-el-sistema-cve-2025-43300">💥 El Segundo Eslabón: La Imagen que Explota el Sistema (CVE-2025-43300)</h2>
+<p>Una vez descargada la imagen en el almacenamiento local del dispositivo, iOS utiliza el framework <strong>ImageIO</strong> y el paquete <strong><code>RawCamera.bundle</code></strong> para generar vistas previas y procesar archivos RAW.</p>
+<h3 id="️️-la-analogía-del-restaurante">🕵️‍♂️ La Analogía del Restaurante</h3>
+<p>Para entender cómo un simple archivo gráfico puede doblegar las defensas de un iPhone, imaginemos el procesamiento de memoria como la gestión de mesas en un restaurante:</p>
+<ol>
+<li><strong>La Reserva de Espacio:</strong> El sistema (el camarero) lee los metadatos TIFF y reserva una mesa para 2 comensales (<code>SamplesPerPixel = 2</code>).</li>
+<li><strong>La Entrada de Datos:</strong> El decodificador lee los datos reales del JPEG (<code>SOF3</code>) que resultan ser de solo 1 comensal (<code>NumComponents = 1</code>), pero procesa los datos con un formato desalineado.</li>
+<li><strong>El Desbordamiento:</strong> El camarero, confundido por la falta de coincidencia, empieza a escribir la información fuera del espacio reservado. Escribe directamente en la mesa de al lado, corrompiendo la reserva de otros clientes.</li>
+<li><strong>La Corrupción Calculada:</strong> El atacante ha diseñado la imagen DNG para que esta escritura fuera de límites no sea accidental. Coloca datos especialmente estructurados que sobrescriben una dirección de memoria crítica: <strong>el puntero que le dice al programa qué instrucción ejecutar a continuación</strong>.</li>
+<li><strong>La Redirección del Control:</strong> Cuando el programa termina su tarea actual, consulta esa dirección de memoria. Como el atacante la ha modificado, el sistema salta directamente a ejecutar <strong>las instrucciones del atacante</strong> en lugar del código legítimo.</li>
+</ol>
+<hr>
+<h3 id="️-el-proceso-técnico-de-explotación-rce-paso-a-paso">⚙️ El Proceso Técnico de Explotación (RCE Paso a Paso)</h3>
+<p>Para comprender la ingeniería detrás de la Ejecución Remota de Código (RCE), este es el proceso paso a paso:</p>
+<h4 id="1-la-corrupción-de-memoria-heap-overflow">1. La Corrupción de Memoria (Heap Overflow)</h4>
+<p>El <code>heap</code> es la zona de memoria dinámica donde los programas crean y destruyen objetos sobre la marcha.</p>
+<ul>
+<li>Los metadatos TIFF engañan a <code>RawCamera.bundle</code> para que reserve un búfer reducido.</li>
+<li>La rutina de decodificación del stream JPEG lee el marcador comprimido y <strong>escribe más datos de los que caben en el búfer asignado</strong>, desbordando el bloque de memoria contiguo.</li>
+</ul>
+<h4 id="2-la-desviación-del-flujo-de-control-control-flow-hijacking">2. La Desviación del Flujo de Control (Control Flow Hijacking)</h4>
+<p>El objetivo no es simplemente provocar un fallo (<em>crash</em>), sino tomar el control de la ejecución.</p>
+<ul>
+<li>Al sobrescribir la memoria contigua en el <em>heap</em>, el atacante logra modificar <strong>punteros de función</strong> o estructuras de vtable de objetos C++.</li>
+<li>La siguiente vez que el sistema operativo intenta llamar a un método sobre ese objeto corrompido, la CPU salta a la dirección inyectada por el atacante.</li>
+</ul>
+<h4 id="3-evadiendo-protecciones-con-cadenas-rop-return-oriented-programming">3. Evadiendo Protecciones con Cadenas ROP (Return-Oriented Programming)</h4>
+<p>En iOS moderno existen protecciones estrictas como <strong>W^X</strong> (<em>Write XOR Execute</em>) y <strong>PAC</strong> (<em>Pointer Authentication Codes</em>), que impiden ejecutar código nuevo inyectado directamente en memoria de datos.</p>
+<ul>
+<li><strong>¿Qué es ROP?</strong>: En lugar de inyectar código nuevo, el atacante reutiliza fragmentos de código legítimo ejecutable que ya existen en la memoria de iOS (dentro de librerías del sistema como <code>libsystem_kernel.dylib</code>). Estos fragmentos se conocen como <strong>gadgets</strong> y finalizan con una instrucción de retorno (<code>ret</code>).</li>
+<li><strong>Encadenamiento</strong>: El atacante construye una pila con las direcciones de estos <em>gadgets</em>. Al saltar al primero, este realiza una pequeña instrucción, ejecuta <code>ret</code> y salta automáticamente al siguiente gadget. Con esto, el atacante puede realizar operaciones complejas, como reconfigurar los permisos de memoria.</li>
+</ul>
+<h4 id="4-ejecución-del-payload-final">4. Ejecución del Payload Final</h4>
+<p>Una vez que la cadena ROP ha deshabilitado las restricciones de memoria, el atacante logra ejecutar su <em>payload</em> final con los privilegios del proceso afectado:</p>
+<ul>
+<li><strong>Acceso a datos confidenciales:</strong> Lectura de mensajes, contactos y archivos locales.</li>
+<li><strong>Persistencia o escalado:</strong> Explotación del kernel para obtener acceso <em>root</em>.</li>
+<li><strong>Monitoreo silencioso:</strong> Activación no autorizada de sensores o servicios.</li>
+</ul>
+<hr>
+<h2 id="-la-precisión-de-los-2-bytes">🔬 La Precisión de los 2 Bytes</h2>
+<p>Lo más impactante de esta vulnerabilidad es su simplicidad en la capa de entrada: en un archivo DNG legítimo de muestra (extraído de cámaras como la Pentax K-3 Mark III), bastaba con modificar <strong>únicamente dos bytes</strong> mediante edición hexadecimal para activar el fallo:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="left">Offset Hexadecimal</th><th align="left">Valor Original</th><th align="left">Valor Modificado</th><th align="left">Alteración realizada</th></tr></thead><tbody><tr><td align="left"><code>0x2FD00</code></td><td align="left"><code>0x01</code></td><td align="left"><code>0x02</code></td><td align="left">Elevación del parámetro <code>SamplesPerPixel</code></td></tr><tr><td align="left"><code>0x3E40B</code></td><td align="left"><code>0x02</code></td><td align="left"><code>0x01</code></td><td align="left">Reducción del marcador <code>NumComponents</code></td></tr></tbody></table>
+<hr>
+<h2 id="️-demostración-de-concepto-poc-y-análisis">🖥️ Demostración de Concepto (PoC) y Análisis</h2>
+<p><em>Nota: Los scripts expuestos son recreaciones con fines analíticos y de auditoría de parches.</em></p>
+<h3 id="1-inspección-de-inconsistencias-en-dng">1. Inspección de Inconsistencias en DNG</h3>
+<p>Mediante un script de análisis en Python, los investigadores verificaban los offsets antes de forzar la mutación del archivo:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color:#6A737D"># dng_vulnerability_analyzer.py</span></span>
+<span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> struct</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> analyze_dng</span><span style="color:#E1E4E8">(file_path):</span></span>
+<span class="line"><span style="color:#F97583">    with</span><span style="color:#79B8FF"> open</span><span style="color:#E1E4E8">(file_path, </span><span style="color:#9ECBFF">"rb"</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">as</span><span style="color:#E1E4E8"> f:</span></span>
+<span class="line"><span style="color:#E1E4E8">        content </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> f.read()</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D">    # Lectura de offsets específicos en cabecera TIFF y marcador SOF3</span></span>
+<span class="line"><span style="color:#E1E4E8">    samples_per_pixel </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> content[</span><span style="color:#F97583">0x</span><span style="color:#79B8FF">2FD00</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#E1E4E8">    num_components </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> content[</span><span style="color:#F97583">0x</span><span style="color:#79B8FF">3E40B</span><span style="color:#E1E4E8">]</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"📁 Archivo: </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">file_path</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"  ├── TIFF SamplesPerPixel: </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">samples_per_pixel</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF"> (offset 0x2FD00)"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"  └── JPEG NumComponents:   </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">num_components</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF"> (offset 0x3E40B)"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#F97583">    if</span><span style="color:#E1E4E8"> samples_per_pixel </span><span style="color:#F97583">!=</span><span style="color:#E1E4E8"> num_components:</span></span>
+<span class="line"><span style="color:#79B8FF">        print</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"⚠️ Inconsistencia detectada. Riesgo de desbordamiento en ImageIO."</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">analyze_dng(</span><span style="color:#9ECBFF">"IMGP0847.DNG"</span><span style="color:#E1E4E8">)</span></span></code></pre>
+<h3 id="2-generación-del-payload-de-prueba">2. Generación del Payload de Prueba</h3>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0"><code><span class="line"><span style="color:#6A737D"># hex_modifier.py</span></span>
+<span class="line"><span style="color:#F97583">def</span><span style="color:#B392F0"> generate_poc</span><span style="color:#E1E4E8">(input_dng, output_dng):</span></span>
+<span class="line"><span style="color:#F97583">    with</span><span style="color:#79B8FF"> open</span><span style="color:#E1E4E8">(input_dng, </span><span style="color:#9ECBFF">"rb"</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">as</span><span style="color:#E1E4E8"> f:</span></span>
+<span class="line"><span style="color:#E1E4E8">        data </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> bytearray</span><span style="color:#E1E4E8">(f.read())</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">    # Inyección de inconsistencia en los offsets críticos</span></span>
+<span class="line"><span style="color:#E1E4E8">    data[</span><span style="color:#F97583">0x</span><span style="color:#79B8FF">2FD00</span><span style="color:#E1E4E8">] </span><span style="color:#F97583">=</span><span style="color:#F97583"> 0x</span><span style="color:#79B8FF">02</span><span style="color:#6A737D">  # SamplesPerPixel = 2</span></span>
+<span class="line"><span style="color:#E1E4E8">    data[</span><span style="color:#F97583">0x</span><span style="color:#79B8FF">3E40B</span><span style="color:#E1E4E8">] </span><span style="color:#F97583">=</span><span style="color:#F97583"> 0x</span><span style="color:#79B8FF">01</span><span style="color:#6A737D">  # NumComponents = 1</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">    with</span><span style="color:#79B8FF"> open</span><span style="color:#E1E4E8">(output_dng, </span><span style="color:#9ECBFF">"wb"</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">as</span><span style="color:#E1E4E8"> f:</span></span>
+<span class="line"><span style="color:#E1E4E8">        f.write(data)</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#79B8FF">    print</span><span style="color:#E1E4E8">(</span><span style="color:#F97583">f</span><span style="color:#9ECBFF">"✅ PoC generado correctamente en: </span><span style="color:#79B8FF">{</span><span style="color:#E1E4E8">output_dng</span><span style="color:#79B8FF">}</span><span style="color:#9ECBFF">"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">generate_poc(</span><span style="color:#9ECBFF">"IMGP0847.DNG"</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">"poc_malicious.dng"</span><span style="color:#E1E4E8">)</span></span></code></pre>
+<hr>
+<h2 id="-por-qué-es-tan-peligroso">🧠 ¿Por qué es tan Peligroso?</h2>
+<p>El impacto real de esta vulnerabilidad radica en tres factores críticos:</p>
+<ul>
+<li><strong>Invisible:</strong> El usuario no interactúa. No hay enlaces que pulsar ni botones que aceptar. El procesamiento automático en segundo plano activa la vulnerabilidad.</li>
+<li><strong>Silencioso:</strong> La aplicación no muestra comportamientos anómalos visibles mientras el proceso explota la memoria en segundo plano.</li>
+<li><strong>Escalable:</strong> Al no depender del factor humano, las campañas de explotación pueden automatizarse masivamente.</li>
+</ul>
+<hr>
+<h2 id="️-mitigación-y-remediación">🛡️ Mitigación y Remediación</h2>
+<p>Ambas compañías distribuyeron parches de seguridad para corregir la vulnerabilidad en la cadena:</p>
+<ol>
+<li><strong>Parche en WhatsApp (CVE-2025-55177):</strong> Incorporación de verificación estricta con firmas criptográficas para cualquier solicitud de sincronización recibida de dispositivos vinculados.</li>
+<li><strong>Parche en Apple iOS (CVE-2025-43300):</strong> Actualización en <code>RawCamera.bundle</code> dentro de <strong>iOS 18.6.2</strong> para validar que <code>SamplesPerPixel</code> coincida exactamente con <code>NumComponents</code> antes de reservar memoria.</li>
+</ol>
+<hr>
+<h2 id="-recursos-para-profundizar">📚 Recursos para Profundizar</h2>
+<ul>
+<li><strong><code>zero-click-exploit-analysis</code>:</strong> Proyecto de investigación con paper técnico y análisis de desbordamientos en <em>heap</em>.</li>
+<li><strong>Blog de Quarkslab:</strong> Análisis de ingeniería inversa del parche de Apple para la vulnerabilidad CVE-2025-43300.</li>
+<li><strong>Presentación DNGerousLINK (39C3):</strong> Ponencia detallada sobre la cadena completa de exploits.</li>
+<li><strong>Repositorios PoC:</strong> Herramientas y scripts de análisis publicados por la comunidad de ciberseguridad (<code>hunters-sec</code>, <code>PwnToday</code>).</li>
+</ul> </article> <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-dashed border-gray-300 bg-white/70 p-6 dark:border-gray-800 dark:bg-gray-900/60"> <div> <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+¿Quieres comentar algo?
+</h2> <p class="text-gray-700 dark:text-gray-200">
+Escríbeme si quieres que amplíe alguno de estos temas o tienes
+            curiosidad por el código.
+</p> </div> <a href="mailto:jose.yeste@gmail.com" role="link" class="inline-flex items-center justify-center gap-2 px-3 py-2 space-x-2 text-base text-white transition bg-gray-800 border border-gray-600 focus-visible:ring-yellow-500/80 text-md hover:bg-gray-800 hover:border-gray-900 group max-w-fit rounded-xl hover:text-white focus:outline-none focus-visible:outline-none focus-visible:ring focus-visible:ring-white focus-visible:ring-offset-2 active:bg-black"> Abrir email </a> </div>  </section> </main>  <footer class="opacity-80 m-4 mt-16 w-full mx-auto container lg:max-w-4xl md:max-w-2xl mb-10 flex justify-center"> <div class="rounded-lg w-full max-w-screen-xl mx-auto md:flex md:items-center md:justify-between py-4"> <span class="text-sm sm:text-center text-zinc-800/90 dark:text-zinc-200/90">飧 2026 <a href="https://joseyeste.com/" class="hover:underline">Jose Yeste</a>. Casi
+      todos los derechos reservados
+</span> <ul class="flex flex-wrap items-center mt-3 text-sm font-medium dark:text-white/90 sm:mt-0"> <li> <a href="/#sobre-mi" class="hover:underline me-4 md:me-6">Sobre mí</a> </li> <li> <a href="/blog" class="hover:underline me-4 md:me-6">Blog</a> </li> <li> <a id="contacto" href="mailto:jose.yeste@gmail.com" class="hover:underline">Contacto</a> </li> </ul> </div> </footer>  </body> </html>
