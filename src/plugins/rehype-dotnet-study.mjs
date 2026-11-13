@@ -24,8 +24,8 @@ export default function rehypeDotnetStudy() {
           const href = node.properties.href;
           if (href && !/^(?:[a-z][a-z\d+.-]*:|\/|#)/i.test(href)) {
             const reference = evidence.get(decodeURI(href));
-            if (!reference) file.fail(`Unmapped study evidence reference: ${href}`);
-            node.properties.href = `#${reference.id}`;
+            if (!reference?.url) file.fail(`Unmapped public study evidence reference: ${href}`);
+            node.properties.href = reference.url;
           }
         }
         if (node.tagName === 'img' && typeof node.properties.src === 'string') {

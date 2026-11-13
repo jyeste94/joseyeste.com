@@ -305,447 +305,538 @@
     {
       "sourceHref": "../README.md",
       "path": "README.md",
-      "id": "evidencia-b33563055168"
+      "id": "evidencia-b33563055168",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/README.md"
     },
     {
       "sourceHref": "../README.md#versiones-y-separación-de-factores",
       "path": "README.md",
-      "id": "evidencia-b33563055168"
+      "id": "evidencia-b33563055168",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/README.md#versiones-y-separación-de-factores"
     },
     {
       "sourceHref": "../docs/experiments-aot-language.md",
       "path": "docs/experiments-aot-language.md",
-      "id": "evidencia-47f40c3835b9"
+      "id": "evidencia-47f40c3835b9",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-aot-language.md"
     },
     {
       "sourceHref": "../docs/experiments-apps.md",
       "path": "docs/experiments-apps.md",
-      "id": "evidencia-30f35e655cc7"
+      "id": "evidencia-30f35e655cc7",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-apps.md"
     },
     {
       "sourceHref": "../docs/experiments-diagnostics.md",
       "path": "docs/experiments-diagnostics.md",
-      "id": "evidencia-5998e62b150f"
+      "id": "evidencia-5998e62b150f",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-diagnostics.md"
     },
     {
       "sourceHref": "../docs/experiments-gc.md",
       "path": "docs/experiments-gc.md",
-      "id": "evidencia-66ac6b003d1b"
+      "id": "evidencia-66ac6b003d1b",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-gc.md"
     },
     {
       "sourceHref": "../docs/experiments-opentelemetry.md",
       "path": "docs/experiments-opentelemetry.md",
-      "id": "evidencia-49a84856569b"
+      "id": "evidencia-49a84856569b",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-opentelemetry.md"
     },
     {
       "sourceHref": "../docs/experiments-runtime-async.md",
       "path": "docs/experiments-runtime-async.md",
-      "id": "evidencia-1b6ad6b00607"
+      "id": "evidencia-1b6ad6b00607",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-runtime-async.md"
     },
     {
       "sourceHref": "../docs/final-audit.md",
       "path": "docs/final-audit.md",
-      "id": "evidencia-0c5cb713ef30"
+      "id": "evidencia-0c5cb713ef30",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/final-audit.md"
     },
     {
       "sourceHref": "../docs/limitations.md",
       "path": "docs/limitations.md",
-      "id": "evidencia-a95975256127"
+      "id": "evidencia-a95975256127",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/limitations.md"
     },
     {
       "sourceHref": "../docs/methodology.md",
       "path": "docs/methodology.md",
-      "id": "evidencia-0abaf28a964f"
+      "id": "evidencia-0abaf28a964f",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/methodology.md"
     },
     {
       "sourceHref": "../docs/migration-guide.md",
       "path": "docs/migration-guide.md",
-      "id": "evidencia-c27572d4a0b1"
+      "id": "evidencia-c27572d4a0b1",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/migration-guide.md"
     },
     {
       "sourceHref": "../docs/reproduction.md",
       "path": "docs/reproduction.md",
-      "id": "evidencia-113fa8cfb6cb"
+      "id": "evidencia-113fa8cfb6cb",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/reproduction.md"
     },
     {
       "sourceHref": "../docs/research.md",
       "path": "docs/research.md",
-      "id": "evidencia-d3284b7c09ce"
+      "id": "evidencia-d3284b7c09ce",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/research.md"
     },
     {
       "sourceHref": "../docs/traceability.md",
       "path": "docs/traceability.md",
-      "id": "evidencia-0f1a77641be5"
+      "id": "evidencia-0f1a77641be5",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md"
     },
     {
       "sourceHref": "../results/metadata/",
       "path": "results/metadata/",
-      "id": "evidencia-2e3a949af1d4"
+      "id": "evidencia-2e3a949af1d4",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/metadata/"
     },
     {
       "sourceHref": "../results/metadata/micro-full-20261112/environment.json",
       "path": "results/metadata/micro-full-20261112/environment.json",
-      "id": "evidencia-eae7c22ee92c"
+      "id": "evidencia-eae7c22ee92c",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/metadata/micro-full-20261112/environment.json"
     },
     {
       "sourceHref": "../results/metadata/web-canonical-selection.json",
       "path": "results/metadata/web-canonical-selection.json",
-      "id": "evidencia-2b58aa147724"
+      "id": "evidencia-2b58aa147724",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/metadata/web-canonical-selection.json"
     },
     {
       "sourceHref": "../results/processed/",
       "path": "results/processed/",
-      "id": "evidencia-7af0f987adad"
+      "id": "evidencia-7af0f987adad",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/"
     },
     {
       "sourceHref": "../results/processed/anomalies/comparisons.json",
       "path": "results/processed/anomalies/comparisons.json",
-      "id": "evidencia-1dd017ec894b"
+      "id": "evidencia-1dd017ec894b",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/anomalies/comparisons.json"
     },
     {
       "sourceHref": "../results/processed/anomalies/initial-contrast.json",
       "path": "results/processed/anomalies/initial-contrast.json",
-      "id": "evidencia-8fa56c2c2104"
+      "id": "evidencia-8fa56c2c2104",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/anomalies/initial-contrast.json"
     },
     {
       "sourceHref": "../results/processed/aot-summary.json",
       "path": "results/processed/aot-summary.json",
-      "id": "evidencia-72dacfc93ab3"
+      "id": "evidencia-72dacfc93ab3",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/aot-summary.json"
     },
     {
       "sourceHref": "../results/processed/critical-controls/aot-files.json",
       "path": "results/processed/critical-controls/aot-files.json",
-      "id": "evidencia-ccfdaa91eb0c"
+      "id": "evidencia-ccfdaa91eb0c",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/critical-controls/aot-files.json"
     },
     {
       "sourceHref": "../results/processed/dependency-audit.json",
       "path": "results/processed/dependency-audit.json",
-      "id": "evidencia-4240917cf8c0"
+      "id": "evidencia-4240917cf8c0",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/dependency-audit.json"
     },
     {
       "sourceHref": "../results/processed/ef/independent-runs.json",
       "path": "results/processed/ef/independent-runs.json",
-      "id": "evidencia-0730b27082ed"
+      "id": "evidencia-0730b27082ed",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/ef/independent-runs.json"
     },
     {
       "sourceHref": "../results/processed/jit-pr/micro-records.json",
       "path": "results/processed/jit-pr/micro-records.json",
-      "id": "evidencia-b389f565c315"
+      "id": "evidencia-b389f565c315",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/jit-pr/micro-records.json"
     },
     {
       "sourceHref": "../results/processed/micro-comparisons.json",
       "path": "results/processed/micro-comparisons.json",
-      "id": "evidencia-df8b1b3c3ee3"
+      "id": "evidencia-df8b1b3c3ee3",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/micro-comparisons.json"
     },
     {
       "sourceHref": "../results/processed/runtime-async/records.json",
       "path": "results/processed/runtime-async/records.json",
-      "id": "evidencia-0b839fa40f5b"
+      "id": "evidencia-0b839fa40f5b",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/runtime-async/records.json"
     },
     {
       "sourceHref": "../results/processed/servergc/micro-records.json",
       "path": "results/processed/servergc/micro-records.json",
-      "id": "evidencia-c5f6f42177bc"
+      "id": "evidencia-c5f6f42177bc",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/servergc/micro-records.json"
     },
     {
       "sourceHref": "../results/processed/sizes/micro-comparisons.json",
       "path": "results/processed/sizes/micro-comparisons.json",
-      "id": "evidencia-af1cc789ce98"
+      "id": "evidencia-af1cc789ce98",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/sizes/micro-comparisons.json"
     },
     {
       "sourceHref": "../results/processed/sizes/micro-records.json",
       "path": "results/processed/sizes/micro-records.json",
-      "id": "evidencia-72edf7c1bea8"
+      "id": "evidencia-72edf7c1bea8",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/sizes/micro-records.json"
     },
     {
       "sourceHref": "../results/processed/web-main-summary.json",
       "path": "results/processed/web-main-summary.json",
-      "id": "evidencia-d8f4c3a92139"
+      "id": "evidencia-d8f4c3a92139",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/web-main-summary.json"
     },
     {
       "sourceHref": "../results/raw/",
       "path": "results/raw/",
-      "id": "evidencia-24208bfe2b21"
+      "id": "evidencia-24208bfe2b21",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/"
     },
     {
       "sourceHref": "../results/raw/anomalies/anomalies-20261112/manifest.json",
       "path": "results/raw/anomalies/anomalies-20261112/manifest.json",
-      "id": "evidencia-4d04be4160f7"
+      "id": "evidencia-4d04be4160f7",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/anomalies/anomalies-20261112/manifest.json"
     },
     {
       "sourceHref": "../results/raw/aot/main/results.json",
       "path": "results/raw/aot/main/results.json",
-      "id": "evidencia-7600edfd6c82"
+      "id": "evidencia-7600edfd6c82",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/aot/main/results.json"
     },
     {
       "sourceHref": "../results/raw/audit-channel/audit-channel-20261112-v2/manifest.json",
       "path": "results/raw/audit-channel/audit-channel-20261112-v2/manifest.json",
-      "id": "evidencia-fe64e7167cf6"
+      "id": "evidencia-fe64e7167cf6",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/audit-channel/audit-channel-20261112-v2/manifest.json"
     },
     {
       "sourceHref": "../results/raw/ef/main/",
       "path": "results/raw/ef/main/",
-      "id": "evidencia-342dff88bdf2"
+      "id": "evidencia-342dff88bdf2",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/ef/main/"
     },
     {
       "sourceHref": "../results/raw/gc/main/",
       "path": "results/raw/gc/main/",
-      "id": "evidencia-eb1002fa9057"
+      "id": "evidencia-eb1002fa9057",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/gc/main/"
     },
     {
       "sourceHref": "../results/raw/jit-general-20261112/micro/results/NetComparison.Benchmarks.JitBenchmarks-asm.md",
       "path": "results/raw/jit-general-20261112/micro/results/NetComparison.Benchmarks.JitBenchmarks-asm.md",
-      "id": "evidencia-4dda7b72f5af"
+      "id": "evidencia-4dda7b72f5af",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-general-20261112/micro/results/NetComparison.Benchmarks.JitBenchmarks-asm.md"
     },
     {
       "sourceHref": "../results/raw/jit-pr/main/results/",
       "path": "results/raw/jit-pr/main/results/",
-      "id": "evidencia-18e9feab7b9d"
+      "id": "evidencia-18e9feab7b9d",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-pr/main/results/"
     },
     {
       "sourceHref": "../results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md",
       "path": "results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md",
-      "id": "evidencia-30c35e8cd5bc"
+      "id": "evidencia-30c35e8cd5bc",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md"
     },
     {
       "sourceHref": "../results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-report-full.json",
       "path": "results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-report-full.json",
-      "id": "evidencia-29f7b27309c9"
+      "id": "evidencia-29f7b27309c9",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-report-full.json"
     },
     {
       "sourceHref": "../results/raw/language/main-pinned/results.json",
       "path": "results/raw/language/main-pinned/results.json",
-      "id": "evidencia-e4716719f12b"
+      "id": "evidencia-e4716719f12b",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/language/main-pinned/results.json"
     },
     {
       "sourceHref": "../results/raw/micro-full-20261112/micro/results/",
       "path": "results/raw/micro-full-20261112/micro/results/",
-      "id": "evidencia-71d6e094d75a"
+      "id": "evidencia-71d6e094d75a",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/micro-full-20261112/micro/results/"
     },
     {
       "sourceHref": "../results/raw/opentelemetry/main/",
       "path": "results/raw/opentelemetry/main/",
-      "id": "evidencia-eadf167ea790"
+      "id": "evidencia-eadf167ea790",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/opentelemetry/main/"
     },
     {
       "sourceHref": "../results/raw/runtime-async/main/bdn/results/NetComparison.RuntimeAsync.AsyncBenchmarks-report-full.json",
       "path": "results/raw/runtime-async/main/bdn/results/NetComparison.RuntimeAsync.AsyncBenchmarks-report-full.json",
-      "id": "evidencia-58433020b8b2"
+      "id": "evidencia-58433020b8b2",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/runtime-async/main/bdn/results/NetComparison.RuntimeAsync.AsyncBenchmarks-report-full.json"
     },
     {
       "sourceHref": "../results/raw/runtime-async/main/diagnostic-index.json",
       "path": "results/raw/runtime-async/main/diagnostic-index.json",
-      "id": "evidencia-6e072ef31711"
+      "id": "evidencia-6e072ef31711",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/runtime-async/main/diagnostic-index.json"
     },
     {
       "sourceHref": "../results/raw/sdk/main/",
       "path": "results/raw/sdk/main/",
-      "id": "evidencia-ed06cbb1d49e"
+      "id": "evidencia-ed06cbb1d49e",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/sdk/main/"
     },
     {
       "sourceHref": "../screenshots/manifest.json",
       "path": "screenshots/manifest.json",
-      "id": "evidencia-705b372bd60d"
+      "id": "evidencia-705b372bd60d",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/screenshots/manifest.json"
     },
     {
       "sourceHref": "../scripts/run/publish.ps1",
       "path": "scripts/run/publish.ps1",
-      "id": "evidencia-814202861e40"
+      "id": "evidencia-814202861e40",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/scripts/run/publish.ps1"
     },
     {
       "sourceHref": "../scripts/run/web-load.js",
       "path": "scripts/run/web-load.js",
-      "id": "evidencia-5a1a89cb8fab"
+      "id": "evidencia-5a1a89cb8fab",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/scripts/run/web-load.js"
     },
     {
       "sourceHref": "../src/BenchmarkRunner/",
       "path": "src/BenchmarkRunner/",
-      "id": "evidencia-189c05fb0888"
+      "id": "evidencia-189c05fb0888",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/BenchmarkRunner/"
     },
     {
       "sourceHref": "../src/Benchmarks/",
       "path": "src/Benchmarks/",
-      "id": "evidencia-c6ada5d0c815"
+      "id": "evidencia-c6ada5d0c815",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/"
     },
     {
       "sourceHref": "../src/Benchmarks/AsyncAndConcurrencyBenchmarks.cs",
       "path": "src/Benchmarks/AsyncAndConcurrencyBenchmarks.cs",
-      "id": "evidencia-2f2ab2ee9fca"
+      "id": "evidencia-2f2ab2ee9fca",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/AsyncAndConcurrencyBenchmarks.cs"
     },
     {
       "sourceHref": "../src/Benchmarks/CollectionsBenchmarks.cs",
       "path": "src/Benchmarks/CollectionsBenchmarks.cs",
-      "id": "evidencia-0ee69ae7579f"
+      "id": "evidencia-0ee69ae7579f",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/CollectionsBenchmarks.cs"
     },
     {
       "sourceHref": "../src/Benchmarks/DiagnosticsBenchmarks.cs",
       "path": "src/Benchmarks/DiagnosticsBenchmarks.cs",
-      "id": "evidencia-24932a96fd09"
+      "id": "evidencia-24932a96fd09",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/DiagnosticsBenchmarks.cs"
     },
     {
       "sourceHref": "../src/Benchmarks/IoAndCryptoBenchmarks.cs",
       "path": "src/Benchmarks/IoAndCryptoBenchmarks.cs",
-      "id": "evidencia-9d3b41746437"
+      "id": "evidencia-9d3b41746437",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/IoAndCryptoBenchmarks.cs"
     },
     {
       "sourceHref": "../src/Benchmarks/MemoryJitReflectionBenchmarks.cs",
       "path": "src/Benchmarks/MemoryJitReflectionBenchmarks.cs",
-      "id": "evidencia-1231921bcc1b"
+      "id": "evidencia-1231921bcc1b",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/MemoryJitReflectionBenchmarks.cs"
     },
     {
       "sourceHref": "../src/Benchmarks/TextAndJsonBenchmarks.cs",
       "path": "src/Benchmarks/TextAndJsonBenchmarks.cs",
-      "id": "evidencia-ce34a0dd57d9"
+      "id": "evidencia-ce34a0dd57d9",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/TextAndJsonBenchmarks.cs"
     },
     {
       "sourceHref": "../src/EfCore/Shared/",
       "path": "src/EfCore/Shared/",
-      "id": "evidencia-7002b4de1a6f"
+      "id": "evidencia-7002b4de1a6f",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/EfCore/Shared/"
     },
     {
       "sourceHref": "../src/EfCore/Shared/Workload.cs",
       "path": "src/EfCore/Shared/Workload.cs",
-      "id": "evidencia-00fc7b72f30d"
+      "id": "evidencia-00fc7b72f30d",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/EfCore/Shared/Workload.cs"
     },
     {
       "sourceHref": "../src/JitProbes/",
       "path": "src/JitProbes/",
-      "id": "evidencia-f006efa4101c"
+      "id": "evidencia-f006efa4101c",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/JitProbes/"
     },
     {
       "sourceHref": "../src/JitProbes/Program.cs",
       "path": "src/JitProbes/Program.cs",
-      "id": "evidencia-1014f76afffd"
+      "id": "evidencia-1014f76afffd",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/JitProbes/Program.cs"
     },
     {
       "sourceHref": "../src/LanguageSamples/",
       "path": "src/LanguageSamples/",
-      "id": "evidencia-801e11250a0f"
+      "id": "evidencia-801e11250a0f",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/"
     },
     {
       "sourceHref": "../src/LanguageSamples/After15/Program.cs",
       "path": "src/LanguageSamples/After15/Program.cs",
-      "id": "evidencia-c0d8e32e6c8e"
+      "id": "evidencia-c0d8e32e6c8e",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/After15/Program.cs"
     },
     {
       "sourceHref": "../src/LanguageSamples/Before14/Program.cs",
       "path": "src/LanguageSamples/Before14/Program.cs",
-      "id": "evidencia-c09084b853ba"
+      "id": "evidencia-c09084b853ba",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/Before14/Program.cs"
     },
     {
       "sourceHref": "../src/LanguageSamples/LegacyInterface15/Measurement.cs",
       "path": "src/LanguageSamples/LegacyInterface15/Measurement.cs",
-      "id": "evidencia-3e3eaf845eb4"
+      "id": "evidencia-3e3eaf845eb4",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/LegacyInterface15/Measurement.cs"
     },
     {
       "sourceHref": "../src/LanguageSamples/MemorySafetyPreview/Program.cs",
       "path": "src/LanguageSamples/MemorySafetyPreview/Program.cs",
-      "id": "evidencia-c7d37de1a813"
+      "id": "evidencia-c7d37de1a813",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/MemorySafetyPreview/Program.cs"
     },
     {
       "sourceHref": "../src/LanguageSamples/Shared/AsyncBehavior.cs",
       "path": "src/LanguageSamples/Shared/AsyncBehavior.cs",
-      "id": "evidencia-a529ae37cfa4"
+      "id": "evidencia-a529ae37cfa4",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/Shared/AsyncBehavior.cs"
     },
     {
       "sourceHref": "../src/NativeAot/",
       "path": "src/NativeAot/",
-      "id": "evidencia-47338399560d"
+      "id": "evidencia-47338399560d",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/NativeAot/"
     },
     {
       "sourceHref": "../src/Net11Features/",
       "path": "src/Net11Features/",
-      "id": "evidencia-c1469587a92e"
+      "id": "evidencia-c1469587a92e",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/"
     },
     {
       "sourceHref": "../src/Net11Features/Cases/Crypto.cs",
       "path": "src/Net11Features/Cases/Crypto.cs",
-      "id": "evidencia-3f42500b63f7"
+      "id": "evidencia-3f42500b63f7",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/Crypto.cs"
     },
     {
       "sourceHref": "../src/Net11Features/Cases/FullJoin.cs",
       "path": "src/Net11Features/Cases/FullJoin.cs",
-      "id": "evidencia-84abffd79e6c"
+      "id": "evidencia-84abffd79e6c",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/FullJoin.cs"
     },
     {
       "sourceHref": "../src/Net11Features/Cases/JsonLines.cs",
       "path": "src/Net11Features/Cases/JsonLines.cs",
-      "id": "evidencia-2512a90fff6c"
+      "id": "evidencia-2512a90fff6c",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/JsonLines.cs"
     },
     {
       "sourceHref": "../src/Net11Features/Cases/JsonUnion.cs",
       "path": "src/Net11Features/Cases/JsonUnion.cs",
-      "id": "evidencia-8f7a657cadec"
+      "id": "evidencia-8f7a657cadec",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/JsonUnion.cs"
     },
     {
       "sourceHref": "../src/Net11Features/Cases/MemoryStreams.cs",
       "path": "src/Net11Features/Cases/MemoryStreams.cs",
-      "id": "evidencia-64e36bae106e"
+      "id": "evidencia-64e36bae106e",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/MemoryStreams.cs"
     },
     {
       "sourceHref": "../src/Net11Features/Cases/SequenceStreams.cs",
       "path": "src/Net11Features/Cases/SequenceStreams.cs",
-      "id": "evidencia-381ddd437902"
+      "id": "evidencia-381ddd437902",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/SequenceStreams.cs"
     },
     {
       "sourceHref": "../src/Net11Features/Cases/TupleJoin.cs",
       "path": "src/Net11Features/Cases/TupleJoin.cs",
-      "id": "evidencia-1176d2ac9bae"
+      "id": "evidencia-1176d2ac9bae",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/TupleJoin.cs"
     },
     {
       "sourceHref": "../src/Net11Features/Cases/Zstandard.cs",
       "path": "src/Net11Features/Cases/Zstandard.cs",
-      "id": "evidencia-3ed5656e6e02"
+      "id": "evidencia-3ed5656e6e02",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/Zstandard.cs"
     },
     {
       "sourceHref": "../src/RuntimeAsyncBenchmarks/",
       "path": "src/RuntimeAsyncBenchmarks/",
-      "id": "evidencia-215f5262460a"
+      "id": "evidencia-215f5262460a",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/RuntimeAsyncBenchmarks/"
     },
     {
       "sourceHref": "../src/RuntimeAsyncBenchmarks/AsyncBenchmarks.cs",
       "path": "src/RuntimeAsyncBenchmarks/AsyncBenchmarks.cs",
-      "id": "evidencia-49fbbda8a5e0"
+      "id": "evidencia-49fbbda8a5e0",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/RuntimeAsyncBenchmarks/AsyncBenchmarks.cs"
     },
     {
       "sourceHref": "../src/RuntimeAsyncBenchmarks/Shared/AsyncWorkloads.cs",
       "path": "src/RuntimeAsyncBenchmarks/Shared/AsyncWorkloads.cs",
-      "id": "evidencia-b75210290e49"
+      "id": "evidencia-b75210290e49",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/RuntimeAsyncBenchmarks/Shared/AsyncWorkloads.cs"
     },
     {
       "sourceHref": "../src/WebApi/",
       "path": "src/WebApi/",
-      "id": "evidencia-97ea9fad1b13"
+      "id": "evidencia-97ea9fad1b13",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/WebApi/"
     },
     {
       "sourceHref": "../src/WebApi/Program.cs",
       "path": "src/WebApi/Program.cs",
-      "id": "evidencia-665e52b5b87a"
+      "id": "evidencia-665e52b5b87a",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/WebApi/Program.cs"
     },
     {
       "sourceHref": "blog-assets/index.html",
       "path": "article/blog-assets/index.html",
-      "id": "evidencia-138c99b46a30"
+      "id": "evidencia-138c99b46a30",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/blog-assets/index.html"
     },
     {
       "sourceHref": "blog-editorial-report.md",
       "path": "article/blog-editorial-report.md",
-      "id": "evidencia-bd3afe8b5286"
+      "id": "evidencia-bd3afe8b5286",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/blog-editorial-report.md"
     },
     {
       "sourceHref": "blog-image-manifest.json",
       "path": "article/blog-image-manifest.json",
-      "id": "evidencia-a724e25f2ffb"
+      "id": "evidencia-a724e25f2ffb",
+      "url": "https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/blog-image-manifest.json"
     },
     {
       "sourceHref": "dotnet-10-vs-dotnet-11.md",
       "path": "article/dotnet-10-vs-dotnet-11.md",
-      "id": "evidencia-b82e4d8fdba1"
+      "id": "evidencia-b82e4d8fdba1",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/dotnet-10-vs-dotnet-11.md"
     },
     {
       "sourceHref": "references.md",
       "path": "article/references.md",
-      "id": "evidencia-26daa4cd5a62"
+      "id": "evidencia-26daa4cd5a62",
+      "url": "https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/references.md"
     }
-  ]
+  ],
+  "repository": "https://github.com/jyeste94/.NET11vs.NET11",
+  "commit": "5c8a5419e8330afcd954d87be5547fc1fdf725b5"
 }

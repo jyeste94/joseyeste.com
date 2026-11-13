@@ -15,7 +15,7 @@ researchCutoff: "2026-11-12"
 **Qué cambia dentro de .NET, cómo afecta a nuestras aplicaciones y qué descubrimos al comparar dos generaciones del runtime con pruebas reales.**
 
 <aside class="study-publication-notice" aria-label="Disponibilidad de las evidencias">
-<p><strong>Sobre los enlaces de investigación:</strong> el repositorio de código y evidencias está pendiente de revisión de privacidad y publicación. Sus enlaces muestran <a href="#evidencias-investigacion">rutas relativas copiables en el catálogo del capítulo 22</a>, no archivos públicos ni descargas. Sólo se publican aquí las imágenes editoriales seleccionadas; no se publican los originales, los logs ni las trazas de investigación. Las menciones del cuerpo a «esta entrega» describen la preparación editorial original, anterior a la publicación de esta página.</p>
+<p><strong>Sobre los enlaces de investigación:</strong> el <a href="https://github.com/jyeste94/.NET11vs.NET11">repositorio público de código y evidencias</a> conserva los originales de esta investigación. Los enlaces del artículo y el <a href="#evidencias-investigacion">catálogo del capítulo 22</a> apuntan al commit <a href="https://github.com/jyeste94/.NET11vs.NET11/commit/5c8a5419e8330afcd954d87be5547fc1fdf725b5"><code>5c8a5419e8330afcd954d87be5547fc1fdf725b5</code></a>: código y documentación navegables, directorios de evidencias y datos originales descargables. Este pin identifica la versión publicada; no reconstruye los estados de código históricos ausentes que documenta la auditoría.</p>
 </aside>
 
 <figure class="study-cover">
@@ -117,11 +117,11 @@ Un ranking de ganadores perdería la parte importante. Para interpretar esos res
 
 Si no programas habitualmente, puedes seguir el recorrido desde los fundamentos. Los ejemplos pequeños sirven para identificar qué hace cada pieza. Si trabajas con .NET, encontrarás después el código de las sondas, instrucciones ensamblador, condiciones de medida y enlaces a los originales. Los detalles no están escondidos, pero tampoco hace falta empezar por ellos.
 
-El corte de versiones de este artículo es el **12 de noviembre de 2026**. La [investigación técnica original](#evidencia-b82e4d8fdba1) y la [auditoría crítica](#evidencia-0c5cb713ef30) se conservan por separado. Esta versión desarrolla sus explicaciones; no añade benchmarks ni convierte sus límites en certezas nuevas.
+El corte de versiones de este artículo es el **12 de noviembre de 2026**. La [investigación técnica original](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/dotnet-10-vs-dotnet-11.md) y la [auditoría crítica](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/final-audit.md) se conservan por separado. Esta versión desarrolla sus explicaciones; no añade benchmarks ni convierte sus límites en certezas nuevas.
 
 La comparación empieza por identificar las piezas que pueden cambiar. Antes de interpretar los resultados, vamos a separar el lenguaje, las herramientas y el motor de ejecución.
 
-**Para contrastar este capítulo:** [Investigación técnica](#evidencia-b82e4d8fdba1) · [Auditoría y alcance](#evidencia-0c5cb713ef30) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Investigación técnica](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/dotnet-10-vs-dotnet-11.md) · [Auditoría y alcance](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/final-audit.md) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: Resumen ejecutivo](#resumen-ejecutivo) · [Índice](#indice) · [Siguiente: 2. Qué es .NET](#que-es-dotnet).
 <a id="que-es-dotnet"></a>
@@ -148,7 +148,7 @@ foreach (int cantidad in cantidades)
 Console.WriteLine(total);
 ```
 
-Su salida es `10`. `int[]` representa un array de enteros; `foreach` visita sus elementos; `Console.WriteLine` muestra el resultado. Es un ejemplo didáctico, no la entrada del benchmark de arrays. La operación medida y sus datos están en [CollectionsBenchmarks.cs](#evidencia-0ee69ae7579f).
+Su salida es `10`. `int[]` representa un array de enteros; `foreach` visita sus elementos; `Console.WriteLine` muestra el resultado. Es un ejemplo didáctico, no la entrada del benchmark de arrays. La operación medida y sus datos están en [CollectionsBenchmarks.cs](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/CollectionsBenchmarks.cs).
 
 La CPU —el procesador— no entiende directamente `foreach`, nombres de variables o archivos `.cs`. Ejecuta instrucciones de código máquina propias de una arquitectura, como x64 o Arm64. Entre esas dos representaciones intervienen las demás piezas.
 
@@ -188,7 +188,7 @@ Por tanto, un programa puede mejorar sin cambiar sus archivos C# por al menos do
 
 [![Proceso conceptual desde un archivo C# hasta las instrucciones que ejecuta la CPU](/blog/dotnet-10-vs-dotnet-11/01-dotnet-pipeline.png)](/blog/dotnet-10-vs-dotnet-11/01-dotnet-pipeline.png)
 
-*Figura 1. Esquema conceptual, no una captura experimental: C# pasa por el compilador y el IL; en el camino JIT, el runtime produce código máquina para la CPU. El SDK interviene al construir y el runtime al ejecutar. La ruta Native AOT adelanta la compilación nativa y se desarrolla en la sección 16. Fuente: elaboración didáctica a partir de la [metodología](#evidencia-0abaf28a964f) y la [documentación de .NET](https://learn.microsoft.com/dotnet/core/introduction).* 
+*Figura 1. Esquema conceptual, no una captura experimental: C# pasa por el compilador y el IL; en el camino JIT, el runtime produce código máquina para la CPU. El SDK interviene al construir y el runtime al ejecutar. La ruta Native AOT adelanta la compilación nativa y se desarrolla en la sección 16. Fuente: elaboración didáctica a partir de la [metodología](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/methodology.md) y la [documentación de .NET](https://learn.microsoft.com/dotnet/core/introduction).* 
 
 [Abrir PNG a tamaño completo](/blog/dotnet-10-vs-dotnet-11/01-dotnet-pipeline.png).
 
@@ -202,7 +202,7 @@ La investigación utiliza los mismos archivos C# en buena parte de las comparaci
 
 Con las piezas situadas, ya podemos dar significado a las etiquetas 10 y 11. El siguiente paso es fijar qué versiones y qué opciones se comparan realmente.
 
-**Para contrastar este capítulo:** [Ejemplo de operación medida](#evidencia-0ee69ae7579f) · [Metodología](#evidencia-0abaf28a964f) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Ejemplo de operación medida](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/CollectionsBenchmarks.cs) · [Metodología](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/methodology.md) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 1. Introducción](#introduccion) · [Índice](#indice) · [Siguiente: 3. Versiones](#versiones).
 <a id="versiones"></a>
@@ -221,7 +221,7 @@ Estas son las versiones concretas del laboratorio, no nombres genéricos como «
 | Lenguaje de la suite principal | C# 14 explícito | C# 14 explícito |
 | Muestras de novedades de lenguaje | C# 14 | C# 15, con preview de memoria separada |
 
-Fuente: [configuración y lockfiles](#evidencia-b33563055168), [dependencias auditadas](#evidencia-4240917cf8c0) y [metadatos oficiales de releases](https://builds.dotnet.microsoft.com/dotnet/release-metadata/releases-index.json).
+Fuente: [configuración y lockfiles](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/README.md#versiones-y-separación-de-factores), [dependencias auditadas](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/dependency-audit.json) y [metadatos oficiales de releases](https://builds.dotnet.microsoft.com/dotnet/release-metadata/releases-index.json).
 
 La suite principal se construye con **SDK 11 en ambos destinos**. Mantener C# 14 reduce un factor de variación, pero no devuelve Roslyn a la versión que llevaba el SDK 10 ni garantiza que todo el IL sea idéntico. El experimento específico del SDK, que veremos más adelante, es otra comparación.
 
@@ -253,7 +253,7 @@ Runtime Async de la aplicación y las nuevas reglas de *memory safety* siguen si
 
 Compatibilidad, dependencias, datos y posibilidad de volver atrás forman parte de la decisión; retomaremos esos puntos al preparar la migración. Antes necesitamos saber cómo se midió cada tratamiento y qué incertidumbre conserva.
 
-**Para contrastar este capítulo:** [Versiones y separación de factores](#evidencia-b33563055168) · [Dependencias auditadas](#evidencia-4240917cf8c0) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Versiones y separación de factores](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/README.md#versiones-y-separación-de-factores) · [Dependencias auditadas](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/dependency-audit.json) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 2. Qué es .NET](#que-es-dotnet) · [Índice](#indice) · [Siguiente: 4. Metodología](#metodologia).
 <a id="metodologia"></a>
@@ -284,7 +284,7 @@ No era un servidor dedicado. No se reservaron núcleos exclusivos, no se detuvie
 
 La frecuencia instantánea de una CPU tampoco prueba que haya mantenido esa frecuencia durante todas las medidas. El ahorro energético, el turbo, la temperatura y otras aplicaciones pueden introducir diferencias entre procesos. Registrar el entorno permite ver el límite; no lo hace desaparecer.
 
-El [snapshot original](#evidencia-eae7c22ee92c) conserva esos datos. El blog utiliza gráficos y capturas seleccionados sin rutas personales visibles; el conjunto histórico completo necesita una revisión de privacidad independiente antes de publicarse íntegramente.
+El [snapshot original](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/metadata/micro-full-20261112/environment.json) conserva esos datos. El blog utiliza gráficos y capturas seleccionados sin rutas personales visibles; los originales de investigación se conservan en el repositorio público enlazado, sin incorporar el entorno local ni las herramientas instaladas.
 
 ### Qué hace BenchmarkDotNet por nosotros
 
@@ -339,7 +339,7 @@ Las pruebas de EF y de arranque utilizan protocolos propios. Sus rangos no se re
 
 ### De una cifra a su evidencia
 
-El recorrido deseable es artículo → código → original → entorno → commit. La [matriz de trazabilidad](#evidencia-0f1a77641be5) permite seguirlo, pero también documenta sus huecos: algunas campañas comenzaron antes del primer commit o capturaron un estado con cambios pendientes que no se conserva íntegramente.
+El recorrido deseable es artículo → código → original → entorno → commit. La [matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md) permite seguirlo, pero también documenta sus huecos: algunas campañas comenzaron antes del primer commit o capturaron un estado con cambios pendientes que no se conserva íntegramente.
 
 La auditoría realizó **4042 comprobaciones estáticas correctas** sobre datos y estructuras conservadas. No son 4042 benchmarks nuevos, una repetición independiente de todo el laboratorio ni una demostración de causalidad. Un hash ayuda a contrastar un archivo; no reconstruye una fuente ausente.
 
@@ -347,7 +347,7 @@ Con ese marco, podemos mirar los resultados sin pedirles más de lo que contiene
 
 Con las reglas y las unidades claras, podemos empezar por una evidencia que deja ver el trabajo realizado: las instrucciones que genera el JIT.
 
-**Para contrastar este capítulo:** [Metodología completa](#evidencia-0abaf28a964f) · [Entorno principal](#evidencia-eae7c22ee92c) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Metodología completa](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/methodology.md) · [Entorno principal](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/metadata/micro-full-20261112/environment.json) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 3. Versiones](#versiones) · [Índice](#indice) · [Siguiente: 5. JIT](#jit).
 
@@ -372,7 +372,7 @@ No es una elección absoluta entre «JIT lento» y «nativo rápido». ReadyToRu
 
 [![Esquema conceptual de cómo un contexto conocido habilita desvirtualización, inlining y simplificación](/blog/dotnet-10-vs-dotnet-11/02-jit-pipeline.png)](/blog/dotnet-10-vs-dotnet-11/02-jit-pipeline.png)
 
-*Figura 2. Diagrama didáctico de oportunidades de optimización, no una traza ni un orden contractual de fases. Conocer el receptor permite razonar sobre la llamada y el trabajo necesario; el resultado depende del patrón. Fuente: [diseño del JIT de CoreCLR](https://github.com/dotnet/runtime/tree/main/docs/design/coreclr/jit) y [configuración de las sondas](#evidencia-1014f76afffd).*
+*Figura 2. Diagrama didáctico de oportunidades de optimización, no una traza ni un orden contractual de fases. Conocer el receptor permite razonar sobre la llamada y el trabajo necesario; el resultado depende del patrón. Fuente: [diseño del JIT de CoreCLR](https://github.com/dotnet/runtime/tree/main/docs/design/coreclr/jit) y [configuración de las sondas](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/JitProbes/Program.cs).*
 
 [Abrir PNG a tamaño completo](/blog/dotnet-10-vs-dotnet-11/02-jit-pipeline.png).
 
@@ -464,7 +464,7 @@ cmp       word ptr [rax+r10*2],46
 
 Para leerlo sin conocer ensamblador: `lea` calcula una dirección o expresión de índice; `cmp` compara; `jae` es un salto condicionado. Lo relevante es que desaparece una comparación y su camino de error redundante. **El guard de `i+2` sigue presente.**
 
-El [PR 124242](https://github.com/dotnet/runtime/pull/124242) describe ese patrón de optimización. Nuestro resultado sale de [las sondas propias](#evidencia-1014f76afffd) y del [ensamblador original](#evidencia-30c35e8cd5bc), no del ejemplo de código máquina del PR.
+El [PR 124242](https://github.com/dotnet/runtime/pull/124242) describe ese patrón de optimización. Nuestro resultado sale de [las sondas propias](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/JitProbes/Program.cs) y del [ensamblador original](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md), no del ejemplo de código máquina del PR.
 
 ### Resolver una pregunta conocida antes de ejecutarla
 
@@ -481,7 +481,7 @@ ret
 
 El [PR 121985](https://github.com/dotnet/runtime/pull/121985) trabaja sobre `SequenceEqual` con ayuda de **value numbering**, una técnica para identificar valores y equivalencias en el programa. La explicación no es «comparar cualquier texto ahora cuesta casi nada». Estas entradas son conocidas; la sonda DynamicEqual conserva comparación efectiva para cadenas construidas durante la ejecución.
 
-El benchmark constante sigue teniendo una llamada `NoInlining`; su media fue 2,489 ns en 10 y 2,034 ns en 11, no cero. Mide lo que queda de ese camino, no el ancho de banda de comparar documentos. [Medias, Error y muestras](#evidencia-b389f565c315).
+El benchmark constante sigue teniendo una llamada `NoInlining`; su media fue 2,489 ns en 10 y 2,034 ns en 11, no cero. Mide lo que queda de ese camino, no el ancho de banda de comparar documentos. [Medias, Error y muestras](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/jit-pr/micro-records.json).
 
 ### SIMD: varias operaciones dentro de una instrucción
 
@@ -491,11 +491,11 @@ La sonda SIMD general utiliza vectores explícitos. En ambos runtimes se observa
 
 El kernel pasó de 181 a 173 bytes; otros controles conservaron tamaños: SpanLoop 57, ConcreteDispatch 54, BoundsLoop 70 e InterfaceDispatch 95 bytes. El camino rápido de tipo de este último ya existía en ambos. Son detalles que impiden atribuir toda diferencia a una novedad exclusiva de 11.
 
-La [captura general de seis métodos](#evidencia-4dda7b72f5af) acredita instrucciones, no una mejora universal de todos los bucles ni un experimento de autovectorización. Reducir instrucciones y reducir tiempo están relacionados, pero no son la misma medida.
+La [captura general de seis métodos](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-general-20261112/micro/results/NetComparison.Benchmarks.JitBenchmarks-asm.md) acredita instrucciones, no una mejora universal de todos los bucles ni un experimento de autovectorización. Reducir instrucciones y reducir tiempo están relacionados, pero no son la misma medida.
 
 Estas optimizaciones importan cuando aparecen en un camino frecuente, no sólo cuando reducen una lista de instrucciones. El siguiente experimento reúne receptor conocido, inlining y eliminación de trabajo en un único caso observable.
 
-**Para contrastar este capítulo:** [Sondas JIT](#evidencia-1014f76afffd) · [Ensamblador de los kernels](#evidencia-30c35e8cd5bc) · [Registros temporales](#evidencia-b389f565c315) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Sondas JIT](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/JitProbes/Program.cs) · [Ensamblador de los kernels](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md) · [Registros temporales](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/jit-pr/micro-records.json) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 4. Metodología](#metodologia) · [Índice](#indice) · [Siguiente: 6. De 69 a 3 bytes](#gvm).
 <a id="gvm"></a>
@@ -553,7 +553,7 @@ En este contexto x64, el argumento entero llega en `ecx` y el resultado se devue
 
 [![Comparación didáctica del código C# del receptor conocido y los caminos nativos observados en las dos versiones](/blog/dotnet-10-vs-dotnet-11/03-gvm-code.png)](/blog/dotnet-10-vs-dotnet-11/03-gvm-code.png)
 
-*Figura 3. Transcripción didáctica basada en código y ensamblador reales, no una captura de terminal. Los tamaños 69 y 3 corresponden al kernel GenericVirtual; el wrapper BDN conserva 19 bytes en ambos runtimes. Fuente: [PrJitKernels y PrJitConstants](#evidencia-1014f76afffd) y [asm local](#evidencia-30c35e8cd5bc).*
+*Figura 3. Transcripción didáctica basada en código y ensamblador reales, no una captura de terminal. Los tamaños 69 y 3 corresponden al kernel GenericVirtual; el wrapper BDN conserva 19 bytes en ambos runtimes. Fuente: [PrJitKernels y PrJitConstants](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/JitProbes/Program.cs) y [asm local](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md).*
 
 [Abrir PNG a tamaño completo](/blog/dotnet-10-vs-dotnet-11/03-gvm-code.png).
 
@@ -584,7 +584,7 @@ Un objeto administrado no ocupa sólo sus posibles campos de negocio: hay estruc
 
 [![Resultados del kernel virtual genérico, con tiempos y asignaciones separados por unidades](/blog/dotnet-10-vs-dotnet-11/04-gvm-measurements.png)](/blog/dotnet-10-vs-dotnet-11/04-gvm-measurements.png)
 
-*Figura 4. Resultado propio del patrón de receptor conocido. Media de 10,578 a 2,298 ns; Error BDN de 1,415 y 0,017 ns, con 15 y 13 observaciones utilizadas; 24 a 0 B/op. Tiempo y asignación se indican como métricas distintas. Es una campaña con diagnóstico de ensamblador, no una aceleración prometida para toda la aplicación. Fuente: [BDN original](#evidencia-29f7b27309c9).*
+*Figura 4. Resultado propio del patrón de receptor conocido. Media de 10,578 a 2,298 ns; Error BDN de 1,415 y 0,017 ns, con 15 y 13 observaciones utilizadas; 24 a 0 B/op. Tiempo y asignación se indican como métricas distintas. Es una campaña con diagnóstico de ensamblador, no una aceleración prometida para toda la aplicación. Fuente: [BDN original](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-report-full.json).*
 
 [Abrir PNG a tamaño completo](/blog/dotnet-10-vs-dotnet-11/04-gvm-measurements.png).
 
@@ -598,7 +598,7 @@ Para un desarrollador, la lección no es sustituir clases por código manual en 
 
 Evitar aquel objeto conecta el código generado con otra pregunta práctica: cuánto reservamos, cuánto conservamos y quién recupera la memoria. El GC necesita esas distinciones.
 
-**Para contrastar este capítulo:** [Kernel y wrapper GVM](#evidencia-1014f76afffd) · [Ensamblador original](#evidencia-30c35e8cd5bc) · [BDN original](#evidencia-29f7b27309c9) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Kernel y wrapper GVM](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/JitProbes/Program.cs) · [Ensamblador original](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md) · [BDN original](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-report-full.json) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 5. JIT](#jit) · [Índice](#indice) · [Siguiente: 7. GC y memoria](#gc).
 <a id="gc"></a>
@@ -638,7 +638,7 @@ El control del proyecto crea deliberadamente huecos: retiene buffers alternos, s
 
 [![Fragmentación LOH antes y después de una compactación solicitada en los cuatro tratamientos](/blog/dotnet-10-vs-dotnet-11/05-gc-fragmentation.png)](/blog/dotnet-10-vs-dotnet-11/05-gc-fragmentation.png)
 
-*Figura 5. Intervención artificial, un proceso por tratamiento. Los huecos observados, alrededor de 8,1 millones de bytes, se reducen a unos 4,4–4,6 miles tras la compactación explícita. No es un ranking de pausas ni una recomendación de forzar GC por petición. Fuente: [protocolo](#evidencia-66ac6b003d1b) y [resultados originales](#evidencia-eb1002fa9057).*
+*Figura 5. Intervención artificial, un proceso por tratamiento. Los huecos observados, alrededor de 8,1 millones de bytes, se reducen a unos 4,4–4,6 miles tras la compactación explícita. No es un ranking de pausas ni una recomendación de forzar GC por petición. Fuente: [protocolo](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-gc.md) y [resultados originales](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/gc/main/).*
 
 [Abrir PNG a tamaño completo](/blog/dotnet-10-vs-dotnet-11/05-gc-fragmentation.png).
 
@@ -655,7 +655,7 @@ Las pausas de aquella ventana ilustran por qué hay que separar estados, tiempo 
 | 11 / Workstation | 2,792 | 66,359 |
 | 11 / Server | 16,158 | 191,879 |
 
-Fuente: [resultados por tratamiento](#evidencia-eb1002fa9057). El tiempo transcurrido incluye el trabajo de la presión, no sólo pausas. Con una ejecución por celda, esta tabla describe el control; no permite recomendar un modo del GC ni afirmar una regresión general de pausas.
+Fuente: [resultados por tratamiento](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/gc/main/). El tiempo transcurrido incluye el trabajo de la presión, no sólo pausas. Con una ejecución por celda, esta tabla describe el control; no permite recomendar un modo del GC ni afirmar una regresión general de pausas.
 
 ### Reutilizar un buffer no es lo mismo que cambiar de runtime
 
@@ -688,7 +688,7 @@ En el caso medido de 100.000 bytes, Allocate registró 100.059 B/op en ambos run
 
 El cambio grande es **reutilizar frente a crear**, una posibilidad ya disponible en .NET 10. Puede ahorrar asignaciones y, a la vez, retener más memoria para reutilización. No es una mejora automática por instalar 11.
 
-Las [operaciones de memoria](#evidencia-1231921bcc1b) y los [seis jobs Server GC separados](#evidencia-c5f6f42177bc) están conservados. No mezclamos las campañas para atribuir a un modo del GC una diferencia que también podría depender del momento del host.
+Las [operaciones de memoria](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/MemoryJitReflectionBenchmarks.cs) y los [seis jobs Server GC separados](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/servergc/micro-records.json) están conservados. No mezclamos las campañas para atribuir a un modo del GC una diferencia que también podría depender del momento del host.
 
 ### Cuatro cifras de memoria que no conviene intercambiar
 
@@ -700,7 +700,7 @@ La pregunta práctica depende del problema: para presión de asignación miramos
 
 Gestionar la memoria explica parte del coste de ejecutar; esperar sin bloquear introduce otra clase de coste. En async veremos qué estado debe sobrevivir mientras una operación está pendiente.
 
-**Para contrastar este capítulo:** [Operaciones de memoria](#evidencia-1231921bcc1b) · [Protocolo GC](#evidencia-66ac6b003d1b) · [Originales del control](#evidencia-eb1002fa9057) · [Server GC separado](#evidencia-c5f6f42177bc) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Operaciones de memoria](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/MemoryJitReflectionBenchmarks.cs) · [Protocolo GC](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-gc.md) · [Originales del control](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/gc/main/) · [Server GC separado](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/servergc/micro-records.json) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 6. De 69 a 3 bytes](#gvm) · [Índice](#indice) · [Siguiente: 8. Async/await](#async).
 <a id="async"></a>
@@ -736,7 +736,7 @@ static async Task<int> CalcularAsync(Task<int> puerta)
 
 La salida es `False` y `42`. La primera línea prueba que el resultado aún no estaba listo. Después se libera la puerta con 41 y el método suma uno.
 
-Es una demostración de consola fiel a la idea del escenario suspendido; no es el programa que produjo la tabla de rendimiento. El [kernel medido](#evidencia-b75210290e49) y el [wrapper real](#evidencia-49fbbda8a5e0) incluyen sus propias fronteras y configuración de medida.
+Es una demostración de consola fiel a la idea del escenario suspendido; no es el programa que produjo la tabla de rendimiento. El [kernel medido](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/RuntimeAsyncBenchmarks/Shared/AsyncWorkloads.cs) y el [wrapper real](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/RuntimeAsyncBenchmarks/AsyncBenchmarks.cs) incluyen sus propias fronteras y configuración de medida.
 
 La opción `RunContinuationsAsynchronously` evita ejecutar de forma síncrona las continuaciones correspondientes dentro de la llamada que completa esa puerta. Eso no promete un orden temporal global entre hilos ni convierte cualquier continuación en trabajo gratuito.
 
@@ -764,7 +764,7 @@ No es simplemente una variable global del proceso ni una variable ligada siempre
 
 `ConfigureAwait(false)` indica que esa continuación no necesita volver al contexto de sincronización capturado. **No equivale a suprimir ExecutionContext ni a borrar AsyncLocal.** Tampoco AsyncLocal hace una copia profunda de cualquier objeto mutable que guardemos dentro.
 
-El proyecto comprueba flujo de contexto, aislamiento del estado del padre, cancelación y excepciones. Los tests no se limitan a «no ha lanzado nada»: verifican valores y transiciones concretas. [Comportamiento compartido](#evidencia-a529ae37cfa4).
+El proyecto comprueba flujo de contexto, aislamiento del estado del padre, cancelación y excepciones. Los tests no se limitan a «no ha lanzado nada»: verifican valores y transiciones concretas. [Comportamiento compartido](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/Shared/AsyncBehavior.cs).
 
 ### Qué introduce Runtime Async
 
@@ -784,7 +784,7 @@ El proyecto experimental añade, para net11, esta propiedad:
 
 El opt-out por proyecto usa `UseRuntimeAsync=false`. Ninguna de esas opciones recompila retroactivamente todas las dependencias de una aplicación. Cambiar sólo el host de una DLL convencional y llamarla «opt-in» no probaría un lowering nuevo.
 
-La [matriz específica](#evidencia-1b6ad6b00607) compara cuatro tratamientos compilados por separado: 10 convencional, 11 predeterminado, 11 opt-in preview y 11 opt-out. Se registran las propiedades del ensamblado cargado, atributos y cuerpos IL del proceso hijo, no sólo el nombre de la carpeta.
+La [matriz específica](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-runtime-async.md) compara cuatro tratamientos compilados por separado: 10 convencional, 11 predeterminado, 11 opt-in preview y 11 opt-out. Se registran las propiedades del ensamblado cargado, atributos y cuerpos IL del proceso hijo, no sólo el nombre de la carpeta.
 
 ### Lo que cambió en código y memoria
 
@@ -794,13 +794,13 @@ Una reducción de IL no garantiza una reducción equivalente de tiempo o de memo
 
 [![Selección de asignaciones de tres workloads async, comparando Default11 y OptIn11Preview](/blog/dotnet-10-vs-dotnet-11/06-runtime-async-allocations.png)](/blog/dotnet-10-vs-dotnet-11/06-runtime-async-allocations.png)
 
-*Figura 6. Selección de tres de los siete workloads de la campaña de 28 jobs: Default11 frente a OptIn11Preview, con runtime11 y C# 15 en ambos. El tratamiento opt-in de la aplicación es preview. Incluye puertas, Tasks y contexto de cada operación, no sólo el `await`. Los cuatro tratamientos completos se conservan en el [BDN original](#evidencia-58433020b8b2) y el [lowering de los hijos](#evidencia-6e072ef31711).*
+*Figura 6. Selección de tres de los siete workloads de la campaña de 28 jobs: Default11 frente a OptIn11Preview, con runtime11 y C# 15 en ambos. El tratamiento opt-in de la aplicación es preview. Incluye puertas, Tasks y contexto de cada operación, no sólo el `await`. Los cuatro tratamientos completos se conservan en el [BDN original](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/runtime-async/main/bdn/results/NetComparison.RuntimeAsync.AsyncBenchmarks-report-full.json) y el [lowering de los hijos](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/runtime-async/main/diagnostic-index.json).*
 
 [Abrir PNG a tamaño completo](/blog/dotnet-10-vs-dotnet-11/06-runtime-async-allocations.png).
 
 La cadena async pasa de 408 a 368 B/op entre Default11 y opt-in. En cambio, la suspensión Task pasa de 184 a 256 y AsyncLocalFlow de 280 a 360. Las medias temporales respectivas fueron 743,54 → 695,17 ns, 408,34 → 483,63 ns y 491,59 → 668,64 ns.
 
-Sus intervalos y advertencias de distribución bimodal están en los [registros](#evidencia-0b839fa40f5b). Un lanzamiento por tratamiento no acredita una mejora temporal estable entre despliegues. Lo que sí se conserva es la diferencia observada de lowering y la contabilidad de esos caminos.
+Sus intervalos y advertencias de distribución bimodal están en los [registros](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/runtime-async/records.json). Un lanzamiento por tratamiento no acredita una mejora temporal estable entre despliegues. Lo que sí se conserva es la diferencia observada de lowering y la contabilidad de esos caminos.
 
 ### Un stack vivo no es un stack de excepción
 
@@ -814,7 +814,7 @@ La conclusión práctica es separar migraciones: probar .NET 11 predeterminado n
 
 Las esperas y su estado no son toda la aplicación. Pasamos ahora al trabajo que hacemos sobre los datos, empezando por las estructuras y consultas que elegimos en nuestro propio código.
 
-**Para contrastar este capítulo:** [Kernels async](#evidencia-b75210290e49) · [Matriz de tratamientos](#evidencia-1b6ad6b00607) · [Registros](#evidencia-0b839fa40f5b) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Kernels async](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/RuntimeAsyncBenchmarks/Shared/AsyncWorkloads.cs) · [Matriz de tratamientos](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-runtime-async.md) · [Registros](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/runtime-async/records.json) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 7. GC y memoria](#gc) · [Índice](#indice) · [Siguiente: 9. Colecciones y LINQ](#colecciones).
 
@@ -864,7 +864,7 @@ La implementación puede especializar caminos para arrays, listas, iteradores o 
 
 ### Lo que mide nuestra selección
 
-La [suite de colecciones](#evidencia-0ee69ae7579f) usa valores `i % 1024`, consulta claves preparadas y comprueba sumas y cardinalidades. El filtro selecciona pares y la transformación multiplica por tres. Join relaciona 10.000 elementos de la izquierda con 1024 claves únicas de la derecha.
+La [suite de colecciones](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/CollectionsBenchmarks.cs) usa valores `i % 1024`, consulta claves preparadas y comprueba sumas y cardinalidades. El filtro selecciona pares y la transformación multiplica por tres. Join relaciona 10.000 elementos de la izquierda con 1024 claves únicas de la derecha.
 
 | Operación, entrada principal | .NET 10, µs | .NET 11, µs | Cambio de tiempo | B/op 10 → 11 |
 |---|---:|---:|---:|---:|
@@ -873,11 +873,11 @@ La [suite de colecciones](#evidencia-0ee69ae7579f) usa valores `i % 1024`, consu
 | Materialize, filtro y transformación a array | 9,809 | 8,363 | −14,74% | 20.129 → 20.129 |
 | Join, claves descritas arriba | 141,235 | 130,359 | −7,70% | 123.208 → 119.616 |
 
-Fuente: [originales principales BDN](#evidencia-71d6e094d75a) y [pares procesados](#evidencia-df8b1b3c3ee3). Observaciones utilizadas, 10/11: 15/15, 15/15, 15/12 y 14/12 respectivamente. Son resultados exploratorios del host compartido.
+Fuente: [originales principales BDN](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/micro-full-20261112/micro/results/) y [pares procesados](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/micro-comparisons.json). Observaciones utilizadas, 10/11: 15/15, 15/15, 15/12 y 14/12 respectivamente. Son resultados exploratorios del host compartido.
 
 No hay un «LINQ ha mejorado un 15%». Materializar mejora en esta campaña y conserva sus bytes asignados; FrozenDictionary consulta más despacio. Ambos resultados pueden coexistir porque hacen trabajos distintos.
 
-El barrido de tamaños añade contexto: ArrayFor con 100, 10.000 y un millón de elementos mostró cambios de −1,30%, +0,44% y +0,48%, sin asignaciones. Es otra campaña, no una sustitución de la fila inicial. La conclusión razonable es que este recorrido no muestra una ventaja grande y consistente atribuible a la versión. [Barrido y originales](#evidencia-af1cc789ce98).
+El barrido de tamaños añade contexto: ArrayFor con 100, 10.000 y un millón de elementos mostró cambios de −1,30%, +0,44% y +0,48%, sin asignaciones. Es otra campaña, no una sustitución de la fila inicial. La conclusión razonable es que este recorrido no muestra una ventaja grande y consistente atribuible a la versión. [Barrido y originales](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/sizes/micro-comparisons.json).
 
 ### FullJoin: una API nueva con un problema concreto
 
@@ -909,13 +909,13 @@ public sealed record Row(string Id, string? Key);
 
 La salida es `10` y `6`. Tres elementos de la izquierda coinciden con dos de la derecha: **tres por dos, seis parejas**, no una coincidencia deduplicada. Quedan cuatro filas sin pareja; las dos claves nulas no se emparejan entre sí.
 
-El [probe original](#evidencia-84abffd79e6c) compara un multiconjunto ordenado contra una implementación de referencia, no contra un `Distinct` que borraría duplicados. El [probe de tuple Join](#evidencia-1176d2ac9bae) es otro contrato de unión examinado.
+El [probe original](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/FullJoin.cs) compara un multiconjunto ordenado contra una implementación de referencia, no contra un `Distinct` que borraría duplicados. El [probe de tuple Join](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/TupleJoin.cs) es otro contrato de unión examinado.
 
 Estos controles prueban comportamiento de APIs nuevas. **No tienen tiempos ni asignaciones medidos.** No afirmamos que FullJoin sea más rápido que cualquier implementación anterior, ni que el operador de memoria garantice la traducción equivalente de cualquier proveedor EF.
 
 El contrato de una colección determina qué recorremos y qué materializamos. Al trabajar con texto aparece una decisión parecida: cuándo necesitamos otra copia y cuándo basta una vista.
 
-**Para contrastar este capítulo:** [Suite de colecciones](#evidencia-0ee69ae7579f) · [Comparaciones principales](#evidencia-df8b1b3c3ee3) · [Probe FullJoin](#evidencia-84abffd79e6c) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Suite de colecciones](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/CollectionsBenchmarks.cs) · [Comparaciones principales](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/micro-comparisons.json) · [Probe FullJoin](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/FullJoin.cs) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 8. Async/await](#async) · [Índice](#indice) · [Siguiente: 10. Strings y Span](#strings-span).
 <a id="strings-span"></a>
@@ -958,7 +958,7 @@ int valor = int.Parse(numero, CultureInfo.InvariantCulture);
 Console.WriteLine(valor);
 ```
 
-La salida es `12345`. `AsSpan(0, 5)` describe los primeros cinco elementos; el parser acepta esa vista. Es una simplificación fiel a la parte numérica del [TextWorkload real](#evidencia-ce34a0dd57d9).
+La salida es `12345`. `AsSpan(0, 5)` describe los primeros cinco elementos; el parser acepta esa vista. Es una simplificación fiel a la parte numérica del [TextWorkload real](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/TextAndJsonBenchmarks.cs).
 
 La suite también usa `Utf8Parser` sobre bytes ya preparados. Eso responde a otra pregunta útil: ¿puedo analizar datos que ya llegan como UTF-8 sin convertir todo antes a UTF-16? Si para usarlo primero codificásemos un string dentro de cada operación, estaríamos añadiendo otro coste.
 
@@ -988,7 +988,7 @@ Console.WriteLine(vista.ReadByte());
 
 La salida es `1` y `99`. La copia mantiene sus bytes anteriores; el adaptador observa el almacenamiento del propietario. **Es precisamente por eso por lo que la vida y la mutación de ese almacenamiento forman parte del contrato.** En uso concurrente hay que conservarlo válido y no modificarlo mientras otro código lo consume.
 
-El [probe completo](#evidencia-64e36bae106e) compara lecturas, posiciones y límites. El de [ReadOnlySequenceStream](#evidencia-381ddd437902), cuyo namespace es `System.Buffers`, añade segmentos y longitudes de borde. Una secuencia permite representar datos repartidos en varios bloques sin exigir que todo sea un array contiguo.
+El [probe completo](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/MemoryStreams.cs) compara lecturas, posiciones y límites. El de [ReadOnlySequenceStream](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/SequenceStreams.cs), cuyo namespace es `System.Buffers`, añade segmentos y longitudes de borde. Una secuencia permite representar datos repartidos en varios bloques sin exigir que todo sea un array contiguo.
 
 No copiar el payload al construir el adaptador no es lo mismo que cero allocations: sigue pudiendo existir el objeto stream. Tampoco garantiza que una lectura posterior no copie bytes al destino. Estos probes no incorporan cronómetro; prueban el contrato que permite evitar aquella copia concreta.
 
@@ -996,7 +996,7 @@ La recomendación práctica es mirar el recorrido completo de los datos. Si lleg
 
 Seguir las copias prepara la siguiente pregunta: qué ocurre cuando esos datos se convierten en un mensaje. JSON añade contratos, formatos y caminos de serialización que conviene medir por separado.
 
-**Para contrastar este capítulo:** [Workloads de texto](#evidencia-ce34a0dd57d9) · [Probe de streams sobre memoria](#evidencia-64e36bae106e) · [Probe de secuencias](#evidencia-381ddd437902) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Workloads de texto](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/TextAndJsonBenchmarks.cs) · [Probe de streams sobre memoria](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/MemoryStreams.cs) · [Probe de secuencias](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/SequenceStreams.cs) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 9. Colecciones y LINQ](#colecciones) · [Índice](#indice) · [Siguiente: 11. JSON](#json).
 <a id="json"></a>
@@ -1031,7 +1031,7 @@ public sealed record Pedido(int Id, string Cliente);
 public partial class PedidoJsonContext : JsonSerializerContext;
 ```
 
-Ambas líneas producen `{"Id":7,"Cliente":"Ana"}`. El atributo indica qué contrato debe generar el compilador. Es una demostración reducida; el [benchmark real](#evidencia-ce34a0dd57d9) utiliza un contenedor de pedidos, cliente, dirección y dos líneas por pedido.
+Ambas líneas producen `{"Id":7,"Cliente":"Ana"}`. El atributo indica qué contrato debe generar el compilador. Es una demostración reducida; el [benchmark real](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/TextAndJsonBenchmarks.cs) utiliza un contenedor de pedidos, cliente, dirección y dos líneas por pedido.
 
 Source generation ya estaba disponible en .NET 10. Si una aplicación pasa de reflection en 10 a generación en 11, ha cambiado dos factores; no debemos atribuir toda diferencia al runtime.
 
@@ -1043,11 +1043,11 @@ Source generation ya estaba disponible en .NET 10. Si una aplicación pasa de re
 | SerializeSourceGen | 33,263 | 33,184 | −0,24% | 19.022 → 19.022 |
 | DeserializeSourceGen | 193,458 | 173,821 | −10,15% | 96.368 → 96.368 |
 
-Fuente: [BDN principal](#evidencia-71d6e094d75a) y [comparaciones](#evidencia-df8b1b3c3ee3). N utilizado, 10/11: 14/13, 14/14 y 14/14. Los dos caminos de serialización reciben la misma estructura; la preparación del workload queda fuera.
+Fuente: [BDN principal](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/micro-full-20261112/micro/results/) y [comparaciones](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/micro-comparisons.json). N utilizado, 10/11: 14/13, 14/14 y 14/14. Los dos caminos de serialización reciben la misma estructura; la preparación del workload queda fuera.
 
 El camino reflection aparece más rápido en 11 en esa campaña. El de generación queda prácticamente igual. No se ha identificado aquí un único cambio interno que explique el 23,98%; tampoco es una comparación de primer uso, porque el calentamiento ya ha preparado metadata.
 
-El barrido adicional de SerializeSourceGen con 10, 1000 y 10.000 pedidos mostró −8,14%, −0,70% y −9,12%. El tamaño importa y la variación entre campañas también: no podemos utilizar la fila de 100 como una ley para todos los payloads. [Resultados por tamaño](#evidencia-af1cc789ce98).
+El barrido adicional de SerializeSourceGen con 10, 1000 y 10.000 pedidos mostró −8,14%, −0,70% y −9,12%. El tamaño importa y la variación entre campañas también: no podemos utilizar la fila de 100 como una ley para todos los payloads. [Resultados por tamaño](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/sizes/micro-comparisons.json).
 
 Los escenarios de stream usan `MemoryStream`. Eso incluye el trabajo indicado por su código —uno devuelve `ToArray`, por ejemplo—, no una conexión de red ni una prueba de memoria constante con un cliente lento.
 
@@ -1079,13 +1079,13 @@ static async IAsyncEnumerable<int> Generar()
 }
 ```
 
-La salida contiene `1` y `2` en líneas separadas, cada una terminada en LF, no `[1,2]`. El [control original](#evidencia-2512a90fff6c) incluye duplicados, Unicode, un salto dentro de un string y secuencia vacía. También verifica que el modo JSONL permanece compacto y usa LF aunque las opciones soliciten indentación y CRLF.
+La salida contiene `1` y `2` en líneas separadas, cada una terminada en LF, no `[1,2]`. El [control original](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/JsonLines.cs) incluye duplicados, Unicode, un salto dentro de un string y secuencia vacía. También verifica que el modo JSONL permanece compacto y usa LF aunque las opciones soliciten indentación y CRLF.
 
 La consola didáctica acumula el resultado en memoria para mostrarlo; eso no convierte el ejemplo en una demostración de streaming de extremo a extremo. La API permite emitir valores progresivamente, pero el comportamiento final también depende del consumidor, los buffers y el transporte.
 
 ### JSON y unions: reconocer qué alternativa contiene un valor
 
-Una union representa un valor elegido entre varios tipos permitidos; la desarrollaremos en C# 15. El [probe JSON](#evidencia-8f7a657cadec) comprueba una `Reading(int, string)` y otra union de `Dog` y `Cat`.
+Una union representa un valor elegido entre varios tipos permitidos; la desarrollaremos en C# 15. El [probe JSON](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/JsonUnion.cs) comprueba una `Reading(int, string)` y otra union de `Dog` y `Cat`.
 
 Para objetos, `JsonUnionTypeStructuralClassifier` utiliza la estructura de propiedades para clasificar. Si un objeto no permite distinguir candidato o no tiene candidato válido, el control exige `JsonException`. No se «adivina» silenciosamente un tipo para que el roundtrip pase.
 
@@ -1095,7 +1095,7 @@ Estas pruebas prueban serialización y errores esperados. No acreditan más thro
 
 Producir el mensaje es sólo una parte del servicio. Cuando llegan varios trabajos a la vez, hay que coordinar quién los ejecuta, dónde esperan y cómo se limita la cola.
 
-**Para contrastar este capítulo:** [Workloads JSON](#evidencia-ce34a0dd57d9) · [Comparaciones principales](#evidencia-df8b1b3c3ee3) · [JSONL](#evidencia-2512a90fff6c) · [Unions JSON](#evidencia-8f7a657cadec) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Workloads JSON](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/TextAndJsonBenchmarks.cs) · [Comparaciones principales](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/micro-comparisons.json) · [JSONL](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/JsonLines.cs) · [Unions JSON](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/JsonUnion.cs) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 10. Strings y Span](#strings-span) · [Índice](#indice) · [Siguiente: 12. Concurrencia](#concurrencia).
 <a id="concurrencia"></a>
@@ -1157,7 +1157,7 @@ public sealed class ConcurrencyWorkload(int count, int workers)
 
 La salida es **499500**, la suma de 0 a 999. Se arrancan los consumidores antes de escribir; después se completa el writer y se espera a todos. El resultado se devuelve al harness, no queda descartado.
 
-Es importante lo que incluye la operación: crear canal y tareas, escribir, consumir, cerrar y esperar. **No es una cola de larga vida ya inicializada midiendo únicamente cada `Read` o `Write`.** [Fuente completa](#evidencia-2f2ab2ee9fca).
+Es importante lo que incluye la operación: crear canal y tareas, escribir, consumir, cerrar y esperar. **No es una cola de larga vida ya inicializada midiendo únicamente cada `Read` o `Write`.** [Fuente completa](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/AsyncAndConcurrencyBenchmarks.cs).
 
 ### Por qué el caso Channel necesitó una revisión especial
 
@@ -1175,7 +1175,7 @@ El orden histórico fue 11A → 10A → 10B → 11B. La auditoría añadió úni
 
 [![Channel de dos consumidores: repeticiones históricas A y B frente a controles posteriores C y D](/blog/dotnet-10-vs-dotnet-11/07-channel-history-and-control.png)](/blog/dotnet-10-vs-dotnet-11/07-channel-history-and-control.png)
 
-*Figura 7. Medias y Error BDN por ejecución, sin mezclar A/B con C/D. Todos procesan 1000 enteros en canal acotado a 256; el host no es exclusivo. Los controles sostienen el signo adverso local, no un recargo universal del 55% o 98%. Fuente: [orden y originales históricos](#evidencia-4d04be4160f7) y [manifiesto del control](#evidencia-fe64e7167cf6).*
+*Figura 7. Medias y Error BDN por ejecución, sin mezclar A/B con C/D. Todos procesan 1000 enteros en canal acotado a 256; el host no es exclusivo. Los controles sostienen el signo adverso local, no un recargo universal del 55% o 98%. Fuente: [orden y originales históricos](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/anomalies/anomalies-20261112/manifest.json) y [manifiesto del control](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/audit-channel/audit-channel-20261112-v2/manifest.json).*
 
 [Abrir PNG a tamaño completo](/blog/dotnet-10-vs-dotnet-11/07-channel-history-and-control.png).
 
@@ -1183,13 +1183,13 @@ En C, BDN utilizó 12 observaciones de 10 y 15 de 11; Error fue 0,517 y 1,153 µ
 
 La telemetría incluye CPU de procesos hijos activos durante piloto, calentamientos y diagnóstico, además de memoria libre. No equivale a medir exclusivamente la carga de fondo. Tampoco demuestra ausencia de paginación o de competencia sobre algún núcleo.
 
-La formulación defendible es: **el escenario vuelve a ser más lento en .NET 11 en este equipo y protocolo; el +98,14% histórico no reaparece como magnitud estable en los controles**. No se ha identificado causalidad exclusiva de un cambio del runtime. Los originales, el orden y los límites permanecen en la [auditoría](#evidencia-0c5cb713ef30) y la [trazabilidad](#evidencia-0f1a77641be5).
+La formulación defendible es: **el escenario vuelve a ser más lento en .NET 11 en este equipo y protocolo; el +98,14% histórico no reaparece como magnitud estable en los controles**. No se ha identificado causalidad exclusiva de un cambio del runtime. Los originales, el orden y los límites permanecen en la [auditoría](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/final-audit.md) y la [trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 ### Más consumidores no implica más rendimiento
 
 [![Barrido independiente de Channel con uno, dos, cuatro y ocho consumidores y 1000 elementos](/blog/dotnet-10-vs-dotnet-11/08-channel-workers.png)](/blog/dotnet-10-vs-dotnet-11/08-channel-workers.png)
 
-*Figura 8. Campaña de tamaños/workers separada del control A–D. Los valores son tiempo del lote completo; no latencia de cada mensaje. Ocho workers son consumidores lógicos, no ocho núcleos físicos dedicados. Fuente: [resultados por parámetros](#evidencia-72edf7c1bea8).*
+*Figura 8. Campaña de tamaños/workers separada del control A–D. Los valores son tiempo del lote completo; no latencia de cada mensaje. Ocho workers son consumidores lógicos, no ocho núcleos físicos dedicados. Fuente: [resultados por parámetros](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/sizes/micro-records.json).*
 
 [Abrir PNG a tamaño completo](/blog/dotnet-10-vs-dotnet-11/08-channel-workers.png).
 
@@ -1209,7 +1209,7 @@ Una regresión local merece investigación y cautela. También merece describirs
 
 El caso Channel muestra por qué la vida útil y la coordinación forman parte de la operación. Ampliamos ahora la mirada a otras tareas habituales: tipos dinámicos, archivos, criptografía y diagnóstico.
 
-**Para contrastar este capítulo:** [Workload de concurrencia](#evidencia-2f2ab2ee9fca) · [Manifiesto histórico A/B](#evidencia-4d04be4160f7) · [Control C/D](#evidencia-fe64e7167cf6) · [Barrido de workers](#evidencia-72edf7c1bea8) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Workload de concurrencia](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/AsyncAndConcurrencyBenchmarks.cs) · [Manifiesto histórico A/B](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/anomalies/anomalies-20261112/manifest.json) · [Control C/D](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/audit-channel/audit-channel-20261112-v2/manifest.json) · [Barrido de workers](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/sizes/micro-records.json) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 11. JSON](#json) · [Índice](#indice) · [Siguiente: 13. Otras superficies](#otras-superficies).
 <a id="otras-superficies"></a>
@@ -1241,7 +1241,7 @@ public static class Operaciones
 
 La salida es `45` dos veces. El ejemplo prepara metadata, argumentos y delegate antes de llamar. Esa frontera importa: medir además `GetMethod` o crear el delegate en cada operación respondería otra pregunta.
 
-La [suite de reflection](#evidencia-1231921bcc1b) mantiene esa preparación fuera de la ventana correspondiente. Invoke registró 19,02 → 17,13 ns y 24 B/op; Delegate, 3,39 → 3,06 ns y 0 B/op. No son tiempos de construir un sistema de plugins completo ni de compilar una expresión.
+La [suite de reflection](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/MemoryJitReflectionBenchmarks.cs) mantiene esa preparación fuera de la ventana correspondiente. Invoke registró 19,02 → 17,13 ns y 24 B/op; Delegate, 3,39 → 3,06 ns y 0 B/op. No son tiempos de construir un sistema de plugins completo ni de compilar una expresión.
 
 El resultado más práctico no requiere culpar o premiar una versión: cuando se repite una llamada conocida, conservar su representación preparada puede importar más que el delta entre runtimes. Si el destino realmente cambia, no podemos eliminar esa flexibilidad sin cambiar el problema.
 
@@ -1249,7 +1249,7 @@ El resultado más práctico no requiere culpar o premiar una versión: cuando se
 
 **I/O**, entrada/salida, incluye leer y escribir archivos. `FileStream` y las APIs asíncronas coordinan buffers, llamadas al sistema y finalización.
 
-La [suite](#evidencia-9d3b41746437) utiliza archivos reales, lectura secuencial con buffer de 64 KiB y verificaciones de longitud, contenido y checksum. Las escrituras incluyen crear el stream y finalizarlo según el contrato del método.
+La [suite](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/IoAndCryptoBenchmarks.cs) utiliza archivos reales, lectura secuencial con buffer de 64 KiB y verificaciones de longitud, contenido y checksum. Las escrituras incluyen crear el stream y finalizarlo según el contrato del método.
 
 Pero tras los calentamientos, el sistema operativo puede servir lecturas desde su caché. No son necesariamente lecturas de disco físico frío. `FlushAsync` tampoco certifica que los bytes hayan llegado de forma durable al medio de almacenamiento frente a un corte eléctrico.
 
@@ -1273,7 +1273,7 @@ La salida es `BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD`,
 
 El laboratorio incluye SHA-256, AES-256-CBC con padding PKCS7, comparación fija y generación de Guid. El caso AES crea, configura y dispone el proveedor por operación: no mide exclusivamente cifrar con una instancia ya preparada. Sus clave e IV fijos pertenecen a una fixture reproducible; **no son una receta segura para cifrar mensajes de producción**.
 
-La API nueva `CryptographicOperations.FixedTimeEquals(ReadOnlySpan<byte>, byte)` se contrasta con la misma comparación contra un span de bytes repetidos. El [probe](#evidencia-3f42500b63f7) mueve el desacuerdo al principio, centro y final y contempla longitudes vacías y de borde. Comprueba igualdad y errores lógicos; no pretende demostrar resistencia a canales laterales con un Stopwatch.
+La API nueva `CryptographicOperations.FixedTimeEquals(ReadOnlySpan<byte>, byte)` se contrasta con la misma comparación contra un span de bytes repetidos. El [probe](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/Crypto.cs) mueve el desacuerdo al principio, centro y final y contempla longitudes vacías y de borde. Comprueba igualdad y errores lógicos; no pretende demostrar resistencia a canales laterales con un Stopwatch.
 
 Para comparar criptografía, archivos comprimidos o certificados se aplica la regla de [conservar el contrato](#metodo-lectura), incluidas las garantías de autenticación y validación.
 
@@ -1281,7 +1281,7 @@ Para comparar criptografía, archivos comprimidos o certificados se aplica la re
 
 La compresión reduce datos mediante una representación reversible. Puede ahorrar transferencia a cambio de CPU, memoria y complejidad. Diferentes formatos no producen necesariamente el mismo tamaño ni ofrecen los mismos intercambios.
 
-El [probe Zstandard](#evidencia-3ed5656e6e02) utiliza los nuevos streams de .NET 11 y controles GZip/Brotli, comprobando que la descompresión recupera los bytes. Incluye texto español, JSON completo y datos pseudoaleatorios deterministas.
+El [probe Zstandard](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/Zstandard.cs) utiliza los nuevos streams de .NET 11 y controles GZip/Brotli, comprobando que la descompresión recupera los bytes. Incluye texto español, JSON completo y datos pseudoaleatorios deterministas.
 
 Los nombres de niveles de compresión no implican equivalencia numérica entre algoritmos. Los probes sí conservan tamaños y ratios para sus entradas concretas, además de los hashes del roundtrip; **no miden velocidad ni allocations**. Esos tamaños no aíslan un cambio de runtime entre codecs distintos ni justifican un ganador general de compresión.
 
@@ -1313,11 +1313,11 @@ using (Activity? activity = source.StartActivity("pedido"))
 
 La salida es `42` al finalizar la actividad. Es una demostración de la BCL, no el SDK de OpenTelemetry usado en la campaña específica.
 
-Los [benchmarks generales](#evidencia-24932a96fd09) separan logging generado, extensiones de logging, Activity y Meter con consumidor activo/inactivo. El logger activo cuenta eventos; no escribe un archivo o envía por red cada línea.
+Los [benchmarks generales](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/DiagnosticsBenchmarks.cs) separan logging generado, extensiones de logging, Activity y Meter con consumidor activo/inactivo. El logger activo cuenta eventos; no escribe un archivo o envía por red cada línea.
 
 La prueba de **OpenTelemetry 1.21.0** sí utiliza su SDK: `AlwaysOnSampler` y un procesador síncrono acotado que lee el tag esperado y cuenta spans. No es un exporter vacío, pero tampoco un pipeline OTLP real con lotes, red, almacenamiento y reintentos.
 
-En ese escenario, Disabled pasó de 2,779 a 3,502 ns con 0 B/op. Enabled, de 212,793 a 198,688 ns con 520 B/op en ambos runtimes. No son el coste total de observabilidad de una API ni prueba de que una plataforma externa vaya más rápida. [Implementación y protocolo](#evidencia-49a84856569b), [originales](#evidencia-eadf167ea790).
+En ese escenario, Disabled pasó de 2,779 a 3,502 ns con 0 B/op. Enabled, de 212,793 a 198,688 ns con 520 B/op en ambos runtimes. No son el coste total de observabilidad de una API ni prueba de que una plataforma externa vaya más rápida. [Implementación y protocolo](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-opentelemetry.md), [originales](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/opentelemetry/main/).
 
 ### Perfiles: observar dónde se va el tiempo sin inventar precisión
 
@@ -1325,7 +1325,7 @@ El proyecto conserva cuatro trazas EventPipe: dos de la API y dos de las aplicac
 
 Un perfil de tiempo muestreado puede incluir espera, y los valores inclusivos de una función y sus descendientes se solapan. No deben sumarse como porcentajes independientes de CPU. Del mismo modo, un contador de pausa expresado en segundos por segundo no son segundos acumulados de toda la sesión.
 
-Por ejemplo, `0,010361 s/1 s` no significa una pausa única de 10,361 segundos. Los perfiles ayudan a formular hipótesis sobre un camino; su relación con el P99 o con un microbenchmark debe leerse con la distinción entre [observación y atribución](#metodo-lectura). [Capturas, comandos y alcance](#evidencia-5998e62b150f).
+Por ejemplo, `0,010361 s/1 s` no significa una pausa única de 10,361 segundos. Los perfiles ayudan a formular hipótesis sobre un camino; su relación con el P99 o con un microbenchmark debe leerse con la distinción entre [observación y atribución](#metodo-lectura). [Capturas, comandos y alcance](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-diagnostics.md).
 
 ### También medimos el SDK, sin confundirlo con la aplicación
 
@@ -1335,7 +1335,7 @@ La campaña inició quince procesos por combinación SDK/comando, después de cu
 
 [![Tiempos de los comandos version e info con SDK 10 y 11, incluyendo dispersión observada](/blog/dotnet-10-vs-dotnet-11/14-sdk-cli.png)](/blog/dotnet-10-vs-dotnet-11/14-sdk-cli.png)
 
-*Figura 9. Comparación propia del CLI en este host: `--version`, 158,570 → 47,878 ms; `--info`, 315,671 → 78,461 ms. Quince procesos por combinación, sin vaciar caché y con host compartido. No demuestra causalidad exclusiva de Native AOT en el host ni mejora del runtime de una API. Fuente: [campaña CLI](#evidencia-ed06cbb1d49e) y [protocolo diagnóstico](#evidencia-5998e62b150f).*
+*Figura 9. Comparación propia del CLI en este host: `--version`, 158,570 → 47,878 ms; `--info`, 315,671 → 78,461 ms. Quince procesos por combinación, sin vaciar caché y con host compartido. No demuestra causalidad exclusiva de Native AOT en el host ni mejora del runtime de una API. Fuente: [campaña CLI](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/sdk/main/) y [protocolo diagnóstico](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-diagnostics.md).*
 
 [Abrir PNG a tamaño completo](/blog/dotnet-10-vs-dotnet-11/14-sdk-cli.png).
 
@@ -1345,7 +1345,7 @@ Para quien desarrolla a diario, SDK y herramientas también importan. Para quien
 
 Ya tenemos un mapa de costes pequeños y de herramientas para observarlos. Al reunirlos en un servidor veremos por qué una mejora local no determina por sí sola el comportamiento de una petición completa.
 
-**Para contrastar este capítulo:** [I/O y criptografía](#evidencia-9d3b41746437) · [Diagnósticos](#evidencia-24932a96fd09) · [OpenTelemetry](#evidencia-49a84856569b) · [Perfiles y SDK](#evidencia-5998e62b150f) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [I/O y criptografía](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/IoAndCryptoBenchmarks.cs) · [Diagnósticos](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/DiagnosticsBenchmarks.cs) · [OpenTelemetry](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-opentelemetry.md) · [Perfiles y SDK](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-diagnostics.md) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 12. Concurrencia](#concurrencia) · [Índice](#indice) · [Siguiente: 14. HTTP](#http).
 
@@ -1388,7 +1388,7 @@ static long Compute(int count)
 
 La respuesta contiene `count: 10000` y `checksum: 166616670000`. El cast a `long` se hace antes de multiplicar. El servidor recibe la solicitud, ejecuta el bucle, serializa el objeto y devuelve JSON. No se mide sólo la suma.
 
-El [Program.cs real](#evidencia-665e52b5b87a) fija HTTP/1.1, límites, payloads, base de datos y los demás endpoints. Conserva el mismo código y EF Core 10.0.15 en ambos destinos.
+El [Program.cs real](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/WebApi/Program.cs) fija HTTP/1.1, límites, payloads, base de datos y los demás endpoints. Conserva el mismo código y EF Core 10.0.15 en ambos destinos.
 
 ### Nueve tipos de trabajo
 
@@ -1416,7 +1416,7 @@ Se utilizan 1, 10, 50 y 100 **usuarios virtuales**, VU. Es un modelo de circuito
 
 La selección canónica contiene **144 celdas**: nueve endpoints, cuatro niveles de concurrencia, dos runtimes y dos repeticiones. Sumó **15.287.645 peticiones**, sin errores HTTP ni checks fallidos en esa selección.
 
-La primera campaña se interrumpió con 140 casos conservados. No se convirtió su timeout en un éxito. Se retuvieron las 128 celdas no-Channel y se completó aparte un bloque Channel equilibrado de 16; doce Channel históricos quedan fuera de la selección, pero no se borran. El [manifiesto canónico](#evidencia-2b58aa147724) explica qué se usa y por qué.
+La primera campaña se interrumpió con 140 casos conservados. No se convirtió su timeout en un éxito. Se retuvieron las 128 celdas no-Channel y se completó aparte un bloque Channel equilibrado de 16; doce Channel históricos quedan fuera de la selección, pero no se borran. El [manifiesto canónico](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/metadata/web-canonical-selection.json) explica qué se usa y por qué.
 
 En el bloque r0 el orden es 10 → 11; en r1, 11 → 10. Alternarlo ayuda a observar deriva, aunque no convierte el portátil en un laboratorio aislado.
 
@@ -1424,7 +1424,7 @@ En el bloque r0 el orden es 10 → 11; en r1, 11 → 10. Alternarlo ayuda a obse
 
 [![Throughput por concurrencia de text y processing, con las dos repeticiones separadas](/blog/dotnet-10-vs-dotnet-11/09-http-throughput.png)](/blog/dotnet-10-vs-dotnet-11/09-http-throughput.png)
 
-*Figura 10. Selección editorial de text y processing: 32 de las 144 celdas canónicas. Cada curva conserva runtime y repetición; no es una media de todos los endpoints. El cliente y el servidor comparten equipo. Fuente: [resúmenes HTTP canónicos](#evidencia-d8f4c3a92139) y [script de carga](#evidencia-5a1a89cb8fab).*
+*Figura 10. Selección editorial de text y processing: 32 de las 144 celdas canónicas. Cada curva conserva runtime y repetición; no es una media de todos los endpoints. El cliente y el servidor comparten equipo. Fuente: [resúmenes HTTP canónicos](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/web-main-summary.json) y [script de carga](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/scripts/run/web-load.js).*
 
 [Abrir PNG a tamaño completo](/blog/dotnet-10-vs-dotnet-11/09-http-throughput.png).
 
@@ -1440,7 +1440,7 @@ Throughput cuenta respuestas por unidad de tiempo. **Latencia** mide cuánto tar
 
 [![P95 HTTP de text y processing por concurrencia y repetición independiente](/blog/dotnet-10-vs-dotnet-11/10-http-latency.png)](/blog/dotnet-10-vs-dotnet-11/10-http-latency.png)
 
-*Figura 11. P95 en milisegundos de las mismas 32 celdas seleccionadas. Cada percentil pertenece a una ejecución, no a una agregación de r0 y r1. Menor puede ser mejor si conserva corrección y carga comparable. Fuente: [resúmenes originales seleccionados](#evidencia-d8f4c3a92139).*
+*Figura 11. P95 en milisegundos de las mismas 32 celdas seleccionadas. Cada percentil pertenece a una ejecución, no a una agregación de r0 y r1. Menor puede ser mejor si conserva corrección y carga comparable. Fuente: [resúmenes originales seleccionados](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/web-main-summary.json).*
 
 [Abrir PNG a tamaño completo](/blog/dotnet-10-vs-dotnet-11/10-http-latency.png).
 
@@ -1467,7 +1467,7 @@ Los recursos se muestrean cada 200 ms, no de forma continua. Por defecto no se g
 
 [![Captura histórica auténtica de la página HTTP generada a partir de los resultados canónicos](/blog/dotnet-10-vs-dotnet-11/16-http-evidence.png)](/blog/dotnet-10-vs-dotnet-11/16-http-evidence.png)
 
-*Figura 12. Copia sin retoques de una captura real del navegador sobre el panel de resultados. Es el viewport histórico de 1440 × 1000, con varios endpoints y sus dos bloques; no es una captura del terminal ni una página completa. Algunos paneles continúan fuera de la imagen. Origen: [manifiesto histórico](#evidencia-705b372bd60d), panel HTTP; trazabilidad de la copia en [blog-image-manifest.json](#evidencia-a724e25f2ffb).*
+*Figura 12. Copia sin retoques de una captura real del navegador sobre el panel de resultados. Es el viewport histórico de 1440 × 1000, con varios endpoints y sus dos bloques; no es una captura del terminal ni una página completa. Algunos paneles continúan fuera de la imagen. Origen: [manifiesto histórico](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/screenshots/manifest.json), panel HTTP; trazabilidad de la copia en [blog-image-manifest.json](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/blog-image-manifest.json).*
 
 [Abrir la captura HTTP a tamaño completo para leer los paneles](/blog/dotnet-10-vs-dotnet-11/16-http-evidence.png).
 
@@ -1481,7 +1481,7 @@ Contar millones de peticiones no compensa un diseño de medida que no permita at
 
 La API muestra el recorrido completo y los límites del generador. Para entender mejor la parte de datos hay que abrir otra capa: qué corresponde al runtime y qué cambia al actualizar Entity Framework Core.
 
-**Para contrastar este capítulo:** [API real](#evidencia-665e52b5b87a) · [Script de carga](#evidencia-5a1a89cb8fab) · [Selección canónica](#evidencia-2b58aa147724) · [Resúmenes HTTP](#evidencia-d8f4c3a92139) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [API real](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/WebApi/Program.cs) · [Script de carga](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/scripts/run/web-load.js) · [Selección canónica](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/metadata/web-canonical-selection.json) · [Resúmenes HTTP](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/web-main-summary.json) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 13. Otras superficies](#otras-superficies) · [Índice](#indice) · [Siguiente: 15. EF Core](#ef-core).
 <a id="ef-core"></a>
@@ -1499,7 +1499,7 @@ Podemos distinguir varias fases: construir o recuperar la representación de la 
 
 `AsNoTracking` es apropiado para muchas lecturas que no necesitan actualizar las entidades recuperadas. Pero cambiar tracking puede cambiar identidad, navegación y comportamiento de una aplicación; no es un atajo universal que podamos activar sin revisar el contrato.
 
-Una **proyección** selecciona la forma de salida necesaria, en lugar de traer todo un grafo. Este fragmento es la consulta real del proyecto; requiere `ShopContext`, `OrderDto` y las referencias de [Workload.cs](#evidencia-00fc7b72f30d):
+Una **proyección** selecciona la forma de salida necesaria, en lugar de traer todo un grafo. Este fragmento es la consulta real del proyecto; requiere `ShopContext`, `OrderDto` y las referencias de [Workload.cs](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/EfCore/Shared/Workload.cs):
 
 ```csharp
 // Fragmento real de Queries; no es un programa autónomo.
@@ -1540,7 +1540,7 @@ Las escrituras de cien elementos verifican el cambio, hacen rollback y comprueba
 
 [![Resultados EF de consulta simple y proyección para 1000 clientes, con tres procesos independientes por tratamiento](/blog/dotnet-10-vs-dotnet-11/11-ef-core.png)](/blog/dotnet-10-vs-dotnet-11/11-ef-core.png)
 
-*Figura 13. Media de las tres medias de proceso, en ms/op; corchetes y bigotes son mínimo–máximo de esas tres medias, **no un intervalo de confianza**. Cada proceso aporta quince muestras tras calentamiento. Fuente: [independent-runs](#evidencia-0730b27082ed) y [raw por proceso](#evidencia-342dff88bdf2).*
+*Figura 13. Media de las tres medias de proceso, en ms/op; corchetes y bigotes son mínimo–máximo de esas tres medias, **no un intervalo de confianza**. Cada proceso aporta quince muestras tras calentamiento. Fuente: [independent-runs](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/ef/independent-runs.json) y [raw por proceso](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/ef/main/).*
 
 [Abrir PNG a tamaño completo](/blog/dotnet-10-vs-dotnet-11/11-ef-core.png).
 
@@ -1560,11 +1560,11 @@ Eso reduce una explicación posible en esos casos, pero no demuestra que cada co
 
 La memoria registrada es administrada del hilo síncrono de la operación; no incluye toda la memoria nativa SQLite ni otros hilos. Más objetos materializados pueden explicar parte del coste conceptual de una consulta, pero no hemos hecho una descomposición causal de cada delta.
 
-Para una aplicación empresarial, la conclusión es revisar las consultas que usa, el proveedor real y el esquema. Una base SQLite local no certifica SQL Server, PostgreSQL o Cosmos. El [catálogo EF](#evidencia-30f35e655cc7) conserva los once contratos y sus oráculos de resultado.
+Para una aplicación empresarial, la conclusión es revisar las consultas que usa, el proveedor real y el esquema. Una base SQLite local no certifica SQL Server, PostgreSQL o Cosmos. El [catálogo EF](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-apps.md) conserva los once contratos y sus oráculos de resultado.
 
 Runtime, ORM y motor nativo ya están separados. Queda otra decisión que no cambia una consulta, pero sí cómo se entrega y arranca la aplicación: la forma de publicación.
 
-**Para contrastar este capítulo:** [Workload EF](#evidencia-00fc7b72f30d) · [Contratos de aplicaciones](#evidencia-30f35e655cc7) · [Procesos independientes](#evidencia-0730b27082ed) · [Originales EF](#evidencia-342dff88bdf2) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Workload EF](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/EfCore/Shared/Workload.cs) · [Contratos de aplicaciones](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-apps.md) · [Procesos independientes](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/ef/independent-runs.json) · [Originales EF](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/ef/main/) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 14. HTTP](#http) · [Índice](#indice) · [Siguiente: 16. Native AOT](#native-aot).
 <a id="native-aot"></a>
@@ -1597,7 +1597,7 @@ Un ejemplo conceptual de cambio de publicación es este comando para el proyecto
   -c Release -f net11.0 -r win-x64 -p:PublishAot=true
 ```
 
-Los comandos completos y los proyectos efectivos están en el [catálogo de publicación](#evidencia-47f40c3835b9) y el [runner](#evidencia-814202861e40). No se debe sustituir en silencio un fallo de toolchain AOT por una publicación JIT.
+Los comandos completos y los proyectos efectivos están en el [catálogo de publicación](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-aot-language.md) y el [runner](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/scripts/run/publish.ps1). No se debe sustituir en silencio un fallo de toolchain AOT por una publicación JIT.
 
 ### Mismas aplicaciones, dieciséis tratamientos
 
@@ -1611,7 +1611,7 @@ Una publicación por tratamiento no son cinco publicaciones independientes. Los 
 
 [![Tamaño de los ejecutables Native AOT de consola y API, separando los assets estáticos](/blog/dotnet-10-vs-dotnet-11/12-nativeaot-size.png)](/blog/dotnet-10-vs-dotnet-11/12-nativeaot-size.png)
 
-*Figura 14. Inventario de ejecutable, una publicación por tratamiento, símbolos excluidos. Consola: 2.455.040 → 2.507.264 bytes; API: 10.780.160 → 10.946.560. La API añade por separado un JSON de 53 bytes idéntico en ambos lados. Fuente: [publicaciones originales](#evidencia-7600edfd6c82) y [control de archivos retenidos](#evidencia-ccfdaa91eb0c).*
+*Figura 14. Inventario de ejecutable, una publicación por tratamiento, símbolos excluidos. Consola: 2.455.040 → 2.507.264 bytes; API: 10.780.160 → 10.946.560. La API añade por separado un JSON de 53 bytes idéntico en ambos lados. Fuente: [publicaciones originales](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/aot/main/results.json) y [control de archivos retenidos](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/critical-controls/aot-files.json).*
 
 [Abrir PNG a tamaño completo](/blog/dotnet-10-vs-dotnet-11/12-nativeaot-size.png).
 
@@ -1625,7 +1625,7 @@ El tamaño total de API/AOT es 10.780.213 → 10.946.613 bytes porque incorpora 
 
 [![Arranque Native AOT de consola y API a partir de cinco procesos por tratamiento](/blog/dotnet-10-vs-dotnet-11/13-nativeaot-startup.png)](/blog/dotnet-10-vs-dotnet-11/13-nativeaot-startup.png)
 
-*Figura 15. Medias y rangos observados de los cinco arranques Native AOT, no IC. La caché del SO no se vació; consola y API tienen señales de disponibilidad distintas. Fuente: [muestras originales](#evidencia-7600edfd6c82).*
+*Figura 15. Medias y rangos observados de los cinco arranques Native AOT, no IC. La caché del SO no se vació; consola y API tienen señales de disponibilidad distintas. Fuente: [muestras originales](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/aot/main/results.json).*
 
 [Abrir PNG a tamaño completo](/blog/dotnet-10-vs-dotnet-11/13-nativeaot-startup.png).
 
@@ -1646,7 +1646,7 @@ La ventaja de AOT frente al camino FDD es visible en estas aplicaciones. La comp
 
 ReadyToRun aporta otra advertencia: API/11 tiene media de 775,88 ms y mediana de 492,48, frente a 488,21/446,55 en 10. La primera muestra de 11 fue 1943,78 ms. No se elimina para mejorar la tabla ni se presenta como una fase JIT identificada: no se instrumentó su causa.
 
-El cronómetro empieza al lanzar el proceso y termina al observar readiness. En la API incluye polling HTTP; en consola, otro protocolo. Son procesos nuevos con caché de SO no vaciada, no arranque de disco frío. Los [dieciséis inventarios completos](#evidencia-72dacfc93ab3) conservan también los otros modos, símbolos y muestras.
+El cronómetro empieza al lanzar el proceso y termina al observar readiness. En la API incluye polling HTTP; en consola, otro protocolo. Son procesos nuevos con caché de SO no vaciada, no arranque de disco frío. Los [dieciséis inventarios completos](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/aot-summary.json) conservan también los otros modos, símbolos y muestras.
 
 ### Memoria, publicación y compatibilidad
 
@@ -1660,7 +1660,7 @@ Para una herramienta de línea de comandos o una instancia de vida corta, arranc
 
 La publicación obliga a elegir compromisos de distribución y compatibilidad. El lenguaje plantea otra elección independiente: cómo expresar mejor los contratos del programa sin atribuir a la sintaxis tiempos que no se han medido.
 
-**Para contrastar este capítulo:** [Proyectos Native AOT](#evidencia-47338399560d) · [Runner de publicación](#evidencia-814202861e40) · [Inventario y arranques originales](#evidencia-7600edfd6c82) · [Los dieciséis tratamientos](#evidencia-72dacfc93ab3) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Proyectos Native AOT](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/NativeAot/) · [Runner de publicación](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/scripts/run/publish.ps1) · [Inventario y arranques originales](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/aot/main/results.json) · [Los dieciséis tratamientos](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/aot-summary.json) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 15. EF Core](#ef-core) · [Índice](#indice) · [Siguiente: 17. C# 14 y 15](#csharp).
 
@@ -1675,7 +1675,7 @@ Una mejora del runtime puede beneficiar código sin cambiar su sintaxis. Una nov
 
 Eso no es menos importante. Un contrato más claro puede evitar estados inválidos, duplicación o errores al añadir casos. Pero **más legible no equivale automáticamente a más rápido**. Las muestras de lenguaje de esta investigación comprueban resultados y reglas de compilación, no porcentajes de rendimiento.
 
-Los siguientes pares son programas didácticos completos salvo el par de archivos de biblioteca, identificado como tal. Se basan en [Before14](#evidencia-c09084b853ba), [After15](#evidencia-c0d8e32e6c8e) y las muestras específicas enlazadas. Se separa cada característica para poder leerla sin depender de las demás.
+Los siguientes pares son programas didácticos completos salvo el par de archivos de biblioteca, identificado como tal. Se basan en [Before14](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/Before14/Program.cs), [After15](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/After15/Program.cs) y las muestras específicas enlazadas. Se separa cada característica para poder leerla sin depender de las demás.
 
 ### Unions: expresar «uno de estos tipos»
 
@@ -1951,7 +1951,7 @@ namespace Comparison.Language
 }
 ```
 
-Después, archivo real de [LegacyInterface15/Measurement.cs](#evidencia-3e3eaf845eb4):
+Después, archivo real de [LegacyInterface15/Measurement.cs](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/LegacyInterface15/Measurement.cs):
 
 ```csharp
 // Archivo de biblioteca: helper-despues (C# 15, netstandard2.0)
@@ -2005,11 +2005,11 @@ Console.WriteLine(unsafe(*pointer));
 
 Ambos imprimen `42`. El segundo requiere `LangVersion=preview`, `AllowUnsafeBlocks=true` y el feature `updated-memory-safety-rules`. No se activa por elegir C# 15 estable, ni mediante una propiedad ficticia `MemorySafetyRules`.
 
-La [muestra completa](#evidencia-c7d37de1a813) añade `fixed`, acceso indexado y una llamada marcada como insegura. No demuestra que cualquier programa con punteros se vuelva seguro. Cambia cómo se hacen explícitas ciertas operaciones; conservar direcciones válidas, vida útil y límites sigue siendo responsabilidad del diseño.
+La [muestra completa](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/MemorySafetyPreview/Program.cs) añade `fixed`, acceso indexado y una llamada marcada como insegura. No demuestra que cualquier programa con punteros se vuelva seguro. Cambia cómo se hacen explícitas ciertas operaciones; conservar direcciones válidas, vida útil y límites sigue siendo responsabilidad del diseño.
 
 ### Qué verificó realmente la matriz de lenguaje
 
-El [resultado histórico main-pinned](#evidencia-e4716719f12b) contiene 22 operaciones con resultado esperado, incluidos tres rechazos de compilación previstos. Un restore fallido no sirve como rechazo de sintaxis: se exigieron errores del compilador.
+El [resultado histórico main-pinned](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/language/main-pinned/results.json) contiene 22 operaciones con resultado esperado, incluidos tres rechazos de compilación previstos. Un restore fallido no sirve como rechazo de sintaxis: se exigieron errores del compilador.
 
 No son 22 benchmarks. Tampoco se debe convertir el rechazo conjunto de After15 con C# 14 en seis controles negativos independientes de cada característica. La cobertura ejecutada está identificada por operación.
 
@@ -2017,7 +2017,7 @@ Para un equipo, las novedades más interesantes pueden ser contratos más claros
 
 Estas posibilidades no tienen que adoptarse en bloque. El siguiente capítulo convierte la separación entre runtime, paquetes, lenguaje y previews en una secuencia de migración reversible.
 
-**Para contrastar este capítulo:** [Before14](#evidencia-c09084b853ba) · [After15](#evidencia-c0d8e32e6c8e) · [Preview de memoria](#evidencia-c7d37de1a813) · [Matriz histórica de lenguaje](#evidencia-e4716719f12b) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Before14](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/Before14/Program.cs) · [After15](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/After15/Program.cs) · [Preview de memoria](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/MemorySafetyPreview/Program.cs) · [Matriz histórica de lenguaje](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/language/main-pinned/results.json) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 16. Native AOT](#native-aot) · [Índice](#indice) · [Siguiente: 18. Migración](#migracion).
 <a id="migracion"></a>
@@ -2100,7 +2100,7 @@ Al pasar a EF11 hay que mirar más que la versión del paquete. Entre los cambio
 
 Las capacidades como FullJoin traducido, jerarquías complejas o vectores dependen de proveedor y estado de la característica. El soporte de un caso SQLite no certifica SQL Server o Cosmos; las funciones vectoriales experimentales no deben presentarse como contrato estable general.
 
-La [guía de migración](#evidencia-c27572d4a0b1) desarrolla cada incompatibilidad con fuentes oficiales. Son controles documentados para la aplicación del lector, no una declaración de que aquí se hayan ejercitado todos.
+La [guía de migración](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/migration-guide.md) desarrolla cada incompatibilidad con fuentes oficiales. Son controles documentados para la aplicación del lector, no una declaración de que aquí se hayan ejercitado todos.
 
 ### Paso 4: C# 15 y previews como decisiones independientes
 
@@ -2145,7 +2145,7 @@ El criterio de aceptación es operativo: mismo contrato, datos preservados, arte
 
 La migración establece qué debe mantenerse correcto. Antes de decidir si compensa, volvamos a los hallazgos y a los controles que retiraron algunas conclusiones iniciales.
 
-**Para contrastar este capítulo:** [Guía de migración](#evidencia-c27572d4a0b1) · [Versiones y factores](#evidencia-b33563055168) · [Procedimiento de reproducción](#evidencia-113fa8cfb6cb) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Guía de migración](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/migration-guide.md) · [Versiones y factores](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/README.md#versiones-y-separación-de-factores) · [Procedimiento de reproducción](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/reproduction.md) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 17. C# 14 y 15](#csharp) · [Índice](#indice) · [Siguiente: 19. Resultados](#resultados).
 <a id="resultados"></a>
@@ -2185,7 +2185,7 @@ El laboratorio repitió once casos anómalos en dos pares A/B, 44 jobs. Channel 
 | SHA256, 100000 bytes | +24,09% | +1,00% | +8,52% |
 | SHA256 con destino, 100000 bytes | +9,58% | −0,33% | +10,70% |
 
-Fuente: [contraste con la campaña inicial](#evidencia-8fa56c2c2104), [medias, Error, N y memoria de cada par](#evidencia-1dd017ec894b) y [orden de ejecución](#evidencia-4d04be4160f7). Negativo significa menos tiempo.
+Fuente: [contraste con la campaña inicial](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/anomalies/initial-contrast.json), [medias, Error, N y memoria de cada par](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/anomalies/comparisons.json) y [orden de ejecución](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/anomalies/anomalies-20261112/manifest.json). Negativo significa menos tiempo.
 
 No se sostiene afirmar que StringCreate mejora un 70%, UTF-8 encode un 62% o WriteAsync un 76%: cambian de signo al repetir. No sabemos atribuirlo a una causa única del host o del código. El resultado correcto es retirar aquellas conclusiones, no borrar sus datos.
 
@@ -2195,7 +2195,7 @@ La repetición no elimina toda incertidumbre, pero sí evita publicar como mejor
 
 [![Captura auténtica del panel JIT con estadísticas originales y ensamblador de ConstantUnequal](/blog/dotnet-10-vs-dotnet-11/15-jit-evidence.png)](/blog/dotnet-10-vs-dotnet-11/15-jit-evidence.png)
 
-*Figura 16. Captura histórica real del navegador, sin retoques: muestra estadísticas de dos kernels constantes y fragmentos propios de ConstantUnequal. No es un terminal recreado ni un benchmark nuevo. Origen: [manifiesto histórico](#evidencia-705b372bd60d), panel JIT; hashes y destino de la copia en [manifiesto editorial](#evidencia-a724e25f2ffb).*
+*Figura 16. Captura histórica real del navegador, sin retoques: muestra estadísticas de dos kernels constantes y fragmentos propios de ConstantUnequal. No es un terminal recreado ni un benchmark nuevo. Origen: [manifiesto histórico](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/screenshots/manifest.json), panel JIT; hashes y destino de la copia en [manifiesto editorial](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/blog-image-manifest.json).*
 
 [Abrir la captura JIT a tamaño completo para leer tabla e instrucciones](/blog/dotnet-10-vs-dotnet-11/15-jit-evidence.png).
 
@@ -2205,7 +2205,7 @@ La investigación no ha aislado qué commit interno causa cada porcentaje. La di
 
 Ordenar la evidencia permite distinguir mecanismos claros de resultados variables. Con ese criterio podemos responder la pregunta práctica sin exigir un ganador universal.
 
-**Para contrastar este capítulo:** [Contraste de anomalías con la campaña inicial](#evidencia-8fa56c2c2104) · [Comparaciones A/B](#evidencia-1dd017ec894b) · [Orden histórico](#evidencia-4d04be4160f7) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Contraste de anomalías con la campaña inicial](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/anomalies/initial-contrast.json) · [Comparaciones A/B](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/anomalies/comparisons.json) · [Orden histórico](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/anomalies/anomalies-20261112/manifest.json) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 18. Migración](#migracion) · [Índice](#indice) · [Siguiente: 20. Decisión](#decision).
 <a id="decision"></a>
@@ -2229,7 +2229,7 @@ También hay razones para actualizar que no caben en un cronómetro: soporte de 
 
 La decisión no necesita que una versión gane todas las filas. Necesita que el conjunto de beneficios y riesgos tenga sentido para el servicio que mantenemos. Cerremos recuperando qué hemos aprendido de la pregunta con la que empezamos.
 
-**Para contrastar este capítulo:** [Guía de migración](#evidencia-c27572d4a0b1) · [Limitaciones documentadas](#evidencia-a95975256127) · [Hallazgos del artículo](#resultados) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Guía de migración](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/migration-guide.md) · [Limitaciones documentadas](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/limitations.md) · [Hallazgos del artículo](#resultados) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 19. Resultados](#resultados) · [Índice](#indice) · [Siguiente: 21. Conclusión](#conclusion).
 <a id="conclusion"></a>
@@ -2249,13 +2249,13 @@ El resultado de esta investigación es un mapa para hacer esas preguntas con má
 
 La conclusión sólo resulta útil si puedes contrastar su recorrido. El siguiente capítulo reúne los puntos de entrada al código, los originales y el procedimiento de reproducción.
 
-**Para contrastar este capítulo:** [Investigación técnica](#evidencia-b82e4d8fdba1) · [Auditoría crítica](#evidencia-0c5cb713ef30) · [Decisión por aplicación](#decision) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Investigación técnica](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/dotnet-10-vs-dotnet-11.md) · [Auditoría crítica](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/final-audit.md) · [Decisión por aplicación](#decision) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 20. Decisión](#decision) · [Índice](#indice) · [Siguiente: 22. Reproducción](#reproduccion).
 <a id="reproduccion"></a>
 ## 22. Código fuente y reproducción
 
-El código y las evidencias acompañan a este artículo en el repositorio local. **Todavía no se presenta una URL pública de GitHub**, porque no existe una dirección confirmada que podamos enlazar.
+El código y las evidencias están disponibles en el [repositorio público de investigación](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5). Los enlaces de este capítulo conservan el mismo commit que el resto del artículo. El [README](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/README.md) explica cómo preparar una copia de trabajo separada sin sobrescribir los originales conservados.
 
 Para orientarse:
 
@@ -2271,363 +2271,365 @@ Para orientarse:
 | Datos y entorno | [Originales](../results/raw/), [metadatos](../results/metadata/) y [derivados](../results/processed/). |
 | Imágenes de esta versión | [Galería](blog-assets/index.html) y [manifiesto con procedencia y hashes](blog-image-manifest.json). |
 
+Los enlaces a archivos HTML abren su código en GitHub, no un panel alojado. Para consultarlos como páginas interactivas, utiliza el servidor local descrito en el README.
+
 
 <details id="evidencias-investigacion" class="study-evidence-catalogue">
-<summary>Catálogo de rutas de código y evidencias · publicación pendiente</summary>
+<summary>Catálogo enlazado de código y evidencias · versión publicada</summary>
 
-<p>Estas rutas pertenecen al repositorio de investigación; no son enlaces a archivos alojados en este blog. Puedes copiar la ruta para localizarla cuando el repositorio esté publicado y autorizado. Su publicación integral sigue pendiente de revisión de privacidad. No se adjuntan contenidos de archivos, logs ni trazas.</p>
+<p>Mapa de fuentes del <a href="https://github.com/jyeste94/.NET11vs.NET11">repositorio público de investigación</a>, fijado al commit <a href="https://github.com/jyeste94/.NET11vs.NET11/commit/5c8a5419e8330afcd954d87be5547fc1fdf725b5"><code>5c8a5419e8330afcd954d87be5547fc1fdf725b5</code></a>. Los enlaces abren el código y la documentación, los directorios o los datos originales según el tipo de fuente; los archivos de investigación no se duplican dentro de este blog.</p>
 <dl class="study-evidence-paths">
 <div id="evidencia-b33563055168" class="study-evidence-row" tabindex="-1">
-<dt><code>README.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización. Fragmento original: <code>#versiones-y-separación-de-factores</code>.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/README.md#versiones-y-separación-de-factores"><code>README.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado. Fragmento original: <code>#versiones-y-separación-de-factores</code>.</dd>
 </div>
 <div id="evidencia-138c99b46a30" class="study-evidence-row" tabindex="-1">
-<dt><code>article/blog-assets/index.html</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/blog-assets/index.html"><code>article/blog-assets/index.html</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-bd3afe8b5286" class="study-evidence-row" tabindex="-1">
-<dt><code>article/blog-editorial-report.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/blog-editorial-report.md"><code>article/blog-editorial-report.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-a724e25f2ffb" class="study-evidence-row" tabindex="-1">
-<dt><code>article/blog-image-manifest.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/blog-image-manifest.json"><code>article/blog-image-manifest.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-b82e4d8fdba1" class="study-evidence-row" tabindex="-1">
-<dt><code>article/dotnet-10-vs-dotnet-11.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/dotnet-10-vs-dotnet-11.md"><code>article/dotnet-10-vs-dotnet-11.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-26daa4cd5a62" class="study-evidence-row" tabindex="-1">
-<dt><code>article/references.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/references.md"><code>article/references.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-47f40c3835b9" class="study-evidence-row" tabindex="-1">
-<dt><code>docs/experiments-aot-language.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-aot-language.md"><code>docs/experiments-aot-language.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-30f35e655cc7" class="study-evidence-row" tabindex="-1">
-<dt><code>docs/experiments-apps.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-apps.md"><code>docs/experiments-apps.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-5998e62b150f" class="study-evidence-row" tabindex="-1">
-<dt><code>docs/experiments-diagnostics.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-diagnostics.md"><code>docs/experiments-diagnostics.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-66ac6b003d1b" class="study-evidence-row" tabindex="-1">
-<dt><code>docs/experiments-gc.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-gc.md"><code>docs/experiments-gc.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-49a84856569b" class="study-evidence-row" tabindex="-1">
-<dt><code>docs/experiments-opentelemetry.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-opentelemetry.md"><code>docs/experiments-opentelemetry.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-1b6ad6b00607" class="study-evidence-row" tabindex="-1">
-<dt><code>docs/experiments-runtime-async.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-runtime-async.md"><code>docs/experiments-runtime-async.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-0c5cb713ef30" class="study-evidence-row" tabindex="-1">
-<dt><code>docs/final-audit.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/final-audit.md"><code>docs/final-audit.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-a95975256127" class="study-evidence-row" tabindex="-1">
-<dt><code>docs/limitations.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/limitations.md"><code>docs/limitations.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-0abaf28a964f" class="study-evidence-row" tabindex="-1">
-<dt><code>docs/methodology.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/methodology.md"><code>docs/methodology.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-c27572d4a0b1" class="study-evidence-row" tabindex="-1">
-<dt><code>docs/migration-guide.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/migration-guide.md"><code>docs/migration-guide.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-113fa8cfb6cb" class="study-evidence-row" tabindex="-1">
-<dt><code>docs/reproduction.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/reproduction.md"><code>docs/reproduction.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-d3284b7c09ce" class="study-evidence-row" tabindex="-1">
-<dt><code>docs/research.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/research.md"><code>docs/research.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-0f1a77641be5" class="study-evidence-row" tabindex="-1">
-<dt><code>docs/traceability.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md"><code>docs/traceability.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-2e3a949af1d4" class="study-evidence-row" tabindex="-1">
-<dt><code>results/metadata/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/metadata/"><code>results/metadata/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-eae7c22ee92c" class="study-evidence-row" tabindex="-1">
-<dt><code>results/metadata/micro-full-20261112/environment.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/metadata/micro-full-20261112/environment.json"><code>results/metadata/micro-full-20261112/environment.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-2b58aa147724" class="study-evidence-row" tabindex="-1">
-<dt><code>results/metadata/web-canonical-selection.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/metadata/web-canonical-selection.json"><code>results/metadata/web-canonical-selection.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-7af0f987adad" class="study-evidence-row" tabindex="-1">
-<dt><code>results/processed/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/"><code>results/processed/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-1dd017ec894b" class="study-evidence-row" tabindex="-1">
-<dt><code>results/processed/anomalies/comparisons.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/anomalies/comparisons.json"><code>results/processed/anomalies/comparisons.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-8fa56c2c2104" class="study-evidence-row" tabindex="-1">
-<dt><code>results/processed/anomalies/initial-contrast.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/anomalies/initial-contrast.json"><code>results/processed/anomalies/initial-contrast.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-72dacfc93ab3" class="study-evidence-row" tabindex="-1">
-<dt><code>results/processed/aot-summary.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/aot-summary.json"><code>results/processed/aot-summary.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-ccfdaa91eb0c" class="study-evidence-row" tabindex="-1">
-<dt><code>results/processed/critical-controls/aot-files.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/critical-controls/aot-files.json"><code>results/processed/critical-controls/aot-files.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-4240917cf8c0" class="study-evidence-row" tabindex="-1">
-<dt><code>results/processed/dependency-audit.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/dependency-audit.json"><code>results/processed/dependency-audit.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-0730b27082ed" class="study-evidence-row" tabindex="-1">
-<dt><code>results/processed/ef/independent-runs.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/ef/independent-runs.json"><code>results/processed/ef/independent-runs.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-b389f565c315" class="study-evidence-row" tabindex="-1">
-<dt><code>results/processed/jit-pr/micro-records.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/jit-pr/micro-records.json"><code>results/processed/jit-pr/micro-records.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-df8b1b3c3ee3" class="study-evidence-row" tabindex="-1">
-<dt><code>results/processed/micro-comparisons.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/micro-comparisons.json"><code>results/processed/micro-comparisons.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-0b839fa40f5b" class="study-evidence-row" tabindex="-1">
-<dt><code>results/processed/runtime-async/records.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/runtime-async/records.json"><code>results/processed/runtime-async/records.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-c5f6f42177bc" class="study-evidence-row" tabindex="-1">
-<dt><code>results/processed/servergc/micro-records.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/servergc/micro-records.json"><code>results/processed/servergc/micro-records.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-af1cc789ce98" class="study-evidence-row" tabindex="-1">
-<dt><code>results/processed/sizes/micro-comparisons.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/sizes/micro-comparisons.json"><code>results/processed/sizes/micro-comparisons.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-72edf7c1bea8" class="study-evidence-row" tabindex="-1">
-<dt><code>results/processed/sizes/micro-records.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/sizes/micro-records.json"><code>results/processed/sizes/micro-records.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-d8f4c3a92139" class="study-evidence-row" tabindex="-1">
-<dt><code>results/processed/web-main-summary.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/web-main-summary.json"><code>results/processed/web-main-summary.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-24208bfe2b21" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/"><code>results/raw/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-4d04be4160f7" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/anomalies/anomalies-20261112/manifest.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/anomalies/anomalies-20261112/manifest.json"><code>results/raw/anomalies/anomalies-20261112/manifest.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-7600edfd6c82" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/aot/main/results.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/aot/main/results.json"><code>results/raw/aot/main/results.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-fe64e7167cf6" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/audit-channel/audit-channel-20261112-v2/manifest.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/audit-channel/audit-channel-20261112-v2/manifest.json"><code>results/raw/audit-channel/audit-channel-20261112-v2/manifest.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-342dff88bdf2" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/ef/main/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/ef/main/"><code>results/raw/ef/main/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-eb1002fa9057" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/gc/main/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/gc/main/"><code>results/raw/gc/main/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-4dda7b72f5af" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/jit-general-20261112/micro/results/NetComparison.Benchmarks.JitBenchmarks-asm.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-general-20261112/micro/results/NetComparison.Benchmarks.JitBenchmarks-asm.md"><code>results/raw/jit-general-20261112/micro/results/NetComparison.Benchmarks.JitBenchmarks-asm.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-18e9feab7b9d" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/jit-pr/main/results/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-pr/main/results/"><code>results/raw/jit-pr/main/results/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-30c35e8cd5bc" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md"><code>results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-29f7b27309c9" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-report-full.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-report-full.json"><code>results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-report-full.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-e4716719f12b" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/language/main-pinned/results.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/language/main-pinned/results.json"><code>results/raw/language/main-pinned/results.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-71d6e094d75a" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/micro-full-20261112/micro/results/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/micro-full-20261112/micro/results/"><code>results/raw/micro-full-20261112/micro/results/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-eadf167ea790" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/opentelemetry/main/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/opentelemetry/main/"><code>results/raw/opentelemetry/main/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-58433020b8b2" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/runtime-async/main/bdn/results/NetComparison.RuntimeAsync.AsyncBenchmarks-report-full.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/runtime-async/main/bdn/results/NetComparison.RuntimeAsync.AsyncBenchmarks-report-full.json"><code>results/raw/runtime-async/main/bdn/results/NetComparison.RuntimeAsync.AsyncBenchmarks-report-full.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-6e072ef31711" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/runtime-async/main/diagnostic-index.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/runtime-async/main/diagnostic-index.json"><code>results/raw/runtime-async/main/diagnostic-index.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-ed06cbb1d49e" class="study-evidence-row" tabindex="-1">
-<dt><code>results/raw/sdk/main/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/sdk/main/"><code>results/raw/sdk/main/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-705b372bd60d" class="study-evidence-row" tabindex="-1">
-<dt><code>screenshots/manifest.json</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/screenshots/manifest.json"><code>screenshots/manifest.json</code></a></dt>
+<dd>Datos originales descargables, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-814202861e40" class="study-evidence-row" tabindex="-1">
-<dt><code>scripts/run/publish.ps1</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/scripts/run/publish.ps1"><code>scripts/run/publish.ps1</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-5a1a89cb8fab" class="study-evidence-row" tabindex="-1">
-<dt><code>scripts/run/web-load.js</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/scripts/run/web-load.js"><code>scripts/run/web-load.js</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-189c05fb0888" class="study-evidence-row" tabindex="-1">
-<dt><code>src/BenchmarkRunner/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/BenchmarkRunner/"><code>src/BenchmarkRunner/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-c6ada5d0c815" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Benchmarks/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/"><code>src/Benchmarks/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-2f2ab2ee9fca" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Benchmarks/AsyncAndConcurrencyBenchmarks.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/AsyncAndConcurrencyBenchmarks.cs"><code>src/Benchmarks/AsyncAndConcurrencyBenchmarks.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-0ee69ae7579f" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Benchmarks/CollectionsBenchmarks.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/CollectionsBenchmarks.cs"><code>src/Benchmarks/CollectionsBenchmarks.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-24932a96fd09" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Benchmarks/DiagnosticsBenchmarks.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/DiagnosticsBenchmarks.cs"><code>src/Benchmarks/DiagnosticsBenchmarks.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-9d3b41746437" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Benchmarks/IoAndCryptoBenchmarks.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/IoAndCryptoBenchmarks.cs"><code>src/Benchmarks/IoAndCryptoBenchmarks.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-1231921bcc1b" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Benchmarks/MemoryJitReflectionBenchmarks.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/MemoryJitReflectionBenchmarks.cs"><code>src/Benchmarks/MemoryJitReflectionBenchmarks.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-ce34a0dd57d9" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Benchmarks/TextAndJsonBenchmarks.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/TextAndJsonBenchmarks.cs"><code>src/Benchmarks/TextAndJsonBenchmarks.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-7002b4de1a6f" class="study-evidence-row" tabindex="-1">
-<dt><code>src/EfCore/Shared/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/EfCore/Shared/"><code>src/EfCore/Shared/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-00fc7b72f30d" class="study-evidence-row" tabindex="-1">
-<dt><code>src/EfCore/Shared/Workload.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/EfCore/Shared/Workload.cs"><code>src/EfCore/Shared/Workload.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-f006efa4101c" class="study-evidence-row" tabindex="-1">
-<dt><code>src/JitProbes/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/JitProbes/"><code>src/JitProbes/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-1014f76afffd" class="study-evidence-row" tabindex="-1">
-<dt><code>src/JitProbes/Program.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/JitProbes/Program.cs"><code>src/JitProbes/Program.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-801e11250a0f" class="study-evidence-row" tabindex="-1">
-<dt><code>src/LanguageSamples/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/"><code>src/LanguageSamples/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-c0d8e32e6c8e" class="study-evidence-row" tabindex="-1">
-<dt><code>src/LanguageSamples/After15/Program.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/After15/Program.cs"><code>src/LanguageSamples/After15/Program.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-c09084b853ba" class="study-evidence-row" tabindex="-1">
-<dt><code>src/LanguageSamples/Before14/Program.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/Before14/Program.cs"><code>src/LanguageSamples/Before14/Program.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-3e3eaf845eb4" class="study-evidence-row" tabindex="-1">
-<dt><code>src/LanguageSamples/LegacyInterface15/Measurement.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/LegacyInterface15/Measurement.cs"><code>src/LanguageSamples/LegacyInterface15/Measurement.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-c7d37de1a813" class="study-evidence-row" tabindex="-1">
-<dt><code>src/LanguageSamples/MemorySafetyPreview/Program.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/MemorySafetyPreview/Program.cs"><code>src/LanguageSamples/MemorySafetyPreview/Program.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-a529ae37cfa4" class="study-evidence-row" tabindex="-1">
-<dt><code>src/LanguageSamples/Shared/AsyncBehavior.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/Shared/AsyncBehavior.cs"><code>src/LanguageSamples/Shared/AsyncBehavior.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-47338399560d" class="study-evidence-row" tabindex="-1">
-<dt><code>src/NativeAot/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/NativeAot/"><code>src/NativeAot/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-c1469587a92e" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Net11Features/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/"><code>src/Net11Features/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-3f42500b63f7" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Net11Features/Cases/Crypto.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/Crypto.cs"><code>src/Net11Features/Cases/Crypto.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-84abffd79e6c" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Net11Features/Cases/FullJoin.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/FullJoin.cs"><code>src/Net11Features/Cases/FullJoin.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-2512a90fff6c" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Net11Features/Cases/JsonLines.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/JsonLines.cs"><code>src/Net11Features/Cases/JsonLines.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-8f7a657cadec" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Net11Features/Cases/JsonUnion.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/JsonUnion.cs"><code>src/Net11Features/Cases/JsonUnion.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-64e36bae106e" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Net11Features/Cases/MemoryStreams.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/MemoryStreams.cs"><code>src/Net11Features/Cases/MemoryStreams.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-381ddd437902" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Net11Features/Cases/SequenceStreams.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/SequenceStreams.cs"><code>src/Net11Features/Cases/SequenceStreams.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-1176d2ac9bae" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Net11Features/Cases/TupleJoin.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/TupleJoin.cs"><code>src/Net11Features/Cases/TupleJoin.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-3ed5656e6e02" class="study-evidence-row" tabindex="-1">
-<dt><code>src/Net11Features/Cases/Zstandard.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/Zstandard.cs"><code>src/Net11Features/Cases/Zstandard.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-215f5262460a" class="study-evidence-row" tabindex="-1">
-<dt><code>src/RuntimeAsyncBenchmarks/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/RuntimeAsyncBenchmarks/"><code>src/RuntimeAsyncBenchmarks/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-49fbbda8a5e0" class="study-evidence-row" tabindex="-1">
-<dt><code>src/RuntimeAsyncBenchmarks/AsyncBenchmarks.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/RuntimeAsyncBenchmarks/AsyncBenchmarks.cs"><code>src/RuntimeAsyncBenchmarks/AsyncBenchmarks.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-b75210290e49" class="study-evidence-row" tabindex="-1">
-<dt><code>src/RuntimeAsyncBenchmarks/Shared/AsyncWorkloads.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/RuntimeAsyncBenchmarks/Shared/AsyncWorkloads.cs"><code>src/RuntimeAsyncBenchmarks/Shared/AsyncWorkloads.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-97ea9fad1b13" class="study-evidence-row" tabindex="-1">
-<dt><code>src/WebApi/</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/WebApi/"><code>src/WebApi/</code></a></dt>
+<dd>Directorio de evidencias, fijado al commit publicado.</dd>
 </div>
 <div id="evidencia-665e52b5b87a" class="study-evidence-row" tabindex="-1">
-<dt><code>src/WebApi/Program.cs</code></dt>
-<dd>Publicación pendiente de revisión de privacidad y autorización.</dd>
+<dt><a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/WebApi/Program.cs"><code>src/WebApi/Program.cs</code></a></dt>
+<dd>Código o documentación de investigación, fijado al commit publicado.</dd>
 </div>
 </dl>
 
@@ -2659,9 +2661,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run/verify.ps1 `
   -Locked -RunId blog-repro-correctness
 ```
 
-Después, la [guía completa de reproducción](#evidencia-113fa8cfb6cb) contiene los comandos de cada campaña, requisitos de Native AOT, herramientas diagnósticas y conservación de resultados. Los nombres de ejemplo deben sustituirse por identificadores nuevos, sin sobrescribir campañas existentes.
+Después, la [guía completa de reproducción](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/reproduction.md) contiene los comandos de cada campaña, requisitos de Native AOT, herramientas diagnósticas y conservación de resultados. Los nombres de ejemplo deben sustituirse por identificadores nuevos, sin sobrescribir campañas existentes.
 
-**No se ha repetido toda esa preparación desde un clon limpio para esta edición final.** El [informe editorial de la versión anterior](#evidencia-bd3afe8b5286) describe las comprobaciones históricas de sus ejemplos y Markdown, no una validación recién ejecutada de este archivo. La distinción entre comprobación documental y campaña de rendimiento sigue el [método de lectura](#metodo-lectura).
+**No se ha repetido toda esa preparación desde un clon limpio para esta edición final.** El [informe editorial de la versión anterior](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/blog-editorial-report.md) describe las comprobaciones históricas de sus ejemplos y Markdown, no una validación recién ejecutada de este archivo. La distinción entre comprobación documental y campaña de rendimiento sigue el [método de lectura](#metodo-lectura).
 
 ### Qué registrar en una ejecución nueva
 
@@ -2671,11 +2673,11 @@ Si el tiempo sorprende, comprobar primero el resultado y la configuración. Lueg
 
 En algunas campañas de este repositorio la fuente histórica no se puede reconstruir por completo desde un commit conservado. La versión actual y los hashes permiten revisar mucho, pero no rellenan ese hueco. Reproducir el protocolo ahora es valioso; no equivale a viajar atrás y demostrar qué bytes faltaban.
 
-Los originales también incluyen identificadores del entorno y trazas binarias. La revisión de privacidad pendiente de su publicación integral no desaparece porque las imágenes editoriales estén seleccionadas. No se ha publicado el blog ni el repositorio como parte de esta entrega.
+Los originales publicados también incluyen identificadores del entorno y trazas binarias necesarios para interpretar las medidas. El repositorio enlazado conserva esa evidencia histórica; el entorno local, las herramientas instaladas y los secretos no forman parte de la publicación. La selección editorial de imágenes no sustituye los originales ni resuelve los límites históricos de trazabilidad.
 
 Para recorrer esas fuentes sin perderte entre siglas, el glosario conserva el significado que tienen aquí. Después quedan las referencias oficiales y documentales para ampliar cada capa.
 
-**Para contrastar este capítulo:** [Guía de reproducción](#evidencia-113fa8cfb6cb) · [Mapa del proyecto](#evidencia-b33563055168) · [Originales](#evidencia-24208bfe2b21) · [Metadatos](#evidencia-2e3a949af1d4) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Guía de reproducción](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/reproduction.md) · [Mapa del proyecto](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/README.md#versiones-y-separación-de-factores) · [Originales](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/) · [Metadatos](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/metadata/) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 21. Conclusión](#conclusion) · [Índice](#indice) · [Siguiente: 23. Glosario](#glosario).
 <a id="glosario"></a>
@@ -2751,7 +2753,7 @@ Este capítulo sirve como punto de consulta cuando una sigla interrumpe el hilo.
 
 Las definiciones ayudan a volver al cuerpo con el vocabulario situado. Las referencias siguientes permiten contrastar los contratos oficiales y distinguirlos de nuestros resultados locales.
 
-**Para contrastar este capítulo:** [Fundamentos y componentes](#que-es-dotnet) · [Unidades y estadística](#metodologia) · [Mapa de código y evidencias](#reproduccion) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Fundamentos y componentes](#que-es-dotnet) · [Unidades y estadística](#metodologia) · [Mapa de código y evidencias](#reproduccion) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 22. Reproducción](#reproduccion) · [Índice](#indice) · [Siguiente: 24. Referencias](#referencias).
 <a id="referencias"></a>
@@ -2797,15 +2799,15 @@ Las cifras del artículo proceden del repositorio, no de sustituir nuestras medi
 
 ### Investigación que acompaña al artículo
 
-- [README y mapa del proyecto](#evidencia-b33563055168).
-- [Artículo técnico original, sin sobrescribir](#evidencia-b82e4d8fdba1).
-- [Metodología](#evidencia-0abaf28a964f), [investigación y discrepancias de fuentes](#evidencia-d3284b7c09ce) y [referencias anotadas](#evidencia-26daa4cd5a62).
-- [Auditoría crítica](#evidencia-0c5cb713ef30), [matriz de trazabilidad](#evidencia-0f1a77641be5) y [limitaciones](#evidencia-a95975256127).
-- [Reproducción](#evidencia-113fa8cfb6cb) y [migración](#evidencia-c27572d4a0b1).
-- [Informe editorial de la versión anterior](#evidencia-bd3afe8b5286) y [procedencia de las imágenes reutilizadas](#evidencia-a724e25f2ffb).
+- [README y mapa del proyecto](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/README.md#versiones-y-separación-de-factores).
+- [Artículo técnico original, sin sobrescribir](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/dotnet-10-vs-dotnet-11.md).
+- [Metodología](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/methodology.md), [investigación y discrepancias de fuentes](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/research.md) y [referencias anotadas](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/references.md).
+- [Auditoría crítica](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/final-audit.md), [matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md) y [limitaciones](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/limitations.md).
+- [Reproducción](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/reproduction.md) y [migración](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/migration-guide.md).
+- [Informe editorial de la versión anterior](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/blog-editorial-report.md) y [procedencia de las imágenes reutilizadas](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/blog-image-manifest.json).
 
 Las referencias cierran el recorrido documental. Puedes volver al resumen para recuperar las decisiones o usar el índice para profundizar en un experimento concreto.
 
-**Para contrastar este capítulo:** [Referencias anotadas](#evidencia-26daa4cd5a62) · [Investigación y discrepancias de fuentes](#evidencia-d3284b7c09ce) · [Metodología completa](#evidencia-0abaf28a964f) · [Matriz de trazabilidad](#evidencia-0f1a77641be5).
+**Para contrastar este capítulo:** [Referencias anotadas](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/references.md) · [Investigación y discrepancias de fuentes](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/research.md) · [Metodología completa](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/methodology.md) · [Matriz de trazabilidad](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/traceability.md).
 
 **Navegación:** [Anterior: 23. Glosario](#glosario) · [Índice](#indice) · [Siguiente: Volver al resumen](#resumen-ejecutivo).
