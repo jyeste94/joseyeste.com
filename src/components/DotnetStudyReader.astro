@@ -1,0 +1,137 @@
+<script>
+  import '../scripts/dotnet-study.mjs';
+</script>
+
+<style is:global>
+  /* Keep the existing prose typography, width, yellow links and site theme. */
+  article.dotnet-study {
+    --study-paper: #fff;
+    --study-ink: #111827;
+    --study-panel: #f3f4f6;
+    --study-line: #d1d5db;
+    --study-focus: #854d0e;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+  html.dark article.dotnet-study {
+    --study-paper: #111827;
+    --study-ink: #f9fafb;
+    --study-panel: #1f2937;
+    --study-line: #4b5563;
+    --study-focus: #fde047;
+  }
+  article.dotnet-study [id] { scroll-margin-block-start: 6rem; }
+  article.dotnet-study :is(a, button, summary, [tabindex]):focus-visible {
+    outline: 3px solid var(--study-focus);
+    outline-offset: 4px;
+  }
+  article.dotnet-study :is(#indice, #evidencias-investigacion) {
+    padding: 1rem;
+    border: 1px solid var(--study-line);
+    border-radius: 0.75rem;
+    background: var(--study-panel);
+  }
+  article.dotnet-study summary { cursor: pointer; font-weight: 700; }
+  article.dotnet-study .study-publication-notice {
+    border-inline-start: 3px solid var(--study-line);
+    padding-inline-start: 1rem;
+    font-size: 0.9em;
+  }
+  article.dotnet-study .study-publication-notice p { margin-block: 0; }
+  article.dotnet-study img { max-inline-size: 100%; block-size: auto; }
+  article.dotnet-study a:has(> img) { cursor: zoom-in; }
+  article.dotnet-study .study-cover { margin-inline: 0; }
+  article.dotnet-study .study-evidence-row { margin-block: 1rem; }
+  article.dotnet-study .study-evidence-row code {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+  article.dotnet-study .study-table-scroll {
+    max-inline-size: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    margin-block: 2rem;
+    border: 1px solid var(--study-line);
+    border-radius: 0.4rem;
+  }
+  article.dotnet-study .study-table-scroll table {
+    margin-block: 0;
+    overflow-wrap: normal;
+  }
+  article.dotnet-study :is(th, td) { min-inline-size: 7ch; }
+  article.dotnet-study table :is(th, td) code { overflow-wrap: normal; }
+  article.dotnet-study pre {
+    max-inline-size: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+  article.dotnet-study pre code {
+    white-space: pre;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+  article.dotnet-study :not(pre) > code { overflow-wrap: anywhere; }
+  article.dotnet-study .study-image-dialog {
+    inline-size: min(96vw, 100rem);
+    max-inline-size: 96vw;
+    max-block-size: 94vh;
+    box-sizing: border-box;
+    padding: 1rem;
+    overflow: auto;
+    color: var(--study-ink);
+    background: var(--study-paper);
+    border: 1px solid var(--study-line);
+    border-radius: 0.75rem;
+  }
+  article.dotnet-study .study-image-dialog::backdrop { background: rgb(0 0 0 / 78%); }
+  article.dotnet-study .study-image-dialog header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-block-end: 1rem;
+  }
+  article.dotnet-study .study-image-dialog header > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  article.dotnet-study .study-image-dialog button {
+    font: inherit;
+    min-block-size: 2.75rem;
+    padding: 0.5rem 0.9rem;
+    color: var(--study-ink);
+    background: var(--study-panel);
+    border: 1px solid var(--study-line);
+    border-radius: 0.4rem;
+    cursor: pointer;
+  }
+  article.dotnet-study .study-image-dialog figure { margin: 0; }
+  article.dotnet-study .study-image-dialog figcaption { margin-block-start: 0.75rem; }
+  article.dotnet-study .study-image-viewport {
+    max-inline-size: 100%;
+    max-block-size: 65vh;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  article.dotnet-study .study-image-viewport img {
+    display: block;
+    max-block-size: 65vh;
+    margin: 0 auto;
+    object-fit: contain;
+  }
+  article.dotnet-study .study-image-viewport[data-zoom="natural"] { block-size: 65vh; }
+  article.dotnet-study .study-image-viewport[data-zoom="natural"] img {
+    max-inline-size: none;
+    max-block-size: none;
+    inline-size: auto;
+    block-size: auto;
+    margin: 0;
+  }
+  @media print {
+    article.dotnet-study .study-image-dialog { display: none; }
+    article.dotnet-study :is(pre, .study-table-scroll) { overflow: visible; }
+    article.dotnet-study pre code { white-space: pre-wrap; }
+  }
+</style>

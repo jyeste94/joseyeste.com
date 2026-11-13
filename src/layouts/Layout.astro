@@ -11,9 +11,15 @@ interface Props {
   title: string;
   description: string;
   image?: string;
+  article?: {
+    publishedDate: string;
+    imageAlt: string;
+    imageWidth: number;
+    imageHeight: number;
+  };
 }
 
-const { description, title, image = "/Yo.jpeg" } = Astro.props;
+const { description, title, image = "/Yo.jpeg", article } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://joseyeste.com");
 const socialImageURL = new URL(image, canonicalURL);
 ---
@@ -29,18 +35,27 @@ const socialImageURL = new URL(image, canonicalURL);
     <meta name="generator" content={Astro.generator} />
 
     <!-- Open Graph / Facebook / WhatsApp -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={article ? "article" : "website"} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={socialImageURL} />
+    {article && <>
+      <meta property="og:locale" content="es_ES" />
+      <meta property="og:image:alt" content={article.imageAlt} />
+      <meta property="og:image:width" content={article.imageWidth.toString()} />
+      <meta property="og:image:height" content={article.imageHeight.toString()} />
+      <meta property="article:published_time" content={article.publishedDate} />
+    </>}
 
     <!-- Twitter / X -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={canonicalURL} />
-    <meta property="twitter:title" content={title} />
-    <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={socialImageURL} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalURL} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImageURL} />
+    {article && <meta name="twitter:image:alt" content={article.imageAlt} />}
+    <slot name="head" />
     <meta
       name="google-site-verification"
       content="TEnM9pD-wJdcciVyK1WvK6GdWyftKefmQvuIATsirCI"

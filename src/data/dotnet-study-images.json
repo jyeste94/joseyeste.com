@@ -1,0 +1,751 @@
+{
+  "schemaVersion": 1,
+  "images": [
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/01-dotnet-pipeline.png",
+      "width": 640,
+      "height": 776,
+      "sha256": "7e1983b8ca9d4321ea35a8ddf7befde63fdc8c82a7c0807b05ea0178752d9ac1",
+      "kind": "conceptual",
+      "sourceAsset": "article/blog-assets/01-dotnet-pipeline.png",
+      "sourcePaths": [
+        "article/dotnet-10-vs-dotnet-11.md"
+      ],
+      "provenance": "Original conceptual layout explaining distinctions already documented in the technical article."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/02-jit-pipeline.png",
+      "width": 640,
+      "height": 760,
+      "sha256": "c7e5ae9233e75dc506aebcb92d8c9d1d560e09ec52eb718eaf8b38c3d9d26744",
+      "kind": "conceptual",
+      "sourceAsset": "article/blog-assets/02-jit-pipeline.png",
+      "sourcePaths": [
+        "article/dotnet-10-vs-dotnet-11.md",
+        "src/JitProbes/Program.cs"
+      ],
+      "provenance": "Didactic conceptual sequence, not an instrumented compiler phase trace."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/03-gvm-code.png",
+      "width": 640,
+      "height": 826,
+      "sha256": "9215aaa10ca66e4d272774760ca80d54b40f549daab414176b035fa78d4fca4e",
+      "kind": "conceptual",
+      "sourceAsset": "article/blog-assets/03-gvm-code.png",
+      "sourcePaths": [
+        "src/JitProbes/Program.cs",
+        "results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md"
+      ],
+      "provenance": "C# excerpt is line-wrapped for readability without changing tokens. The two x64 instructions are transcribed literally from retained assembly; no terminal is simulated."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/04-gvm-measurements.png",
+      "width": 640,
+      "height": 508,
+      "sha256": "1c61a13238074f4f09f2cdea6b15f172d65aaf7a3ccc790862127ab79d40ab34",
+      "kind": "derived-chart",
+      "sourceAsset": "article/blog-assets/04-gvm-measurements.png",
+      "sourcePaths": [
+        "results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-report-full.json",
+        "results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md"
+      ],
+      "provenance": "Means and n recomputed from retained BDN OriginalValues. Error and CI copied from retained BDN statistics. No new measurements."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/05-gc-fragmentation.png",
+      "width": 640,
+      "height": 684,
+      "sha256": "45a30dd17e60cb8951cafbc5c4a03be65fcba282a14c23daec13056e5f432164",
+      "kind": "derived-chart",
+      "sourceAsset": "article/blog-assets/05-gc-fragmentation.png",
+      "sourcePaths": [
+        "results/raw/gc/main/net10.0-workstation/result.json",
+        "results/raw/gc/main/net10.0-server/result.json",
+        "results/raw/gc/main/net11.0-workstation/result.json",
+        "results/raw/gc/main/net11.0-server/result.json"
+      ],
+      "provenance": "Exact FragmentedBytes fields from holes and compacted snapshots. Bars display holesBytes/1048576; text retains exact byte counts."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/06-runtime-async-allocations.png",
+      "width": 640,
+      "height": 828,
+      "sha256": "be71e3308a108f73d818c535b9b5bcb03f175ebec444304d34c656f0f183c0bc",
+      "kind": "derived-chart",
+      "sourceAsset": "article/blog-assets/06-runtime-async-allocations.png",
+      "sourcePaths": [
+        "results/processed/runtime-async/records.json",
+        "results/raw/runtime-async/main/bdn/results/NetComparison.RuntimeAsync.AsyncBenchmarks-report-full.json"
+      ],
+      "provenance": "Select three retained workload allocation pairs from the audited BDN records; keep treatment and iteration n. No timing inference from allocation bars."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/07-channel-history-and-control.png",
+      "width": 640,
+      "height": 1036,
+      "sha256": "8c1b1b4d0bf3a19b2fe9c0079c9ce176348fac93ecf31cbbefb09f8bad67008e",
+      "kind": "derived-chart",
+      "sourceAsset": "article/blog-assets/07-channel-history-and-control.png",
+      "sourcePaths": [
+        "results/processed/anomalies/comparisons.json",
+        "results/processed/critical-controls/channel.json",
+        "results/raw/anomalies-20261112-A-net10/micro/results/BenchmarkRun-joined-2026-11-12-16-28-38-report-full.json",
+        "results/raw/anomalies-20261112-A-net11/micro/results/BenchmarkRun-joined-2026-11-12-16-26-40-report-full.json",
+        "results/raw/anomalies-20261112-B-net10/micro/results/BenchmarkRun-joined-2026-11-12-16-30-36-report-full.json",
+        "results/raw/anomalies-20261112-B-net11/micro/results/BenchmarkRun-joined-2026-11-12-16-32-27-report-full.json",
+        "results/raw/audit-channel-20261112-v2-C-net10/micro/results/NetComparison.Benchmarks.ConcurrencyBenchmarks-report-full.json",
+        "results/raw/audit-channel-20261112-v2-C-net11/micro/results/NetComparison.Benchmarks.ConcurrencyBenchmarks-report-full.json",
+        "results/raw/audit-channel-20261112-v2-D-net10/micro/results/NetComparison.Benchmarks.ConcurrencyBenchmarks-report-full.json",
+        "results/raw/audit-channel-20261112-v2-D-net11/micro/results/NetComparison.Benchmarks.ConcurrencyBenchmarks-report-full.json"
+      ],
+      "provenance": "OriginalValues means and n recomputed separately for eight retained BDN jobs. CI bounds and Error copied from each job. Never pool iterations across launches."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/08-channel-workers.png",
+      "width": 640,
+      "height": 1004,
+      "sha256": "d8026e9536084d6469baf65d5f38f2c1aaca3bba43f063b3a52d99736588b702",
+      "kind": "derived-chart",
+      "sourceAsset": "article/blog-assets/08-channel-workers.png",
+      "sourcePaths": [
+        "results/processed/sizes/micro-records.json",
+        "results/raw/micro-sizes-20261112/micro/results/BenchmarkRun-joined-2026-11-12-16-52-53-report-full.json"
+      ],
+      "provenance": "Select all retained Channel jobs in the sizes campaign, recomputing mean/n from OriginalValues and preserving each CI. Convert ns to µs by division by 1000."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/09-http-throughput.png",
+      "width": 640,
+      "height": 1020,
+      "sha256": "192ca2897388a596f94cb946e2865aaf006b934f935e2a6dac817c30c76f1202",
+      "kind": "derived-chart",
+      "sourceAsset": "article/blog-assets/09-http-throughput.png",
+      "sourcePaths": [
+        "results/processed/web-main-summary.json",
+        "results/raw/web/main/net10.0-repeat0/text-vus1/summary.json",
+        "results/raw/web/main/net10.0-repeat0/text-vus10/summary.json",
+        "results/raw/web/main/net10.0-repeat0/text-vus50/summary.json",
+        "results/raw/web/main/net10.0-repeat0/text-vus100/summary.json",
+        "results/raw/web/main/net10.0-repeat0/process-vus1/summary.json",
+        "results/raw/web/main/net10.0-repeat0/process-vus10/summary.json",
+        "results/raw/web/main/net10.0-repeat0/process-vus50/summary.json",
+        "results/raw/web/main/net10.0-repeat0/process-vus100/summary.json",
+        "results/raw/web/main/net11.0-repeat0/text-vus1/summary.json",
+        "results/raw/web/main/net11.0-repeat0/text-vus10/summary.json",
+        "results/raw/web/main/net11.0-repeat0/text-vus50/summary.json",
+        "results/raw/web/main/net11.0-repeat0/text-vus100/summary.json",
+        "results/raw/web/main/net11.0-repeat0/process-vus1/summary.json",
+        "results/raw/web/main/net11.0-repeat0/process-vus10/summary.json",
+        "results/raw/web/main/net11.0-repeat0/process-vus50/summary.json",
+        "results/raw/web/main/net11.0-repeat0/process-vus100/summary.json",
+        "results/raw/web/main/net11.0-repeat1/text-vus1/summary.json",
+        "results/raw/web/main/net11.0-repeat1/text-vus10/summary.json",
+        "results/raw/web/main/net11.0-repeat1/text-vus50/summary.json",
+        "results/raw/web/main/net11.0-repeat1/text-vus100/summary.json",
+        "results/raw/web/main/net11.0-repeat1/process-vus1/summary.json",
+        "results/raw/web/main/net11.0-repeat1/process-vus10/summary.json",
+        "results/raw/web/main/net11.0-repeat1/process-vus50/summary.json",
+        "results/raw/web/main/net11.0-repeat1/process-vus100/summary.json",
+        "results/raw/web/main/net10.0-repeat1/text-vus1/summary.json",
+        "results/raw/web/main/net10.0-repeat1/text-vus10/summary.json",
+        "results/raw/web/main/net10.0-repeat1/text-vus50/summary.json",
+        "results/raw/web/main/net10.0-repeat1/text-vus100/summary.json",
+        "results/raw/web/main/net10.0-repeat1/process-vus1/summary.json",
+        "results/raw/web/main/net10.0-repeat1/process-vus10/summary.json",
+        "results/raw/web/main/net10.0-repeat1/process-vus50/summary.json",
+        "results/raw/web/main/net10.0-repeat1/process-vus100/summary.json"
+      ],
+      "provenance": "Select text/process from canonical index; read requestsPerSecond directly from each retained k6 summary. No pooled distribution, averaged percentile or interpolation of unmeasured VUs; lines join ordered categories only."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/10-http-latency.png",
+      "width": 640,
+      "height": 1020,
+      "sha256": "fb8aa89d34df675c64db42b08fd71cbdb9d0fc413ccf27fb7043865a277c210e",
+      "kind": "derived-chart",
+      "sourceAsset": "article/blog-assets/10-http-latency.png",
+      "sourcePaths": [
+        "results/processed/web-main-summary.json",
+        "results/raw/web/main/net10.0-repeat0/text-vus1/summary.json",
+        "results/raw/web/main/net10.0-repeat0/text-vus10/summary.json",
+        "results/raw/web/main/net10.0-repeat0/text-vus50/summary.json",
+        "results/raw/web/main/net10.0-repeat0/text-vus100/summary.json",
+        "results/raw/web/main/net10.0-repeat0/process-vus1/summary.json",
+        "results/raw/web/main/net10.0-repeat0/process-vus10/summary.json",
+        "results/raw/web/main/net10.0-repeat0/process-vus50/summary.json",
+        "results/raw/web/main/net10.0-repeat0/process-vus100/summary.json",
+        "results/raw/web/main/net11.0-repeat0/text-vus1/summary.json",
+        "results/raw/web/main/net11.0-repeat0/text-vus10/summary.json",
+        "results/raw/web/main/net11.0-repeat0/text-vus50/summary.json",
+        "results/raw/web/main/net11.0-repeat0/text-vus100/summary.json",
+        "results/raw/web/main/net11.0-repeat0/process-vus1/summary.json",
+        "results/raw/web/main/net11.0-repeat0/process-vus10/summary.json",
+        "results/raw/web/main/net11.0-repeat0/process-vus50/summary.json",
+        "results/raw/web/main/net11.0-repeat0/process-vus100/summary.json",
+        "results/raw/web/main/net11.0-repeat1/text-vus1/summary.json",
+        "results/raw/web/main/net11.0-repeat1/text-vus10/summary.json",
+        "results/raw/web/main/net11.0-repeat1/text-vus50/summary.json",
+        "results/raw/web/main/net11.0-repeat1/text-vus100/summary.json",
+        "results/raw/web/main/net11.0-repeat1/process-vus1/summary.json",
+        "results/raw/web/main/net11.0-repeat1/process-vus10/summary.json",
+        "results/raw/web/main/net11.0-repeat1/process-vus50/summary.json",
+        "results/raw/web/main/net11.0-repeat1/process-vus100/summary.json",
+        "results/raw/web/main/net10.0-repeat1/text-vus1/summary.json",
+        "results/raw/web/main/net10.0-repeat1/text-vus10/summary.json",
+        "results/raw/web/main/net10.0-repeat1/text-vus50/summary.json",
+        "results/raw/web/main/net10.0-repeat1/text-vus100/summary.json",
+        "results/raw/web/main/net10.0-repeat1/process-vus1/summary.json",
+        "results/raw/web/main/net10.0-repeat1/process-vus10/summary.json",
+        "results/raw/web/main/net10.0-repeat1/process-vus50/summary.json",
+        "results/raw/web/main/net10.0-repeat1/process-vus100/summary.json"
+      ],
+      "provenance": "Select text/process from canonical index; read p95Ms directly from each retained k6 summary. No pooled distribution, averaged percentile or interpolation of unmeasured VUs; lines join ordered categories only."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/11-ef-core.png",
+      "width": 640,
+      "height": 892,
+      "sha256": "7014f6575b3d3c09c475b7f022005ec5d4b625350b71c7cb0121245d70752d8a",
+      "kind": "derived-chart",
+      "sourceAsset": "article/blog-assets/11-ef-core.png",
+      "sourcePaths": [
+        "results/processed/ef/independent-runs.json",
+        "results/raw/ef/main/Ef10-net10.0-n1000-run0/raw.json",
+        "results/raw/ef/main/Ef10-net10.0-n1000-run1/raw.json",
+        "results/raw/ef/main/Ef10-net10.0-n1000-run2/raw.json",
+        "results/raw/ef/main/Ef10-net11.0-n1000-run0/raw.json",
+        "results/raw/ef/main/Ef10-net11.0-n1000-run1/raw.json",
+        "results/raw/ef/main/Ef10-net11.0-n1000-run2/raw.json",
+        "results/raw/ef/main/Ef11-net11.0-n1000-run0/raw.json",
+        "results/raw/ef/main/Ef11-net11.0-n1000-run1/raw.json",
+        "results/raw/ef/main/Ef11-net11.0-n1000-run2/raw.json"
+      ],
+      "provenance": "For each retained raw.json, average the 15 elapsedMs samples for the named workload. Average the three process means; retain all three means and their min/max. Never treat 45 sequential samples as 45 independent processes."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/12-nativeaot-size.png",
+      "width": 640,
+      "height": 684,
+      "sha256": "b2457381b4e3b9b9c8a9817ea3ed014d8554d627cb1f8f2de6cf3ff5841408e5",
+      "kind": "derived-chart",
+      "sourceAsset": "article/blog-assets/12-nativeaot-size.png",
+      "sourcePaths": [
+        "results/raw/aot/main/results.json",
+        "results/processed/critical-controls/aot-files.json"
+      ],
+      "provenance": "Use retained executableBytes, not directory total, for bar length. Preserve totalBytesExcludingSymbols and exact asset difference separately. Convert bytes to MiB only for bars."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/13-nativeaot-startup.png",
+      "width": 640,
+      "height": 684,
+      "sha256": "cac0118b3436f1b8a981244188a06cdbf06dfe05e2727047553a6f363295e1e4",
+      "kind": "derived-chart",
+      "sourceAsset": "article/blog-assets/13-nativeaot-startup.png",
+      "sourcePaths": [
+        "results/raw/aot/main/results.json"
+      ],
+      "provenance": "Recompute mean/min/max from five retained passed startupMs samples per treatment. Whiskers are full observed ranges, not confidence intervals."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/14-sdk-cli.png",
+      "width": 640,
+      "height": 684,
+      "sha256": "7fc9f04ea27a74960c7f40dd09b60f02d91b46f01cb70fe7682c26ef00a392c7",
+      "kind": "derived-chart",
+      "sourceAsset": "article/blog-assets/14-sdk-cli.png",
+      "sourcePaths": [
+        "results/raw/sdk/main/samples.json"
+      ],
+      "provenance": "Discard explicitly marked warmups; average elapsedMs of the 15 retained samples per SDK and command. Keep individual times and observed range only, excluding raw stdout and local paths."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/15-jit-evidence.png",
+      "width": 1440,
+      "height": 1000,
+      "sha256": "5b8b0cf3900cadd84f6df797a6fd0016abed522a7c01e1105f9e10d52d21e3e3",
+      "kind": "authentic-capture",
+      "sourceAsset": "article/blog-assets/15-jit-evidence.png",
+      "sourcePaths": [
+        "screenshots/evidence-12-jit.html.png",
+        "results/processed/panels/jit.html",
+        "screenshots/manifest.json"
+      ],
+      "provenance": "Byte-for-byte copy of visually inspected retained authentic HTML browser screenshot. No crop, retouching, rescaling or number modification."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/16-http-evidence.png",
+      "width": 1440,
+      "height": 1000,
+      "sha256": "dc32378459f594ea2a4abfa101392f15152cfe60900b0c4523b6ce4e094946bc",
+      "kind": "authentic-capture",
+      "sourceAsset": "article/blog-assets/16-http-evidence.png",
+      "sourcePaths": [
+        "screenshots/evidence-04-http.html.png",
+        "results/processed/panels/http.html",
+        "screenshots/manifest.json"
+      ],
+      "provenance": "Byte-for-byte copy of visually inspected retained authentic HTML browser screenshot. No crop, retouching, rescaling or number modification."
+    },
+    {
+      "src": "/blog/dotnet-10-vs-dotnet-11/cover-dotnet-study.png",
+      "width": 1200,
+      "height": 630,
+      "sha256": "9d4391eecd5092db727bdcf81d4af76ddd2448303ed339a125480ddf5c266fb1",
+      "kind": "conceptual",
+      "sourceAsset": "article/blog-final-assets/cover-dotnet-study.png",
+      "sourcePaths": [
+        "article/blog-final-assets/cover-dotnet-study.svg"
+      ],
+      "provenance": "Ilustración vectorial editorial original, no una medición ni un logotipo oficial; PNG sobre lienzo blanco."
+    }
+  ],
+  "evidenceReferences": [
+    {
+      "sourceHref": "../README.md",
+      "path": "README.md",
+      "id": "evidencia-b33563055168"
+    },
+    {
+      "sourceHref": "../README.md#versiones-y-separación-de-factores",
+      "path": "README.md",
+      "id": "evidencia-b33563055168"
+    },
+    {
+      "sourceHref": "../docs/experiments-aot-language.md",
+      "path": "docs/experiments-aot-language.md",
+      "id": "evidencia-47f40c3835b9"
+    },
+    {
+      "sourceHref": "../docs/experiments-apps.md",
+      "path": "docs/experiments-apps.md",
+      "id": "evidencia-30f35e655cc7"
+    },
+    {
+      "sourceHref": "../docs/experiments-diagnostics.md",
+      "path": "docs/experiments-diagnostics.md",
+      "id": "evidencia-5998e62b150f"
+    },
+    {
+      "sourceHref": "../docs/experiments-gc.md",
+      "path": "docs/experiments-gc.md",
+      "id": "evidencia-66ac6b003d1b"
+    },
+    {
+      "sourceHref": "../docs/experiments-opentelemetry.md",
+      "path": "docs/experiments-opentelemetry.md",
+      "id": "evidencia-49a84856569b"
+    },
+    {
+      "sourceHref": "../docs/experiments-runtime-async.md",
+      "path": "docs/experiments-runtime-async.md",
+      "id": "evidencia-1b6ad6b00607"
+    },
+    {
+      "sourceHref": "../docs/final-audit.md",
+      "path": "docs/final-audit.md",
+      "id": "evidencia-0c5cb713ef30"
+    },
+    {
+      "sourceHref": "../docs/limitations.md",
+      "path": "docs/limitations.md",
+      "id": "evidencia-a95975256127"
+    },
+    {
+      "sourceHref": "../docs/methodology.md",
+      "path": "docs/methodology.md",
+      "id": "evidencia-0abaf28a964f"
+    },
+    {
+      "sourceHref": "../docs/migration-guide.md",
+      "path": "docs/migration-guide.md",
+      "id": "evidencia-c27572d4a0b1"
+    },
+    {
+      "sourceHref": "../docs/reproduction.md",
+      "path": "docs/reproduction.md",
+      "id": "evidencia-113fa8cfb6cb"
+    },
+    {
+      "sourceHref": "../docs/research.md",
+      "path": "docs/research.md",
+      "id": "evidencia-d3284b7c09ce"
+    },
+    {
+      "sourceHref": "../docs/traceability.md",
+      "path": "docs/traceability.md",
+      "id": "evidencia-0f1a77641be5"
+    },
+    {
+      "sourceHref": "../results/metadata/",
+      "path": "results/metadata/",
+      "id": "evidencia-2e3a949af1d4"
+    },
+    {
+      "sourceHref": "../results/metadata/micro-full-20261112/environment.json",
+      "path": "results/metadata/micro-full-20261112/environment.json",
+      "id": "evidencia-eae7c22ee92c"
+    },
+    {
+      "sourceHref": "../results/metadata/web-canonical-selection.json",
+      "path": "results/metadata/web-canonical-selection.json",
+      "id": "evidencia-2b58aa147724"
+    },
+    {
+      "sourceHref": "../results/processed/",
+      "path": "results/processed/",
+      "id": "evidencia-7af0f987adad"
+    },
+    {
+      "sourceHref": "../results/processed/anomalies/comparisons.json",
+      "path": "results/processed/anomalies/comparisons.json",
+      "id": "evidencia-1dd017ec894b"
+    },
+    {
+      "sourceHref": "../results/processed/anomalies/initial-contrast.json",
+      "path": "results/processed/anomalies/initial-contrast.json",
+      "id": "evidencia-8fa56c2c2104"
+    },
+    {
+      "sourceHref": "../results/processed/aot-summary.json",
+      "path": "results/processed/aot-summary.json",
+      "id": "evidencia-72dacfc93ab3"
+    },
+    {
+      "sourceHref": "../results/processed/critical-controls/aot-files.json",
+      "path": "results/processed/critical-controls/aot-files.json",
+      "id": "evidencia-ccfdaa91eb0c"
+    },
+    {
+      "sourceHref": "../results/processed/dependency-audit.json",
+      "path": "results/processed/dependency-audit.json",
+      "id": "evidencia-4240917cf8c0"
+    },
+    {
+      "sourceHref": "../results/processed/ef/independent-runs.json",
+      "path": "results/processed/ef/independent-runs.json",
+      "id": "evidencia-0730b27082ed"
+    },
+    {
+      "sourceHref": "../results/processed/jit-pr/micro-records.json",
+      "path": "results/processed/jit-pr/micro-records.json",
+      "id": "evidencia-b389f565c315"
+    },
+    {
+      "sourceHref": "../results/processed/micro-comparisons.json",
+      "path": "results/processed/micro-comparisons.json",
+      "id": "evidencia-df8b1b3c3ee3"
+    },
+    {
+      "sourceHref": "../results/processed/runtime-async/records.json",
+      "path": "results/processed/runtime-async/records.json",
+      "id": "evidencia-0b839fa40f5b"
+    },
+    {
+      "sourceHref": "../results/processed/servergc/micro-records.json",
+      "path": "results/processed/servergc/micro-records.json",
+      "id": "evidencia-c5f6f42177bc"
+    },
+    {
+      "sourceHref": "../results/processed/sizes/micro-comparisons.json",
+      "path": "results/processed/sizes/micro-comparisons.json",
+      "id": "evidencia-af1cc789ce98"
+    },
+    {
+      "sourceHref": "../results/processed/sizes/micro-records.json",
+      "path": "results/processed/sizes/micro-records.json",
+      "id": "evidencia-72edf7c1bea8"
+    },
+    {
+      "sourceHref": "../results/processed/web-main-summary.json",
+      "path": "results/processed/web-main-summary.json",
+      "id": "evidencia-d8f4c3a92139"
+    },
+    {
+      "sourceHref": "../results/raw/",
+      "path": "results/raw/",
+      "id": "evidencia-24208bfe2b21"
+    },
+    {
+      "sourceHref": "../results/raw/anomalies/anomalies-20261112/manifest.json",
+      "path": "results/raw/anomalies/anomalies-20261112/manifest.json",
+      "id": "evidencia-4d04be4160f7"
+    },
+    {
+      "sourceHref": "../results/raw/aot/main/results.json",
+      "path": "results/raw/aot/main/results.json",
+      "id": "evidencia-7600edfd6c82"
+    },
+    {
+      "sourceHref": "../results/raw/audit-channel/audit-channel-20261112-v2/manifest.json",
+      "path": "results/raw/audit-channel/audit-channel-20261112-v2/manifest.json",
+      "id": "evidencia-fe64e7167cf6"
+    },
+    {
+      "sourceHref": "../results/raw/ef/main/",
+      "path": "results/raw/ef/main/",
+      "id": "evidencia-342dff88bdf2"
+    },
+    {
+      "sourceHref": "../results/raw/gc/main/",
+      "path": "results/raw/gc/main/",
+      "id": "evidencia-eb1002fa9057"
+    },
+    {
+      "sourceHref": "../results/raw/jit-general-20261112/micro/results/NetComparison.Benchmarks.JitBenchmarks-asm.md",
+      "path": "results/raw/jit-general-20261112/micro/results/NetComparison.Benchmarks.JitBenchmarks-asm.md",
+      "id": "evidencia-4dda7b72f5af"
+    },
+    {
+      "sourceHref": "../results/raw/jit-pr/main/results/",
+      "path": "results/raw/jit-pr/main/results/",
+      "id": "evidencia-18e9feab7b9d"
+    },
+    {
+      "sourceHref": "../results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md",
+      "path": "results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md",
+      "id": "evidencia-30c35e8cd5bc"
+    },
+    {
+      "sourceHref": "../results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-report-full.json",
+      "path": "results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-report-full.json",
+      "id": "evidencia-29f7b27309c9"
+    },
+    {
+      "sourceHref": "../results/raw/language/main-pinned/results.json",
+      "path": "results/raw/language/main-pinned/results.json",
+      "id": "evidencia-e4716719f12b"
+    },
+    {
+      "sourceHref": "../results/raw/micro-full-20261112/micro/results/",
+      "path": "results/raw/micro-full-20261112/micro/results/",
+      "id": "evidencia-71d6e094d75a"
+    },
+    {
+      "sourceHref": "../results/raw/opentelemetry/main/",
+      "path": "results/raw/opentelemetry/main/",
+      "id": "evidencia-eadf167ea790"
+    },
+    {
+      "sourceHref": "../results/raw/runtime-async/main/bdn/results/NetComparison.RuntimeAsync.AsyncBenchmarks-report-full.json",
+      "path": "results/raw/runtime-async/main/bdn/results/NetComparison.RuntimeAsync.AsyncBenchmarks-report-full.json",
+      "id": "evidencia-58433020b8b2"
+    },
+    {
+      "sourceHref": "../results/raw/runtime-async/main/diagnostic-index.json",
+      "path": "results/raw/runtime-async/main/diagnostic-index.json",
+      "id": "evidencia-6e072ef31711"
+    },
+    {
+      "sourceHref": "../results/raw/sdk/main/",
+      "path": "results/raw/sdk/main/",
+      "id": "evidencia-ed06cbb1d49e"
+    },
+    {
+      "sourceHref": "../screenshots/manifest.json",
+      "path": "screenshots/manifest.json",
+      "id": "evidencia-705b372bd60d"
+    },
+    {
+      "sourceHref": "../scripts/run/publish.ps1",
+      "path": "scripts/run/publish.ps1",
+      "id": "evidencia-814202861e40"
+    },
+    {
+      "sourceHref": "../scripts/run/web-load.js",
+      "path": "scripts/run/web-load.js",
+      "id": "evidencia-5a1a89cb8fab"
+    },
+    {
+      "sourceHref": "../src/BenchmarkRunner/",
+      "path": "src/BenchmarkRunner/",
+      "id": "evidencia-189c05fb0888"
+    },
+    {
+      "sourceHref": "../src/Benchmarks/",
+      "path": "src/Benchmarks/",
+      "id": "evidencia-c6ada5d0c815"
+    },
+    {
+      "sourceHref": "../src/Benchmarks/AsyncAndConcurrencyBenchmarks.cs",
+      "path": "src/Benchmarks/AsyncAndConcurrencyBenchmarks.cs",
+      "id": "evidencia-2f2ab2ee9fca"
+    },
+    {
+      "sourceHref": "../src/Benchmarks/CollectionsBenchmarks.cs",
+      "path": "src/Benchmarks/CollectionsBenchmarks.cs",
+      "id": "evidencia-0ee69ae7579f"
+    },
+    {
+      "sourceHref": "../src/Benchmarks/DiagnosticsBenchmarks.cs",
+      "path": "src/Benchmarks/DiagnosticsBenchmarks.cs",
+      "id": "evidencia-24932a96fd09"
+    },
+    {
+      "sourceHref": "../src/Benchmarks/IoAndCryptoBenchmarks.cs",
+      "path": "src/Benchmarks/IoAndCryptoBenchmarks.cs",
+      "id": "evidencia-9d3b41746437"
+    },
+    {
+      "sourceHref": "../src/Benchmarks/MemoryJitReflectionBenchmarks.cs",
+      "path": "src/Benchmarks/MemoryJitReflectionBenchmarks.cs",
+      "id": "evidencia-1231921bcc1b"
+    },
+    {
+      "sourceHref": "../src/Benchmarks/TextAndJsonBenchmarks.cs",
+      "path": "src/Benchmarks/TextAndJsonBenchmarks.cs",
+      "id": "evidencia-ce34a0dd57d9"
+    },
+    {
+      "sourceHref": "../src/EfCore/Shared/",
+      "path": "src/EfCore/Shared/",
+      "id": "evidencia-7002b4de1a6f"
+    },
+    {
+      "sourceHref": "../src/EfCore/Shared/Workload.cs",
+      "path": "src/EfCore/Shared/Workload.cs",
+      "id": "evidencia-00fc7b72f30d"
+    },
+    {
+      "sourceHref": "../src/JitProbes/",
+      "path": "src/JitProbes/",
+      "id": "evidencia-f006efa4101c"
+    },
+    {
+      "sourceHref": "../src/JitProbes/Program.cs",
+      "path": "src/JitProbes/Program.cs",
+      "id": "evidencia-1014f76afffd"
+    },
+    {
+      "sourceHref": "../src/LanguageSamples/",
+      "path": "src/LanguageSamples/",
+      "id": "evidencia-801e11250a0f"
+    },
+    {
+      "sourceHref": "../src/LanguageSamples/After15/Program.cs",
+      "path": "src/LanguageSamples/After15/Program.cs",
+      "id": "evidencia-c0d8e32e6c8e"
+    },
+    {
+      "sourceHref": "../src/LanguageSamples/Before14/Program.cs",
+      "path": "src/LanguageSamples/Before14/Program.cs",
+      "id": "evidencia-c09084b853ba"
+    },
+    {
+      "sourceHref": "../src/LanguageSamples/LegacyInterface15/Measurement.cs",
+      "path": "src/LanguageSamples/LegacyInterface15/Measurement.cs",
+      "id": "evidencia-3e3eaf845eb4"
+    },
+    {
+      "sourceHref": "../src/LanguageSamples/MemorySafetyPreview/Program.cs",
+      "path": "src/LanguageSamples/MemorySafetyPreview/Program.cs",
+      "id": "evidencia-c7d37de1a813"
+    },
+    {
+      "sourceHref": "../src/LanguageSamples/Shared/AsyncBehavior.cs",
+      "path": "src/LanguageSamples/Shared/AsyncBehavior.cs",
+      "id": "evidencia-a529ae37cfa4"
+    },
+    {
+      "sourceHref": "../src/NativeAot/",
+      "path": "src/NativeAot/",
+      "id": "evidencia-47338399560d"
+    },
+    {
+      "sourceHref": "../src/Net11Features/",
+      "path": "src/Net11Features/",
+      "id": "evidencia-c1469587a92e"
+    },
+    {
+      "sourceHref": "../src/Net11Features/Cases/Crypto.cs",
+      "path": "src/Net11Features/Cases/Crypto.cs",
+      "id": "evidencia-3f42500b63f7"
+    },
+    {
+      "sourceHref": "../src/Net11Features/Cases/FullJoin.cs",
+      "path": "src/Net11Features/Cases/FullJoin.cs",
+      "id": "evidencia-84abffd79e6c"
+    },
+    {
+      "sourceHref": "../src/Net11Features/Cases/JsonLines.cs",
+      "path": "src/Net11Features/Cases/JsonLines.cs",
+      "id": "evidencia-2512a90fff6c"
+    },
+    {
+      "sourceHref": "../src/Net11Features/Cases/JsonUnion.cs",
+      "path": "src/Net11Features/Cases/JsonUnion.cs",
+      "id": "evidencia-8f7a657cadec"
+    },
+    {
+      "sourceHref": "../src/Net11Features/Cases/MemoryStreams.cs",
+      "path": "src/Net11Features/Cases/MemoryStreams.cs",
+      "id": "evidencia-64e36bae106e"
+    },
+    {
+      "sourceHref": "../src/Net11Features/Cases/SequenceStreams.cs",
+      "path": "src/Net11Features/Cases/SequenceStreams.cs",
+      "id": "evidencia-381ddd437902"
+    },
+    {
+      "sourceHref": "../src/Net11Features/Cases/TupleJoin.cs",
+      "path": "src/Net11Features/Cases/TupleJoin.cs",
+      "id": "evidencia-1176d2ac9bae"
+    },
+    {
+      "sourceHref": "../src/Net11Features/Cases/Zstandard.cs",
+      "path": "src/Net11Features/Cases/Zstandard.cs",
+      "id": "evidencia-3ed5656e6e02"
+    },
+    {
+      "sourceHref": "../src/RuntimeAsyncBenchmarks/",
+      "path": "src/RuntimeAsyncBenchmarks/",
+      "id": "evidencia-215f5262460a"
+    },
+    {
+      "sourceHref": "../src/RuntimeAsyncBenchmarks/AsyncBenchmarks.cs",
+      "path": "src/RuntimeAsyncBenchmarks/AsyncBenchmarks.cs",
+      "id": "evidencia-49fbbda8a5e0"
+    },
+    {
+      "sourceHref": "../src/RuntimeAsyncBenchmarks/Shared/AsyncWorkloads.cs",
+      "path": "src/RuntimeAsyncBenchmarks/Shared/AsyncWorkloads.cs",
+      "id": "evidencia-b75210290e49"
+    },
+    {
+      "sourceHref": "../src/WebApi/",
+      "path": "src/WebApi/",
+      "id": "evidencia-97ea9fad1b13"
+    },
+    {
+      "sourceHref": "../src/WebApi/Program.cs",
+      "path": "src/WebApi/Program.cs",
+      "id": "evidencia-665e52b5b87a"
+    },
+    {
+      "sourceHref": "blog-assets/index.html",
+      "path": "article/blog-assets/index.html",
+      "id": "evidencia-138c99b46a30"
+    },
+    {
+      "sourceHref": "blog-editorial-report.md",
+      "path": "article/blog-editorial-report.md",
+      "id": "evidencia-bd3afe8b5286"
+    },
+    {
+      "sourceHref": "blog-image-manifest.json",
+      "path": "article/blog-image-manifest.json",
+      "id": "evidencia-a724e25f2ffb"
+    },
+    {
+      "sourceHref": "dotnet-10-vs-dotnet-11.md",
+      "path": "article/dotnet-10-vs-dotnet-11.md",
+      "id": "evidencia-b82e4d8fdba1"
+    },
+    {
+      "sourceHref": "references.md",
+      "path": "article/references.md",
+      "id": "evidencia-26daa4cd5a62"
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import LinkButton from "@/components/LinkButton.astro";
 import SectionContainer from "@/components/SectionContainer.astro";
 import { getCollection } from "astro:content";
+import DotnetStudyReader from "@/components/DotnetStudyReader.astro";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog");
@@ -25,12 +26,52 @@ const formatDate = (date: string) =>
     month: "long",
     year: "numeric",
   });
+
+const isDotnetStudy = post.slug === "dotnet-10-vs-dotnet-11";
+const publicationDate = post.data.date.toISOString().slice(0, 10);
+const articleURL = new URL(Astro.url.pathname, Astro.site);
+if (isDotnetStudy && (!post.data.image || !post.data.imageAlt)) {
+  throw new Error("The .NET study requires its approved cover and alternative text.");
+}
+const studySchema = isDotnetStudy ? {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: post.data.title,
+  description: post.data.description ?? post.data.summary,
+  url: articleURL.href,
+  mainEntityOfPage: { "@type": "WebPage", "@id": articleURL.href },
+  datePublished: publicationDate,
+  inLanguage: "es-ES",
+  articleSection: post.data.category,
+  keywords: post.data.tags.join(", "),
+  author: { "@type": "Person", name: "Jose Yeste", url: Astro.site?.href },
+  image: {
+    "@type": "ImageObject",
+    url: new URL(post.data.image!, articleURL).href,
+    width: 1200,
+    height: 630,
+    caption: post.data.imageAlt,
+  },
+} : null;
+const studySchemaJSON = JSON.stringify(studySchema).replace(/[<>&\u2028\u2029]/g, (character) =>
+  `\\u${character.charCodeAt(0).toString(16).padStart(4, "0")}`,
+);
 ---
 
 <Layout
-  title={`${post.data.title} | Blog de Jose Yeste`}
-  description={post.data.summary}
+  title={isDotnetStudy ? post.data.title : `${post.data.title} | Blog de Jose Yeste`}
+  description={post.data.description ?? post.data.summary}
+  image={post.data.image}
+  article={isDotnetStudy ? {
+    publishedDate: publicationDate,
+    imageAlt: post.data.imageAlt!,
+    imageWidth: 1200,
+    imageHeight: 630,
+  } : undefined}
 >
+  <Fragment slot="head">
+    {studySchema && <script is:inline type="application/ld+json" set:html={studySchemaJSON} />}
+  </Fragment>
   <main class="px-4">
     <SectionContainer id="blog" class="py-16 md:py-24 space-y-10">
       <div class="space-y-4">
@@ -65,10 +106,16 @@ const formatDate = (date: string) =>
             }
           </ul>
         </div>
+        {post.data.researchCutoff && <p class="text-sm text-gray-600 dark:text-gray-300">
+          Corte de la investigación: <time datetime={post.data.researchCutoff}>{formatDate(post.data.researchCutoff)}</time>.
+        </p>}
       </div>
 
       <article
-        class="prose prose-lg mx-auto mt-6 text-gray-800 prose-headings:text-gray-900 prose-a:text-yellow-600 dark:prose-invert dark:text-gray-50 dark:prose-headings:text-white dark:prose-a:text-yellow-300"
+        class:list={[
+          "prose prose-lg mx-auto mt-6 text-gray-800 prose-headings:text-gray-900 prose-a:text-yellow-600 dark:prose-invert dark:text-gray-50 dark:prose-headings:text-white dark:prose-a:text-yellow-300",
+          { "dotnet-study": isDotnetStudy },
+        ]}
       >
         <Content />
       </article>
@@ -89,4 +136,5 @@ const formatDate = (date: string) =>
       </div>
     </SectionContainer>
   </main>
+  {isDotnetStudy && <DotnetStudyReader />}
 </Layout>

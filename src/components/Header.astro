@@ -41,21 +41,38 @@ const isActive = (url: string) => {
   class="fixed top-0 z-10 flex items-center justify-center w-full mx-auto mt-2"
 >
   <nav
-    class="flex items-center gap-2 px-4 py-2 text-base font-semibold rounded-full text-gray-800 dark:text-gray-100 bg-white/90 dark:bg-gray-900/80 shadow-lg ring-1 ring-black/5 dark:ring-white/10 backdrop-blur-md"
+    aria-label="Navegación principal"
+    class="relative flex items-center gap-2 px-4 py-2 text-base font-semibold rounded-full text-gray-800 dark:text-gray-100 bg-white/90 dark:bg-gray-900/80 shadow-lg ring-1 ring-black/5 dark:ring-white/10 backdrop-blur-md"
   >
-    {
-      navItems.map((link) => (
-        <a
-          class={`relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 ${
-            isActive(link.url) ? "text-yellow-500" : ""
-          }`}
-          aria-label={link.label}
-          href={link.url}
-        >
-          {link.title}
-        </a>
-      ))
-    }
+    <details id="mobile-navigation" class="sm:hidden">
+      <summary class="cursor-pointer list-none rounded-full px-2 py-2" aria-label="Menú de navegación">Menú</summary>
+      <div class="absolute left-1/2 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-2xl border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-900">
+        <ul class="space-y-1">
+          {navItems.map((link) => (
+            <li><a
+              class={`block rounded-xl px-3 py-3 transition hover:bg-gray-100 hover:text-yellow-600 dark:hover:bg-gray-800 dark:hover:text-yellow-300 ${isActive(link.url) ? "text-yellow-500" : ""}`}
+              aria-label={link.label}
+              href={link.url}
+            >{link.title}</a></li>
+          ))}
+        </ul>
+      </div>
+    </details>
+    <div class="hidden items-center gap-2 sm:flex">
+      {
+        navItems.map((link) => (
+          <a
+            class={`relative block px-2 py-2 transition hover:text-yellow-500 dark:hover:text-yellow-400 ${
+              isActive(link.url) ? "text-yellow-500" : ""
+            }`}
+            aria-label={link.label}
+            href={link.url}
+          >
+            {link.title}
+          </a>
+        ))
+      }
+    </div>
     <ThemeToggle />
   </nav>
 </header>
@@ -98,6 +115,20 @@ const isActive = (url: string) => {
           observer.observe(section)
         })
       }
+    }
+  })
+
+  document.addEventListener("click", (event) => {
+    const menu = document.querySelector<HTMLDetailsElement>("#mobile-navigation")
+    if (!menu?.open || !(event.target instanceof Element)) return
+    if (event.target.closest("a") || !menu.contains(event.target)) menu.open = false
+  }, { capture: true })
+
+  document.addEventListener("keydown", (event) => {
+    const menu = document.querySelector<HTMLDetailsElement>("#mobile-navigation")
+    if (event.key === "Escape" && menu?.open) {
+      menu.open = false
+      menu.querySelector("summary")?.focus()
     }
   })
 </script>

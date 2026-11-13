@@ -1,0 +1,2 @@
+# Preserve the research article's code and table bytes across checkouts.
+src/content/blog/dotnet-10-vs-dotnet-11.md text eol=lf
