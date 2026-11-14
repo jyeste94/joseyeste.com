@@ -3,7 +3,8 @@
 </script>
 
 <style is:global>
-  /* Keep the existing prose typography, width, yellow links and site theme. */
+  /* The study alone can grow into a two-column reader after TOC enhancement. */
+  .dotnet-study-layout,
   article.dotnet-study {
     --study-paper: #fff;
     --study-ink: #111827;
@@ -13,6 +14,7 @@
     min-inline-size: 0;
     overflow-wrap: anywhere;
   }
+  html.dark .dotnet-study-layout,
   html.dark article.dotnet-study {
     --study-paper: #111827;
     --study-ink: #f9fafb;
@@ -20,21 +22,100 @@
     --study-line: #4b5563;
     --study-focus: #fde047;
   }
-  article.dotnet-study [id] { scroll-margin-block-start: 6rem; }
-  article.dotnet-study :is(a, button, summary, [tabindex]):focus-visible {
+  .dotnet-study-layout { --study-offset: 6rem; }
+  .dotnet-study-layout [id] { scroll-margin-block-start: var(--study-offset); }
+  .dotnet-study-layout :is(a, button, summary, [tabindex]):focus-visible {
     outline: 3px solid var(--study-focus);
     outline-offset: 4px;
   }
-  article.dotnet-study :is(#indice, #evidencias-investigacion) {
+  .dotnet-study-layout #indice,
+  article.dotnet-study #evidencias-investigacion {
     padding: 1rem;
     border: 1px solid var(--study-line);
     border-radius: 0.75rem;
     background: var(--study-panel);
   }
-  article.dotnet-study summary { cursor: pointer; font-weight: 700; }
+  .dotnet-study-layout summary { cursor: pointer; font-weight: 700; }
+  .dotnet-study-layout .study-toc-part a {
+    display: inline-block;
+    border-inline-start: 3px solid transparent;
+    padding-inline-start: 0.5rem;
+  }
+  .dotnet-study-layout .study-toc-active a {
+    border-inline-start-color: currentColor;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+  .dotnet-study-layout .study-toc-active + ol {
+    border-inline-start: 2px solid var(--study-focus);
+  }
+  .study-sidebar[hidden] { display: none; }
+  @media (min-width: 1024px) {
+    #blog.dotnet-study-container:has(.dotnet-study-layout[data-study-toc="desktop"]) {
+      max-width: 80rem;
+    }
+    .dotnet-study-layout[data-study-toc="desktop"] {
+      display: grid;
+      grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+      align-items: start;
+      gap: clamp(1.5rem, 3vw, 3rem);
+    }
+    .dotnet-study-layout[data-study-toc="desktop"] > article {
+      inline-size: 100%;
+      margin-block: 0;
+    }
+    .dotnet-study-layout .study-sidebar {
+      position: sticky;
+      top: var(--study-offset);
+      min-inline-size: 0;
+      max-block-size: calc(100vh - var(--study-offset) - 1rem);
+      max-block-size: calc(100dvh - var(--study-offset) - 1rem);
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+      color: var(--study-ink);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+    .study-sidebar #indice { padding: 1rem; }
+    .study-sidebar summary { font-size: 1rem; }
+    .study-sidebar p { margin-block: 1rem 0.5rem; }
+    .study-sidebar ol { margin-block: 0.5rem 1rem; padding-inline-start: 1.5rem; list-style: decimal; }
+    .study-sidebar li { padding-inline-start: 0.125rem; margin-block: 0.375rem; }
+    .study-sidebar a { color: #ca8a04; text-decoration: underline; }
+    html.dark .study-sidebar a { color: #fde047; }
+  }
   article.dotnet-study img { max-inline-size: 100%; block-size: auto; }
   article.dotnet-study a:has(> img) { cursor: zoom-in; }
   article.dotnet-study .study-cover { margin-inline: 0; }
+  article.dotnet-study .study-gvm-quicklook {
+    min-inline-size: 0;
+    margin-inline: 0;
+    padding: 1rem;
+    border: 1px solid var(--study-line);
+    border-radius: 0.75rem;
+    background: var(--study-panel);
+  }
+  article.dotnet-study :is(.study-gvm-input, .study-gvm-pair, .study-gvm-pair > div) {
+    min-inline-size: 0;
+  }
+  article.dotnet-study .study-gvm-pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+  article.dotnet-study .study-gvm-quicklook pre {
+    margin-block: 0.5rem 1rem;
+    max-inline-size: 100%;
+    overflow-x: auto;
+  }
+  article.dotnet-study .study-gvm-quicklook figcaption { margin-block-start: 0.5rem; }
+  @media (min-width: 640px) {
+    article.dotnet-study .study-gvm-pair {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
   article.dotnet-study .study-evidence-row { margin-block: 1rem; }
   article.dotnet-study .study-evidence-row code {
     overflow-wrap: anywhere;

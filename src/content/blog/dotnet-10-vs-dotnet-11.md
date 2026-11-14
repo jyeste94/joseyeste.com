@@ -11,41 +11,65 @@ imageAlt: "Portada conceptual: .NET 10 y .NET 11 recorren las capas de compilado
 researchCutoff: "2026-11-12"
 ---
 
-**Qué cambia dentro de .NET, qué se nota al ejecutar una aplicación y qué encontré al poner las dos versiones a hacer el mismo trabajo.**
+**JIT, asignaciones, async y despliegue: qué cambia al actualizar y qué permiten afirmar estas pruebas locales.**
 
-[Código y resultados de las pruebas](https://github.com/jyeste94/.NET11vs.NET11) · [Cómo repetirlas](#reproduccion)
+[Código y resultados de .NET 10 vs .NET 11](https://github.com/jyeste94/.NET11vs.NET11) · [Reproducción y trazabilidad](#reproduccion)
+
+<a id="resumen-ejecutivo"></a>
+## Antes de entrar en detalle: la respuesta corta
+
+**El JIT reduce un kernel GVM de 69 a 3 bytes y elimina su asignación de 24 B/op.** El argumento y el resultado siguen vivos; el objeto intermedio deja de materializarse. Es el cambio mejor explicado de esta comparación, no una reducción del ejecutable ni una promesa sobre cualquier llamada virtual. Aquí están el C# y los dos caminos nativos; el [capítulo 6](#gvm) desarrolla los controles.
+
+<figure id="gvm-vistazo" class="study-gvm-quicklook">
+<div class="study-gvm-input"><strong>C# · fragmento del kernel GenericVirtual</strong><pre tabindex="0" aria-label="Fragmento C# del kernel medido"><code class="language-csharp">EchoBase receiver = new Echoer();
+return receiver.Echo(input);</code></pre></div>
+<div class="study-gvm-pair">
+<div><strong>.NET 10 · extracto del kernel de 69 bytes</strong><pre tabindex="0" aria-label="Extracto ASM observado de .NET 10"><code class="language-assembly">mov       rcx,offset MT_Echoer
+call      0000000000005050
+mov       rsi,rax
+mov       rcx,rsi
+mov       rdx,offset MT_EchoBase
+mov       r8,offset MD_EchoBase.Echo[[System.Int32, System.Private.CoreLib]](Int32)
+call      0000000000001CA0
+mov       rcx,rsi
+mov       edx,ebx
+call      rax</code></pre></div>
+<div><strong>.NET 11 · kernel completo de 3 bytes</strong><pre tabindex="0" aria-label="Kernel ASM completo observado de .NET 11"><code class="language-assembly">mov       eax,ecx
+ret</code></pre></div>
+</div>
+<figcaption>Transcripción de código e instrucciones conservados, no una captura nueva. En .NET 10 se omiten prólogo y epílogo; los 69 bytes corresponden al kernel completo. En .NET 11 se devuelve el argumento sin materializar el objeto. El wrapper conserva 19 bytes y el resultado en ambos. <a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/JitProbes/Program.cs">C# original</a> · <a href="https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md">ASM completo</a> · <a href="/blog/dotnet-10-vs-dotnet-11/03-gvm-code.png">PNG del caso</a> · <a href="#gvm">Análisis y control de consumidor</a>.</figcaption>
+</figure>
+
+El resto obliga a separar factores. Channel empeora en un lote que crea y destruye recursos por invocación; Runtime Async cambia al recompilar con opt-in explícito; HTTP enfrenta dos procesos que comparten máquina; EF combina runtime, proveedor y motor nativo. No hay una cifra global de «cuánto mejora .NET 11» que respete esas diferencias.
+
+### Resultados de un vistazo
+
+| Área / Subsistema | Qué se midió | Resultado (.NET 10 vs .NET 11) | Impacto / Nivel de confianza |
+|---|---|---|---|
+| JIT: GVM / objeto no escapante | Kernel con receptor conocido, ASM y asignación por operación | 69 → 3 bytes de kernel; 24 → 0 B/op; wrapper de 19 bytes en ambos | Eliminación local contrastada con IL, ASM y consumidor. No describe todo el polimorfismo ni el ejecutable. |
+| GC y memoria | Asignación frente a ArrayPool caliente; control LOH separado | Allocate: 100.059 B/op en ambos; ArrayPool: 21/20 B/op. La compactación reduce huecos en ambos runtimes | Reutilización frente a creación, no una mejora general del GC. El control LOH tiene un proceso por celda. |
+| Runtime Async | Cuatro tratamientos recompilados; lowering, asignaciones y tiempos | Dentro de .NET 11, Default11 → opt-in preview: SuspendedTask 184 → 256 B/op; AsyncChain 408 → 368 B/op | Cambios de lowering y memoria observados; tiempos exploratorios. El opt-in de la aplicación no es el predeterminado GA. |
+| Channels | Crear canal y tareas, procesar un lote y cerrar | Históricos +55,20% / +98,14%; controles +54,71% / +54,80% de tiempo | Signo adverso local repetido en un ciclo de vida corto. No mide throughput sostenido de una cola reutilizada ni aísla una causa del runtime. |
+| HTTP / ASP.NET Core | Endpoints con carga cerrada; cliente y servidor en el mismo portátil | 144 celdas canónicas; algunas comparaciones se invierten entre r0 y r1 | Comportamiento relativo bajo carga local compartida. No es capacidad aislada de Kestrel ni dimensionamiento de producción. |
+| EF Core | EF10/runtime10 → EF10/runtime11 → EF11/runtime11, SQLite local | Consulta simple con 1000 clientes: 2,871 → 4,048 → 2,915 ms; proyección: 3,231 → 2,861 → 2,809 ms | Medias de tres procesos por tratamiento. Separar runtime, ORM y SQLite; no hay una mejora uniforme. |
+| Native AOT | Tamaño del EXE y cinco arranques del mismo artefacto | Consola: 2.455.040 → 2.507.264 bytes; API: 10.780.160 → 10.946.560 bytes | Tamaños contrastados en archivos; una publicación por tratamiento. No se aisló el origen del aumento ni una distribución de builds. |
+
+Las filas no tienen el mismo diseño experimental ni el mismo grado de atribución. La [auditoría crítica](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/final-audit.md) conserva los controles y sus límites. Mi criterio de migración sigue siendo validar contratos y dependencias primero, y medir después los caminos calientes de la aplicación.
 
 <figure class="study-cover">
 <a href="/blog/dotnet-10-vs-dotnet-11/cover-dotnet-study.png"><img src="/blog/dotnet-10-vs-dotnet-11/cover-dotnet-study.png" width="1200" height="630" alt="Portada conceptual: .NET 10 y .NET 11 recorren las capas de compilador, runtime y bibliotecas; no representa mediciones" /></a>
 <figcaption>Ilustración conceptual original para este artículo. Las capas ayudan a interpretar los resultados; no representan diferencias medidas de rendimiento. <a href="/blog/dotnet-10-vs-dotnet-11/cover-dotnet-study.png">Abrir portada PNG a tamaño completo</a>.</figcaption>
 </figure>
 
-<a id="resumen-ejecutivo"></a>
-## Antes de entrar en detalle: la respuesta corta
-
-Si has llegado buscando si merece la pena pasar de .NET 10 a .NET 11, mi respuesta es que hay motivos para hacerlo, pero no compraría la actualización con una promesa genérica de velocidad. He comparado las dos versiones con el mismo código en pruebas pequeñas, en una API HTTP, en consultas de base de datos y al publicar aplicaciones. Hay mejoras que se pueden explicar mirando las instrucciones del procesador. También hay resultados que empeoran y otros que cambian de signo al repetir la prueba.
-
-El ejemplo más claro cabe en un método diminuto. Una llamada a través de una clase base, con un método genérico y un objeto recién creado, acaba convertida en devolver el argumento recibido. El JIT, que es el compilador que trabaja mientras se ejecuta el programa, consigue pasar de **69 a 3 bytes de código máquina** y de **24 a 0 bytes de memoria asignada por operación**. El resultado se sigue usando. No desaparece el programa ni se reduce así todo el ejecutable: desaparece trabajo que el compilador ha podido demostrar innecesario en ese caso concreto.
-
-Channels cuenta una historia bastante menos cómoda. La prueba de productor y consumidor vuelve a tardar más en .NET 11 en los controles de este equipo. Sin embargo, el resultado histórico más extremo no se mantiene. Además, la prueba crea el canal y sus tareas en cada operación; no equivale a tener una cola funcionando durante horas en un servicio. Merece investigarse si utilizas ese patrón, no afirmar que cualquier aplicación con Channels va a empeorar lo mismo.
-
-La API acumuló más de 15 millones de peticiones correctas. Es una campaña considerable, pero el cliente que genera la carga y el servidor compartían portátil. Algunas comparaciones se invierten entre bloques. Por eso esas tablas sirven para estudiar endpoints y límites de la prueba, no para calcular cuántas máquinas necesitas en producción. Con EF Core separé actualizar el runtime de actualizar el ORM, la biblioteca que traduce entre objetos y base de datos: son cambios distintos y conviene poder distinguirlos cuando algo mejora o se rompe.
-
-Tampoco todo consiste en tardar menos. Los ejecutables Native AOT de .NET 11 salieron mayores en las dos aplicaciones publicadas. AOT adelanta la compilación a código máquina y puede ayudar al arranque, pero no promete el binario más pequeño. Runtime Async, por su parte, cambia cómo se ejecutan ciertas operaciones asíncronas: hay caminos que asignan menos memoria y otros que asignan más. Activarlo expresamente en la aplicación sigue siendo una opción experimental, separada del comportamiento estable con el que puedes migrar a .NET 11.
-
-Yo empezaría una migración comprobando compatibilidad y corrección, manteniendo al principio el lenguaje y los paquetes. Después vendrían EF, el proveedor de base de datos y los cambios de publicación. Si buscas rendimiento, el paso previo es saber dónde se va el tiempo en tu aplicación. Una consulta remota lenta no se arregla porque otra función ahorre unos nanosegundos. .NET 10 parcheado sigue siendo una opción válida; .NET 11 tiene mejoras y APIs que pueden interesarte sin necesidad de que gane todas las pruebas.
-
 <a id="rutas-lectura"></a>
 ## Por dónde empezar
 
-El artículo tiene 24 capítulos porque vamos a bajar desde C# hasta las instrucciones de la CPU y volver a subir hasta una API. Puedes seguirlo en orden, o entrar por lo que necesitas:
+- **Código generado y memoria:** [JIT](#jit), [GVM y eliminación del objeto](#gvm), [GC](#gc) y [Runtime Async](#async).
+- **APIs y persistencia:** [JSON](#json), [concurrencia](#concurrencia), [HTTP](#http), [EF Core](#ef-core) y [Native AOT](#native-aot).
+- **Migración y compatibilidad:** [capas de la plataforma](#que-es-dotnet), [versiones y soporte](#versiones), [C# 15](#csharp) y [orden de actualización](#migracion).
+- **Revisar el experimento:** [metodología](#metodologia), [controles y repeticiones](#resultados), [código y originales](#reproduccion). Las referencias rápidas quedan en el [glosario](#glosario).
 
-- **Si .NET te suena, pero no lo conoces por dentro:** empieza por [qué estamos comparando](#introduccion), [las piezas de .NET](#que-es-dotnet) y [cómo se leen las medidas](#metodologia). El [glosario](#glosario) está para consultar una sigla sin perder el hilo.
-- **Si estás preparando una migración:** ve a [los pasos de actualización](#migracion) y [la decisión según la aplicación](#decision). En [versiones](#versiones) tienes los destinos y el soporte que se comparan aquí.
-- **Si te interesan las tripas del runtime:** empieza por el [JIT](#jit), sigue con [el método de 69 a 3 bytes](#gvm), [memoria](#gc) y [async](#async). El caso [Channel](#concurrencia) y [las repeticiones](#resultados) muestran dónde los tiempos no bastan para explicar lo que pasa.
-- **Si lo tuyo son las APIs:** [HTTP](#http), [EF Core](#ef-core) y [Native AOT](#native-aot) son el recorrido más directo. [JSON](#json) y [observabilidad](#otras-superficies) completan la parte de serializar y diagnosticar.
-
-Las tablas y el código se desplazan lateralmente si no caben en el móvil. Puedes pulsar cualquier gráfico para ampliarlo; debajo está también el enlace al PNG original, que funciona sin JavaScript.
+Tablas y código tienen desplazamiento horizontal propio. Los PNG conservan sus enlaces originales y el visor permite consultar las etiquetas a tamaño real.
 
 <details id="indice">
 <summary>Índice de los 24 capítulos</summary>
@@ -55,7 +79,7 @@ Las tablas y el código se desplazan lateralmente si no caben en el móvil. Pued
 **Parte I — Entender qué estamos comparando**
 
 1. [¿Una versión nueva es realmente más rápida?](#introduccion)
-2. [¿Qué es realmente .NET?](#que-es-dotnet)
+2. [C#, SDK, CoreCLR y BCL: qué cambia en cada capa](#que-es-dotnet)
 3. [.NET 10 y .NET 11: qué cambia y qué permanece](#versiones)
 4. [Cómo hemos realizado las pruebas](#metodologia)
 
@@ -76,7 +100,7 @@ Las tablas y el código se desplazan lateralmente si no caben en el móvil. Pued
 
 **Parte IV — Aplicaciones reales**
 
-14. [ASP.NET Core: qué ocurre cuando llegan miles de peticiones](#http)
+14. [ASP.NET Core: carga local compartida](#http)
 15. [Entity Framework Core 10 frente a 11](#ef-core)
 16. [Native AOT: compilar antes de ejecutar](#native-aot)
 
@@ -95,88 +119,42 @@ Las tablas y el código se desplazan lateralmente si no caben en el móvil. Pued
 
 ---
 
+<a id="parte-i"></a>
 **PARTE I — ENTENDER QUÉ ESTAMOS COMPARANDO**
 
 <a id="introduccion"></a>
 ## 1. ¿Una versión nueva es realmente más rápida?
 
-Tienes una aplicación funcionando, sale otra versión de .NET y llega la duda de siempre: ¿merece la pena actualizar? Cambias el destino del proyecto, vuelves a compilar y la lógica sigue siendo la misma. La consulta busca los mismos datos y la API devuelve la misma respuesta. Aun así, por debajo puede haber cambiado bastante más de lo que parece.
-
-El procesador podría ejecutar menos instrucciones. Una biblioteca podría ahorrarse un recorrido. También podrías encontrarte con más memoria asignada, un ejecutable mayor o una mejora tan localizada que el usuario no llegue a notarla. Y si una prueba pequeña da un resultado espectacular, queda comprobar qué estaba midiendo antes de celebrarlo.
+Actualizar el TFM y recompilar puede conservar los contratos funcionales y cambiar, a la vez, el código nativo, las asignaciones y los caminos de biblioteca. La pregunta no es sólo si .NET 11 tarda menos, sino qué capa cambia, bajo qué condiciones y con qué impacto en la aplicación.
 
 Para ponerle cifras a esa duda, **he comparado .NET 10 y .NET 11 intentando conservar el trabajo que realiza cada operación**. Me interesa saber cuánto cambia, pero también poder explicar qué ha pasado. Un porcentaje sin saber qué hemos hecho para obtenerlo sirve de poco cuando toca decidir sobre una aplicación de verdad.
 
-El proyecto incluye **101 métodos distintos de BenchmarkDotNet**, una herramienta para ejecutar pruebas pequeñas y repetibles de rendimiento, los llamados *benchmarks*. A eso se suma una API HTTP con más de 15 millones de peticiones. Si no trabajas con estos términos, una API es la interfaz por la que un programa ofrece operaciones a otros: pedir un dato, enviar un pedido o solicitar un cálculo, por ejemplo. También hay consultas con Entity Framework Core, aplicaciones publicadas de distintas formas y ejemplos de C# 14 y C# 15.
+El proyecto incluye **101 métodos distintos de BenchmarkDotNet**, una campaña HTTP local compartida con más de 15 millones de peticiones registradas, consultas con Entity Framework Core, aplicaciones publicadas de distintas formas y ejemplos de C# 14 y C# 15. Son superficies experimentales distintas, no una muestra homogénea de aplicaciones.
 
 Ahí conviven operaciones de unos nanosegundos con otras que incluyen una base de datos, una petición HTTP o el arranque de todo un proceso. No voy a meterlas en una media y declarar un ganador. El [método de lectura](#metodo-lectura) explica cómo comparar esas cifras sin mezclar preguntas distintas.
 
-Empezaremos por lo que escribimos en C# y bajaremos hasta las instrucciones que recibe la CPU. Desde ahí iremos a los objetos que ocupan memoria, las operaciones que esperan una respuesta y las bibliotecas que procesan nuestros datos. Después podremos ver cuánto de todo eso se traslada a un servidor o a un despliegue. Una optimización que elimina una llamada tiene interés; saber si esa llamada pesa en tu aplicación tiene todavía más.
-
-No hace falta que domines .NET para seguirlo. Los primeros ejemplos explican las piezas desde cero. Si ya trabajas con él, encontrarás el código medido, el ensamblador y los originales enlazados para entrar al detalle. Así podemos hablar de lo que ocurre sin convertir cada párrafo en una lista de términos que hay que conocer de antemano.
+El recorrido conecta código generado, asignaciones, bibliotecas y comportamiento de aplicaciones. Está dirigido a quien necesita evaluar una migración, revisar un camino caliente o discutir sus límites de atribución: los kernels, el ensamblador y los originales enlazados permiten contrastar cada caso. Las definiciones de consulta quedan en el [glosario](#glosario).
 
 He fijado el corte de versiones en el **12 de noviembre de 2026**. La [investigación técnica original](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/article/dotnet-10-vs-dotnet-11.md) conserva las pruebas y la [auditoría crítica](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/final-audit.md) revisa qué permiten afirmar. Aquí desarrollo sus explicaciones, sin añadir benchmarks ni dar por resueltas las dudas que siguen abiertas.
 
 Antes de tocar los números, conviene aclarar una confusión bastante común: actualizar C#, instalar un SDK y cambiar el runtime no son la misma operación.
 
 <a id="que-es-dotnet"></a>
-## 2. ¿Qué es realmente .NET?
+## 2. C#, SDK, CoreCLR y BCL: qué cambia en cada capa
 
-Decimos «está hecho en .NET» y parece que hablamos de una sola cosa. En realidad, bajo ese nombre juntamos el lenguaje, las herramientas con las que construimos el programa, el entorno que lo ejecuta y las bibliotecas que utiliza. Separarlo ayuda a entender por qué un mismo código puede comportarse de otra manera después de actualizar.
+Para atribuir una diferencia de rendimiento hay que separar cuatro ejes: versión del lenguaje, toolchain de construcción, runtime efectivo e implementaciones de biblioteca. Actualizar el SDK no equivale a actualizar todos ellos, y conservar los archivos C# no garantiza conservar el IL.
 
-### El lenguaje no es el motor
+### Lenguaje y SDK/Roslyn: sintaxis frente a código generado
 
-**C# es el lenguaje con el que damos instrucciones.** Podemos pedir que guarde un dato, sume cantidades, lea un archivo o responda a una petición. Un método agrupa una operación bajo un nombre. Una variable nos permite referirnos a un valor o a una referencia sin repetir su contenido por todo el programa.
+`LangVersion` selecciona las reglas del lenguaje que acepta Roslyn; no selecciona una versión histórica del compilador. Fijar C# 14 con el SDK 11 mantiene ese nivel de lenguaje, pero sigue utilizando el Roslyn incluido en el SDK 11, con sus transformaciones y correcciones. Un cambio de lowering puede alterar IL y metadata sin introducir sintaxis nueva.
 
-Vamos con algo pequeño: sumar tres cantidades. Este programa es autónomo y compatible con C# 14:
+La selección del SDK gobierna la construcción, restore y publicación. Debe distinguirse de las versiones de paquetes resueltas y del runtime que cargará el proceso. En esta comparativa se registran por separado para no atribuir a CoreCLR lo que podría proceder del compilador o del grafo de dependencias.
 
-```csharp
-// Ejemplo autónomo: fundamentos (C# 14, net10.0)
-using System;
+### CoreCLR/JIT/GC frente a BCL: código generado y trabajo de biblioteca
 
-int[] cantidades = [2, 3, 5];
-int total = 0;
-foreach (int cantidad in cantidades)
-{
-    total += cantidad;
-}
-Console.WriteLine(total);
-```
+En la ruta JIT de las aplicaciones estudiadas, CoreCLR aporta carga de tipos, excepciones, gestión de hilos y memoria. El JIT decide el código nativo y sus especializaciones; el GC determina cómo se gestiona el heap administrado. Son mecanismos diferentes: eliminar la materialización de un objeto no equivale a acelerar su recolección.
 
-Imprime `10`. `int[]` declara un array de enteros, `foreach` recorre sus elementos y `Console.WriteLine` escribe el total. Lo utilizo para explicar el funcionamiento; no es la entrada del benchmark de arrays. Los datos y la operación de aquella prueba están en [CollectionsBenchmarks.cs](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/CollectionsBenchmarks.cs).
-
-La CPU, es decir, el procesador, no ejecuta directamente ese `foreach`. Tampoco entiende nuestros nombres de variables ni los archivos `.cs`. Necesita código máquina para su arquitectura, como x64 o Arm64. Para llegar desde lo que hemos escrito hasta esas instrucciones intervienen las otras piezas de .NET.
-
-### El SDK: las herramientas para construir
-
-El **SDK**, de *Software Development Kit*, reúne las herramientas de desarrollo: el compilador de C#, el sistema de construcción y comandos como `dotnet build` o `dotnet publish`. También permite restaurar los paquetes que necesita el proyecto.
-
-El compilador de C# pertenece a **Roslyn**. Revisa que el programa cumpla las reglas del lenguaje y lo transforma en instrucciones intermedias. Junto a ellas guarda información sobre tipos y métodos, la **metadata**. Piensa en la descripción del contenido del programa, no en los datos de un cliente que llegan en una petición.
-
-Ese código se agrupa en **ensamblados**, normalmente archivos `.dll`. Que veas esa extensión no implica que ya tengas instrucciones nativas listas para el procesador: un ensamblado administrado de .NET puede contener esa representación intermedia.
-
-Aquí aparece la primera separación práctica. Instalar el SDK 11 no hace que todas las aplicaciones del equipo pasen a ejecutarse con el runtime 11. Además, un SDK moderno puede construir proyectos para varios destinos. La herramienta que construye y la versión que ejecuta tienen relación, pero hay que comprobar ambas.
-
-### IL: instrucciones intermedias
-
-**IL** significa *Intermediate Language*. Son instrucciones pensadas para .NET, más próximas a la ejecución que C#, aunque todavía no correspondan al código máquina de una CPU concreta.
-
-El IL permite conservar lo que debe hacer el programa dejando parte de la adaptación a la máquina para después. No hay que imaginarlo como un texto traducido palabra por palabra: utiliza un formato definido, con reglas para tipos, llamadas y excepciones. Gracias a esa separación, una suma puede acabar convertida en instrucciones diferentes en x64 y Arm64, o aprovechar capacidades del procesador donde se ejecuta.
-
-### El runtime: el entorno que hace funcionar el programa
-
-Una vez construido el programa, el **runtime** proporciona los servicios para ejecutarlo. Carga tipos, gestiona excepciones, coordina la memoria y los hilos y, cuando corresponde, transforma el IL en código máquina.
-
-En las aplicaciones de esta comparativa utilizamos **CoreCLR**. Dentro de él están el **JIT**, que compila código durante la ejecución, y el **Garbage Collector**, que recupera memoria administrada que ya no hace falta conservar. No hemos añadido esas funciones escribiendo una sintaxis especial de C#: forman parte del entorno donde corre el programa.
-
-Por eso hablamos de **código administrado**. Participa en esos servicios y en sus reglas. Puede generar instrucciones nativas muy optimizadas; «administrado» no quiere decir que alguien vaya interpretando el C# línea a línea en cada llamada.
-
-### La BCL: las herramientas que usa nuestro propio código
-
-Nos queda una pieza que aparece en casi cualquier aplicación: la **BCL**, *Base Class Library*. Es el conjunto de bibliotecas fundamentales, con tipos y operaciones para cadenas de texto, colecciones, tareas, archivos, compresión, criptografía y mucho más.
-
-Cada vez que llamas a `Console.WriteLine`, a `File.ReadAllText` o a una operación LINQ, utilizas una implementación de biblioteca. Esa implementación puede cambiar entre .NET 10 y .NET 11 aunque tú no hayas cambiado la llamada.
-
-Ya tenemos, por tanto, dos formas de mejorar sin reescribir nuestros archivos C#: que el JIT produzca mejores instrucciones o que la biblioteca haga el trabajo de una manera más eficiente. Incluso pueden combinarse. Si el JIT integra código de la biblioteca en el método que la llama, puede optimizar ambos juntos.
+La BCL aporta las implementaciones de colecciones, texto, tareas, I/O y otras operaciones. Una mejora puede estar en el algoritmo de biblioteca, en el código que genera el JIT o en la interacción de ambos mediante inlining. Mantener la llamada fuente no aísla esas causas. La ruta Native AOT requiere otro tratamiento porque adelanta la compilación nativa y no ejecuta ese camino JIT.
 
 [![Proceso conceptual desde un archivo C# hasta las instrucciones que ejecuta la CPU](/blog/dotnet-10-vs-dotnet-11/01-dotnet-pipeline.png)](/blog/dotnet-10-vs-dotnet-11/01-dotnet-pipeline.png)
 
@@ -186,11 +164,11 @@ Ya tenemos, por tanto, dos formas de mejorar sin reescribir nuestros archivos C#
 
 ### ¿Qué estamos cambiando cuando ponemos `net11.0`?
 
-En el proyecto aparece un **target framework**, también llamado TFM. `net10.0` y `net11.0` indican dos destinos .NET y el conjunto de APIs contra el que construimos.
+El **TFM** determina el contrato de APIs contra el que se compila. Las **reference assemblies** exponen ese contrato; no son las implementaciones de biblioteca que ejecutará el proceso. Pasar de `net10.0` a `net11.0` cambia las referencias disponibles y puede cambiar la resolución de sobrecargas, las dependencias seleccionadas y el ensamblado resultante. No es un simple cambio de etiqueta.
 
-Cambiar ese valor afecta a las referencias, a las bibliotecas disponibles y al código que se puede compilar. La DLL resultante puede ser diferente; no estamos cambiando sólo una etiqueta. Por otro lado, una aplicación construida para 10 tampoco pasa automáticamente a ejecutarse sobre 11 por tenerlo instalado. La selección del runtime y sus reglas de *roll-forward* determinan qué sucede.
+La selección en ejecución es otro eje. En una aplicación framework-dependent intervienen el runtimeconfig, los frameworks instalados y la política de *roll-forward*; instalar 11 no convierte automáticamente una aplicación destinada a 10 en una ejecución sobre 11. En una publicación self-contained, el runtime distribuido con el artefacto también forma parte del tratamiento.
 
-En buena parte de las pruebas he mantenido los mismos archivos C#, construido cada destino y comprobado qué runtime utilizaba realmente el proceso. La [metodología](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/methodology.md) recoge esa configuración. Mantener el código fuente ayuda a comparar, pero todavía deja varias piezas capaces de cambiar: compilador, referencias, runtime y paquetes. Por eso necesitamos sus versiones concretas antes de atribuirles una diferencia.
+En buena parte de las pruebas he mantenido los mismos archivos C#, construido cada destino y comprobado qué runtime utilizaba realmente el proceso. La [metodología](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/methodology.md) recoge esa configuración. Antes de atribuir una diferencia necesitamos versiones efectivas de compilador, referencias, runtime y paquetes; cuando importa distinguir código fuente de código generado, también necesitamos inspeccionar el IL.
 
 <a id="versiones"></a>
 ## 3. .NET 10 y .NET 11: qué cambia y qué permanece
@@ -331,16 +309,13 @@ Con esto podemos aprovechar cada prueba para lo que sabe responder. Un microbenc
 
 [Volver al índice](#indice)
 
+<a id="parte-ii"></a>
 **PARTE II — QUÉ OCURRE DENTRO DEL RUNTIME**
 
 <a id="jit"></a>
 ## 5. JIT: del código intermedio a la CPU
 
-Tenemos un ensamblado con IL, pero el procesador necesita sus propias instrucciones. En la ruta habitual de estas aplicaciones, el encargado de dar ese paso es el **JIT**, *Just-In-Time compiler*.
-
-Cuando un método necesita código nativo, el runtime puede pedirle que lo compile. A partir de ahí, ese código puede reutilizarse: no hay una nueva traducción de cada instrucción C# cada vez que pasamos por ella. El JIT adapta el programa a la máquina donde va a ejecutarse y debe conservar su comportamiento observable.
-
-Si lo imaginas como un traductor, quédate con la adaptación al destino. No está interpretando una frase ambigua y decidiendo qué hemos querido decir. Trabaja sobre un programa con reglas precisas, incluidas las de tipos, errores y efectos que el resto de la aplicación puede observar.
+La cuestión del JIT en esta comparativa es qué información permite optimizar el IL y qué trabajo permanece en el código nativo. El comportamiento observable debe conservarse, pero el resultado depende del contexto de compilación, la arquitectura y los perfiles disponibles; no basta con identificar una llamada en C#.
 
 ### ¿Por qué no generar siempre todo de antemano?
 
@@ -366,9 +341,7 @@ Tiering y Dynamic PGO estaban habilitados en los dos runtimes de las campañas g
 
 ### Inlining: quitar una frontera para poder ver más
 
-Cuando llamamos a un método, hay que preparar sus argumentos y transferirle el control. El **inlining** permite incorporar su cuerpo en el punto donde se llama, si el compilador considera que compensa.
-
-Supongamos que el método sólo duplica un entero:
+El **inlining** no interesa sólo por eliminar el coste de llamada: expone el cuerpo al contexto del llamador y habilita propagación de constantes, eliminación de ramas y análisis de objetos. El siguiente fragmento expresa la equivalencia que puede quedar visible:
 
 ```csharp
 // Fragmento didáctico: equivalencia, no ensamblador capturado.
@@ -383,19 +356,15 @@ En nuestras sondas también aparece `NoInlining`, justo para conservar una front
 
 ### Métodos virtuales: elegir una implementación
 
-Una aplicación puede trabajar con un contrato común y dejar que varios tipos lo implementen: proveedores distintos, estrategias o transformaciones intercambiables. Un método **virtual** permite esa elección. El código que llama conoce la base, aunque no siempre sepa qué implementación concreta recibirá.
-
-La flexibilidad tiene un posible coste. Hay que resolver a qué método dirigirse y, mientras el destino siga abierto, el compilador tiene menos información para integrar su cuerpo y simplificarlo.
+Un destino virtual abierto puede bloquear optimizaciones posteriores además de introducir resolución indirecta. La pregunta relevante es si el compilador conoce el receptor con certeza o sólo dispone de un perfil que favorece una implementación.
 
 La **desvirtualización** resuelve ese destino cuando hay información suficiente. A veces existe una certeza: acabamos de construir un objeto de un tipo concreto. Otras veces se crea un camino especializado con una comprobación que lo protege. Conviene distinguir ambas, porque la segunda tiene que conservar una salida para los otros tipos.
 
-A esto se pueden añadir los **genéricos**. En `Echo<T>`, `T` es un parámetro de tipo: puede ser un entero, un texto u otro tipo. No todos reciben el mismo tratamiento interno. La prueba de 69 a 3 bytes utiliza un método virtual genérico **no compartido, especializado aquí para `int`**. Ese detalle delimita el caso; no estamos abarcando de golpe todas las combinaciones de genéricos y polimorfismo.
+La compartición del código genérico añade otra frontera. La prueba de 69 a 3 bytes utiliza un método virtual genérico **no compartido, especializado aquí para `int`**. Ese detalle delimita el caso; no estamos abarcando de golpe todas las combinaciones de genéricos y polimorfismo.
 
 ### Bounds checks: seguridad que a veces puede demostrarse sin repetir
 
-Al leer `array[i]`, el índice debe señalar un elemento válido. Si queda fuera, el programa tiene que producir el error correspondiente, no acceder sin más a otra parte de memoria. El **bounds check** comprueba ese límite.
-
-Hay ocasiones en las que el compilador ya puede demostrar que el acceso es válido. Repetir entonces la comprobación añade trabajo sin aportar otra garantía. Se puede conservar la seguridad haciendo menos comprobaciones durante la ejecución.
+Eliminar un **bounds check** exige demostrar que el acceso conserva su validez y el comportamiento de error. El patrón de lookahead permite preguntar si el rango conocido para un índice también prueba la seguridad de los accesos adyacentes.
 
 Este programa autónomo utiliza el cuerpo de búsqueda de la sonda y añade una envoltura de consola para probarlo:
 
@@ -418,7 +387,7 @@ static bool LookAhead(ReadOnlySpan<char> span)
 }
 ```
 
-Imprime `True` y `False`. En `"x%FF"` hay dos caracteres después de `%`; en `"%F"` el patrón queda cortado y no se deben leer posiciones inexistentes.
+Las salidas `True` y `False` contrastan la coincidencia completa con el patrón truncado: el segundo caso no debe acceder fuera del rango.
 
 La condición sobre `i+2` protege esa lectura adelantada. Con los rangos adecuados, demostrar que cabe `i+2` también permite razonar sobre `i+1`. Conservamos la búsqueda y su salida temprana al encontrar la coincidencia. No estamos ganando tiempo por comparar un bucle que recorre todo con otro que deja de buscar antes.
 
@@ -440,13 +409,13 @@ lea       r10d,[rdx+1]
 cmp       word ptr [rax+r10*2],46
 ```
 
-Aunque no leas ensamblador habitualmente, se ve qué ha desaparecido. `lea` calcula aquí la expresión del índice, `cmp` compara y `jae` realiza un salto condicionado. La segunda versión evita la comparación redundante y su camino de error antes de esa lectura. **La protección de `i+2` sigue en el método**; no han desaparecido todos los controles de límites.
+Desaparecen el `cmp` redundante y su salto `jae` al camino de error antes de esa lectura. **La protección de `i+2` sigue en el método**; no han desaparecido todos los controles de límites.
 
 El [PR 124242](https://github.com/dotnet/runtime/pull/124242) explica la optimización de este patrón. Los bytes anteriores, sin embargo, proceden de [las sondas propias](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/JitProbes/Program.cs) y del [ensamblador original de esta campaña](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/raw/jit-pr/main/results/BenchmarkRun-joined-2026-11-12-16-17-31-asm.md), no de copiar el ejemplo de código máquina del PR.
 
 ### Resolver una pregunta conocida antes de ejecutarla
 
-Si podemos saber el resultado de una expresión de antemano, no hace falta calcularlo cada vez. A esa simplificación se la llama **constant folding**.
+La sonda de **constant folding** contrasta entradas constantes con un control dinámico para separar simplificación en compilación de comparación efectiva durante la ejecución.
 
 La sonda ConstantUnequal obtiene mediante getters dos cadenas constantes diferentes: `"abcdef"` y `"bcdefg"`. Una vez integrados los caminos relevantes, .NET 11 deja este kernel:
 
@@ -463,7 +432,7 @@ El [PR 121985](https://github.com/dotnet/runtime/pull/121985) trata la optimizac
 
 ### SIMD: varias operaciones dentro de una instrucción
 
-Otra forma de ahorrar trabajo es operar con varios datos a la vez. **SIMD** utiliza instrucciones del procesador para hacerlo, por ejemplo al sumar bloques de enteros o procesar buffers. No crea varios hilos; el paralelismo está en los datos tratados por la instrucción.
+En SIMD importa comprobar qué instrucciones y anchura efectiva utiliza el kernel, no deducirlas de las capacidades máximas de la CPU o de la versión del runtime.
 
 La sonda SIMD general usa vectores explícitos. En los dos runtimes aparece `vpaddd ymm6,ymm6,[rax+rcx*4+10]` y se avanza de ocho enteros en ocho: son instrucciones vectoriales de **256 bits**. Que el proceso tenga disponible una capacidad AVX512 no obliga a que ese `Vector<int>` utilice 512 bits.
 
@@ -476,9 +445,7 @@ El ahorro será útil si aparece en una parte que ejecutamos lo suficiente. Pode
 <a id="gvm"></a>
 ## 6. El experimento de 69 a 3 bytes
 
-Vamos a crear un objeto, guardarlo en una variable de una base abstracta y llamar a un método genérico que devuelve exactamente lo que recibe. En C# hemos pedido una creación y una llamada. Pero si el compilador ve qué objeto es y qué hace ese método, ¿necesita realizar todos esos pasos?
-
-Este programa permite seguir el caso completo. Conserva los tipos y el cuerpo del kernel de la investigación y añade una llamada de consola fuera de él. Puedes leerlo como un programa autónomo, pero **no es el ejecutable BenchmarkDotNet con el que se obtuvieron los tiempos**.
+El caso combina receptor de tipo conocido, dispatch virtual genérico no compartido e inlining. La pregunta es si el JIT consigue eliminar no sólo la llamada indirecta, sino también la materialización del receptor. El programa conserva los tipos y el cuerpo del kernel de la investigación, con una llamada de consola fuera de él: **no es el ejecutable BenchmarkDotNet con el que se obtuvieron los tiempos**.
 
 ```csharp
 // Ejemplo autónomo: gvm (C# 14, net10.0)
@@ -509,9 +476,7 @@ public static class PrJitKernels
 }
 ```
 
-La consola muestra `42`. `EchoBase` define el contrato y `Echoer` lo implementa. El parámetro de tipo `<T>` permite devolver el mismo tipo que hemos recibido. En `GenericVirtual`, el objeto se crea allí mismo: no llega desde un proveedor desconocido ni se elige una implementación distinta en función de la entrada.
-
-Fíjate en esa diferencia entre lo que declara la variable y lo que sabemos de su contenido. Se llama `receiver` y está declarada como `EchoBase`, pero acaba de recibir un `new Echoer()`. El compilador puede conocer el tipo concreto. Si consigue resolver `Echo<int>` e integrar el cuerpo, verá que devuelve `input` y que el objeto no añade ningún efecto observable. Entonces puede simplificar bastante más que una llamada.
+La salida es `42`, pero el dato decisivo es la procedencia del receptor: `receiver` está declarado como `EchoBase` y se inicializa localmente con `new Echoer()`. No llega de un proveedor polimórfico desconocido. Si el JIT resuelve `Echo<int>` e integra su cuerpo, puede demostrar que devuelve `input` y que la identidad del objeto no aporta ningún efecto observable.
 
 ### Qué conservaba el camino de .NET 10
 
@@ -574,25 +539,21 @@ Al evitar el objeto también evitamos memoria que, de otro modo, habría que ges
 <a id="gc"></a>
 ## 7. Garbage Collector: memoria que se reserva, vive y se libera
 
-Una respuesta JSON, un array, una tarea o un objeto que representa una consulta necesitan espacio. Si los creamos una y otra vez, la gestión de ese espacio acaba formando parte del coste del programa, aunque no la veamos en la línea de C# que estamos leyendo.
-
-Una **allocation**, o asignación, reserva memoria para un dato. No significa simplemente dar otro valor a una variable. Tampoco quiere decir que, al dejar de usar ese dato, la memoria vuelva inmediatamente al sistema operativo.
+El ahorro de **24 → 0 B/op** del caso anterior evita trabajo de asignación; su impacto en un servicio depende también de supervivencia, retención y presión de recolección. Reducir el volumen asignado no implica devolver inmediatamente memoria al sistema operativo.
 
 ### Stack y heap sin una regla falsa
 
-El **stack**, o pila, está ligado a los marcos de ejecución de las llamadas: contiene información para continuar, argumentos y temporales según el código generado. En el **heap administrado**, el runtime gestiona muchos de los objetos que pueden seguir existiendo después de que termine una llamada.
+La ubicación efectiva de un dato se decide entre marcos de ejecución, registros y almacenamiento administrado según su uso y el código generado; no se deduce sólo de su declaración en C#.
 
 La regla rápida «los tipos valor van al stack y las clases al heap» crea más confusiones de las que aclara. Un valor puede estar dentro de un objeto, un dato puede mantenerse en registros y una creación que vemos en C# puede desaparecer al compilar, como en el kernel anterior. La ubicación efectiva depende del uso y de cómo se haya generado el código.
 
-El **Garbage Collector**, GC, recupera memoria de objetos que ya no son alcanzables desde las referencias que el programa conserva. No tenemos que escribir un `free` por cada objeto administrado. Eso nos quita trabajo manual, pero no hace gratis crear millones de objetos.
+La alcanzabilidad delimita qué puede recuperar el GC, pero el coste incluye asignación, supervivencia y recolección. Evitar objetos temporales y reducir el conjunto vivo son intervenciones distintas.
 
 Además, recuperar memoria y liberar un recurso a tiempo son problemas distintos. Un archivo, una conexión o un identificador nativo pueden requerir `Dispose` y una construcción `using`. Esperar a que el GC resuelva todo no sustituye ese contrato de liberación.
 
 ### Qué son las generaciones
 
-Muchos programas crean montones de objetos que duran poco. El GC aprovecha ese comportamiento y organiza el heap administrado en generaciones, en lugar de revisar siempre todo con el mismo esfuerzo.
-
-Los objetos nuevos suelen comenzar en la **generación 0**. Si sobreviven, pueden promocionar a generaciones posteriores. En la **generación 2** encontramos objetos más longevos; recogerla forma parte de las colecciones más amplias. El funcionamiento concreto depende del modo y de las circunstancias, pero esa separación permite tratar de forma diferente lo que acaba de nacer y lo que lleva tiempo vivo.
+La hipótesis generacional favorece los objetos de vida corta. Los nuevos suelen comenzar en la **generación 0** y los supervivientes pueden promocionar; las colecciones que alcanzan la **generación 2** abarcan un conjunto más longevo. El efecto sobre CPU y pausas depende de la supervivencia, del modo de GC y de la presión efectiva, no sólo del número de asignaciones.
 
 Una **pausa de GC** detiene trabajo administrado durante alguna fase de la colección. Parte del trabajo puede hacerse concurrentemente, aunque «concurrente» no equivale a «sin pausas». También hay consumo de CPU y efectos sobre cachés y memoria residente que no se resumen en el tiempo de pausa.
 
@@ -602,7 +563,7 @@ Una **pausa de GC** detiene trabajo administrado durante alguna fase de la colec
 
 Los objetos grandes tienen su zona, el **Large Object Heap**, o **LOH**. Su umbral habitual por defecto está alrededor de **85.000 bytes de tamaño del objeto**. Los buffers de **128.000 bytes** utilizados en el control entran claramente en ese grupo.
 
-Piensa en una estantería donde retiras algunas cajas y dejas otras. Puedes sumar bastante espacio libre y, aun así, tenerlo repartido en huecos que no encajan con lo que quieres colocar. Compactar reorganiza el contenido para reunir espacio. Es una ayuda para visualizar la fragmentación, no una descripción de todos los algoritmos del GC ni una afirmación de que cada colección compacte todas las zonas.
+La fragmentación puede dejar suficiente espacio libre total sin un hueco contiguo adecuado. La compactación reorganiza objetos para reducir esa dispersión; no implica que cada colección compacte todas las zonas del heap.
 
 En el control preparé deliberadamente esos huecos: se retienen buffers alternos, se solicita una colección sin compactación LOH y después una compactación explícita. Se ejecutaron **cuatro procesos**, uno por combinación de los dos runtimes y los modos Workstation/Server. El modo efectivo se comprobó en cada proceso hijo.
 
@@ -629,9 +590,7 @@ Los [resultados por tratamiento](https://github.com/jyeste94/.NET11vs.NET11/tree
 
 ### Reutilizar un buffer no es lo mismo que cambiar de runtime
 
-Si una operación necesita buffers continuamente, puede convenir reutilizarlos. **`ArrayPool<T>`** permite alquilar un array y devolverlo para que vuelva a usarse. A cambio hay una obligación importante: después de devolverlo, ya no podemos seguir utilizándolo como si fuera nuestro.
-
-El tamaño físico que entrega el pool puede ser mayor que el solicitado. Este programa autónomo pide tres elementos y trabaja sólo con esos tres elementos lógicos:
+**`ArrayPool<T>`** cambia el contrato de propiedad y la retención, no sólo la contabilidad de asignaciones. Tras devolver un buffer no debe seguir utilizándose. Su capacidad física puede superar la longitud solicitada; el ejemplo limita el consumo a tres elementos lógicos:
 
 ```csharp
 // Ejemplo autónomo: array-pool (C# 14, net10.0)
@@ -652,7 +611,7 @@ finally
 }
 ```
 
-Imprime `6`. El `finally` devuelve el array aunque falle el trabajo. `clearArray: true` pide limpiarlo, algo que puede importar para no conservar datos anteriores, pero también cuesta tiempo: la limpieza puede recorrer el tamaño físico alquilado, no sólo nuestros tres bytes lógicos.
+La salida es `6`. La devolución queda protegida por `finally`. `clearArray: true` añade limpieza, potencialmente sobre el tamaño físico alquilado y no sólo sobre nuestros tres bytes lógicos; su coste y la retención de datos forman parte de la decisión de reutilización.
 
 En la prueba de **100.000 bytes**, Allocate registró **100.059 B/op en ambos runtimes**. ArrayPool registró **21/20 B/op** y ArrayPoolClear **21/21**. El pool ya estaba caliente. Ese byte de diferencia entre versiones no justifica hablar de una mejora relevante, y las cifras pequeñas tampoco garantizan que un pool nunca tenga que asignar memoria.
 
@@ -673,17 +632,11 @@ Parte de ese estado en memoria puede existir porque una operación aún no ha te
 <a id="async"></a>
 ## 8. Async/await: esperar sin ocupar un hilo innecesariamente
 
-Un servidor pide un dato a una base de datos y tiene que esperar la respuesta. Durante esa espera puede no estar calculando nada. Si deja un hilo bloqueado hasta que termine, ese hilo no podrá atender otro trabajo mientras tanto.
+El coste de una operación async depende de si completa síncronamente, suspende de verdad y propaga contexto. La campaña separa esos caminos antes de comparar el lowering convencional con Runtime Async. Cambiar sólo el runtime de una DLL ya compilada no demuestra una transformación del compilador.
 
-La programación **asíncrona** permite representar la operación pendiente y continuar cuando haya resultado. No acelera el disco ni la red. Lo que cambia es cómo organizamos la espera y qué recursos mantenemos ocupados. Tampoco implica, por sí sola, que todo se ejecute a la vez en varios hilos.
+### Controlar que haya una suspensión real
 
-### Task no es sinónimo de hilo
-
-Una **`Task<T>`** representa la finalización y el resultado de una operación. Puede estar pendiente o haber terminado con un valor, con una cancelación o con un error. No necesita tener un hilo dedicado esperando a que se complete.
-
-Cuando llegamos a `await`, se comprueba el estado de la operación. Si ya ha terminado, el método puede continuar sin suspenderse por esa espera. Si sigue pendiente, se registra cómo continuar y se devuelve el control al llamador. Al completarse la operación, la continuación podrá ejecutarse según las reglas de contexto y planificación que correspondan.
-
-Podemos observarlo sin depender de cuánto tarde Internet. Basta con una puerta que inicialmente esté cerrada:
+El siguiente control usa una puerta inicialmente incompleta. Evita que una finalización inmediata o un temporizador decidan si el método llega a suspenderse:
 
 ```csharp
 // Ejemplo autónomo: async-gate (C# 14, net10.0)
@@ -701,7 +654,7 @@ static async Task<int> CalcularAsync(Task<int> puerta)
     => 1 + await puerta.ConfigureAwait(false);
 ```
 
-Primero imprime `False`: el cálculo todavía no ha terminado. `SetResult(41)` abre la puerta con el valor 41 y el método pendiente suma uno. Por eso la segunda salida es `42`.
+El `False` previo a `SetResult(41)` acredita que la operación sigue pendiente; el resultado final es `42`. La puerta elimina la carrera que introduciría depender de un temporizador.
 
 La consola explica la idea del caso suspendido, pero los tiempos proceden de otro programa. El [kernel medido](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/RuntimeAsyncBenchmarks/Shared/AsyncWorkloads.cs) y su [wrapper real](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/RuntimeAsyncBenchmarks/AsyncBenchmarks.cs) definen las fronteras y la configuración del benchmark.
 
@@ -709,25 +662,19 @@ La consola explica la idea del caso suspendido, pero los tiempos proceden de otr
 
 ### La máquina de estados que no escribimos a mano
 
-Para retomar un método suspendido hay que recordar por dónde iba y qué valores necesitará al volver. Con la transformación convencional, Roslyn genera una **máquina de estados**: el estado y el código para entrar, suspender, reanudar y propagar el resultado o el error. Al inspeccionarla suele aparecer un método llamado `MoveNext`.
-
-Eso es parte del trabajo que nos ahorra la sintaxis `async`/`await`. Podemos escribir el flujo de forma legible sin programar a mano toda la coordinación, aunque la infraestructura siga existiendo por debajo.
+El lowering convencional de Roslyn emite una máquina de estados con `MoveNext`, estado persistente y builders para suspensión, reanudación y propagación de errores. Esa representación es lo que hay que contrastar al evaluar un modelo alternativo; la longitud del método fuente no describe su coste.
 
 Conviene separar también dos llamadas frecuentes. **`Task.WhenAll`** combina la finalización de varias tareas; no obliga a que sus operaciones se ejecuten en paralelo ni elimina sus arrays y resultados. **`Task.Run`** programa trabajo en el ThreadPool. Utilizarlo es una decisión distinta de esperar una API que ya ofrece una operación asíncrona.
 
 ### ValueTask: una alternativa con un contrato más exigente
 
-**`ValueTask<T>`** puede representar directamente un resultado ya disponible sin crear siempre una `Task<T>` separada para ese resultado. Si queda pendiente, puede apoyarse en otra representación.
-
-Eso tiene interés en una API que completa de forma síncrona muchas veces y donde las asignaciones pesan. Pero sustituir todos los `Task` por `ValueTask` a ciegas puede añadir costes de composición o conversión. Su consumo también exige cuidado: no se debe reutilizar repetidamente ni en paralelo salvo que el contrato lo permita.
+`ValueTask<T>` interesa sobre todo cuando la finalización síncrona es frecuente. Composición, conversiones y consumo repetido o concurrente pueden cambiar el coste o incumplir su contrato; sustituir `Task<T>` mecánicamente no es una optimización.
 
 Para comparar estos caminos necesitamos saber si hubo una suspensión real. Un `MemoryStream` no obliga por sí mismo a esperar I/O pendiente. Y con `Task.Delay(1)` podemos acabar midiendo principalmente el temporizador del sistema. Por eso, en la campaña de Runtime Async, la puerta empieza incompleta y sólo se libera después de registrar la espera. Los casos completados inmediatamente se tratan aparte.
 
 ### Qué viaja con una operación: ExecutionContext y AsyncLocal
 
-Además del resultado, una petición puede necesitar conservar un identificador de correlación u otro estado lógico. **ExecutionContext** forma parte de la infraestructura que propaga ese estado ambiente por la ejecución asíncrona. **`AsyncLocal<T>`** permite asociar un valor a ese flujo lógico.
-
-No funciona como una simple variable global del proceso ni como un dato que pertenezca siempre al mismo hilo físico. La continuación puede ejecutarse en otro hilo y seguir viendo el valor de su contexto.
+La propagación de `ExecutionContext` y el estado de `AsyncLocal<T>` pertenecen al flujo lógico, no a la identidad de un hilo. En este experimento forman parte del trabajo que se conserva al suspender y reanudar.
 
 Aquí suele confundirse el papel de `ConfigureAwait(false)`. Indica que esa continuación no necesita regresar al contexto de sincronización capturado. **No suprime ExecutionContext ni borra AsyncLocal.** Y guardar un objeto mutable dentro de AsyncLocal tampoco provoca que se haga una copia profunda del objeto.
 
@@ -753,6 +700,21 @@ El opt-out por proyecto utiliza `UseRuntimeAsync=false`. Estas opciones actúan 
 
 La [matriz de Runtime Async](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/experiments-runtime-async.md) compara **cuatro tratamientos compilados por separado**: 10 convencional, 11 predeterminado, 11 opt-in preview y 11 opt-out. Para distinguirlos se registran las propiedades del ensamblado realmente cargado, sus atributos y los cuerpos IL del proceso hijo. El nombre de una carpeta no basta para saber qué código ha ejecutado.
 
+Estos son los tratamientos efectivos del [csproj medido](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/RuntimeAsyncBenchmarks/RuntimeAsyncBenchmarks.csproj), no nombres asignados después de ejecutar una misma DLL:
+
+| Tratamiento | TFM / runtime | Lenguaje | Propiedad del proyecto | Lowering observado en la aplicación |
+|---|---|---|---|---|
+| Conventional10 | net10.0 / 10.0.15 | C# 14 | UseRuntimeAsync=false; sin Features adicional | Máquina de estados convencional |
+| Default11 | net11.0 / 11.0.0 | C# 15 | No se define UseRuntimeAsync ni se añade runtime-async a Features | Máquina de estados convencional |
+| OptIn11Preview | net11.0 / 11.0.0 | C# 15 | Features=$(Features);runtime-async=on | Cuerpos IL distintos, sin el atributo/tipo de máquina convencional |
+| OptOut11 | net11.0 / 11.0.0 | C# 15 | UseRuntimeAsync=false; sin Features adicional | Máquina de estados convencional |
+
+El [runner BDN](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/RuntimeAsyncBenchmarks/Program.cs) pasa `/p:RuntimeAsyncTreatment=<tratamiento>` mediante `MsBuildArgument` y usa `Configuration=RuntimeAsync-<tratamiento>`. La referencia de proyecto recompila las mismas fuentes con cada propiedad y separa sus intermediarios. Los [metadatos y cuerpos del ensamblado cargado](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/processed/runtime-async/lowering.json) confirman valores vacíos de Features/UseRuntimeAsync en Default11, `;runtime-async=on` en el opt-in y `false` en los opt-out.
+
+No se añadió `EnablePreviewFeatures=true`, ni se utilizaron `DOTNET_RuntimeAsync` o `UNSUPPORTED_RuntimeAsync`: esos switches de entorno se retiraron. `DOTNET_TieredCompilation=1`, `DOTNET_TieredPGO=1` y `DOTNET_ROLL_FORWARD=Disable` se mantienen en todos los jobs; no seleccionan Runtime Async. Las variables propias `RUNTIME_ASYNC_EXPECTED_TREATMENT` y `RUNTIME_ASYNC_EVIDENCE` validan el tratamiento y localizan diagnósticos, no activan el modelo.
+
+Por tanto, «experimental» describe aquí el **opt-in de compilación del código de la aplicación**. No describe la estabilidad de net11.0 ni implica que su BCL vuelva al lowering convencional al desactivar la propiedad en nuestro proyecto.
+
 ### Lo que cambió en código y memoria
 
 En **CompletedTask**, los tratamientos convencionales tenían **47 bytes IL**, frente a **13** en el opt-in. En **SuspendedTask** eran **55 frente a 17**. El código opt-in ya no presenta la misma máquina de estados convencional. Estamos contando los cuerpos IL inspeccionados, no todo el código máquina ni el tamaño del programa.
@@ -771,7 +733,7 @@ En ese mismo orden, las medias temporales fueron **743,54 → 695,17 ns**, **408
 
 ### Un stack vivo no es un stack de excepción
 
-Un **stack trace** muestra una cadena de llamadas. Pero consultar el stack de una operación viva, suspendida o en ejecución, no responde a la misma pregunta que leer el texto de una excepción.
+El diagnóstico separa stacks vivos de stacks de excepción; no son observaciones intercambiables del mismo punto de ejecución.
 
 En el diagnóstico convencional se ven marcos de builders entre los métodos async. En el opt-in aparecen seguidos métodos de la aplicación como `InnerLiveAsync`, `OuterLiveAsync` y `Main`, y después la infraestructura de continuaciones. Las excepciones mantuvieron el origen `ThrowAfterYieldAsync` en ambos tratamientos.
 
@@ -785,22 +747,21 @@ Con las esperas y el estado que conservan ya situados, queda abrir el trabajo qu
 
 [Volver al índice](#indice)
 
+<a id="parte-iii"></a>
 **PARTE III — RENDIMIENTO DEL CÓDIGO QUE ESCRIBIMOS**
 
 <a id="colecciones"></a>
 ## 9. Colecciones y LINQ: elegir qué trabajo hacemos
 
-Podemos coordinar muy bien nuestras tareas asíncronas y seguir gastando tiempo en recorrer los mismos pedidos tres veces. O en buscar un cliente revisando una lista entera cuando ya conocemos su identificador. Ahí entra una decisión bastante cotidiana: dónde guardamos los datos y qué hacemos con ellos antes de devolver el resultado.
+Antes de atribuir una diferencia a la versión, hay que fijar el patrón de acceso y su ciclo de vida: recorrido, búsqueda por clave, materialización y construcción de estructuras no son operaciones intercambiables.
 
 ### Guardar una secuencia y buscar por clave son trabajos distintos
 
-Un **array** tiene la longitud fijada al crearlo. Si sabemos la posición, accedemos al elemento por índice. Una **List<T>** también mantiene una secuencia, pero permite añadir elementos: cuando se queda sin capacidad, puede tener que reservar otro almacenamiento y copiar lo que ya tenía. Esa comodidad tiene un coste que depende de cómo crezca la lista.
+El crecimiento de una `List<T>` puede introducir reservas y copias que no aparecen en un recorrido de array ya preparado. En búsquedas por clave, capacidad, comparador, distribución del hashing y colisiones condicionan el coste de `Dictionary<TKey,TValue>`; no hay un coste constante garantizado para cualquier entrada.
 
-Si lo que necesitamos es localizar un cliente por su identificador, un **Dictionary<TKey,TValue>** organiza los valores por clave mediante hashing, sin obligarnos a recorrerlos todos para cada consulta. Eso no convierte cualquier búsqueda en un coste constante garantizado: influyen las claves, el comparador, la capacidad, las colisiones y la operación concreta.
+Con `FrozenDictionary`, la amortización de construcción frente a consultas es parte de la pregunta. Medir sólo lecturas sobre una estructura preparada deja fuera su preparación. Si el catálogo se construye para consultarlo una vez, hay que contar ambos costes.
 
-`FrozenDictionary` da otro paso cuando el contenido ya no va a cambiar. Piensa en un catálogo que preparas una vez y consultas muchas veces. Puede compensar dedicar trabajo a construir una estructura orientada a esas lecturas. Pero ese trabajo de preparación no desaparece: un benchmark que sólo cronometra las búsquedas deja fuera la construcción. Si tu aplicación crea el catálogo, lo consulta una vez y lo tira, necesitas contar ambas cosas.
-
-Con unas pocas líneas se ve por qué no pondría estas estructuras a competir sin explicar antes para qué las quiero:
+El siguiente ejemplo conserva tres contratos distintos; no constituye una comparación equivalente entre estructuras:
 
 ```csharp
 // Ejemplo autónomo: colecciones (C# 14, net10.0)
@@ -817,13 +778,11 @@ Console.WriteLine(clientes[7]);
 Console.WriteLine(importes.Where(x => x >= 30).Sum());
 ```
 
-Sale `150`, `Ana` y `70`. En la primera suma entra el `50` que añadimos a la lista. Después buscamos una clave del diccionario. Y al final recorremos el array, descartamos los importes menores que 30 y sumamos los restantes. Cada línea pide una cosa distinta; cambiar el nombre de la colección no basta para hacerlas equivalentes.
+Las salidas son `150`, `Ana` y `70`: agregación de la lista ampliada, acceso por clave y filtro con agregación del array. No se pueden enfrentar como si cada línea resolviera el mismo trabajo.
 
 ### Una consulta LINQ todavía puede estar esperando a que la recorras
 
-**LINQ** nos deja expresar filtros con `Where`, transformaciones con `Select`, agrupaciones, uniones y agregaciones sin escribir a mano cada bucle. Ahora bien, describir una consulta no siempre ejecuta el trabajo en ese momento.
-
-Sobre `IEnumerable<T>`, muchas de esas operaciones tienen **ejecución diferida**. Preparan el recorrido que se hará cuando alguien consuma la secuencia. `Sum` la consume para obtener un valor; `ToArray` y `ToList` la materializan en otra colección. Si enumeras dos veces la misma consulta, puedes estar repitiendo el filtro y la transformación, no leyendo un resultado que se hubiera guardado automáticamente.
+En LINQ sobre `IEnumerable<T>`, la frontera relevante es enumeración frente a materialización. `Sum` consume la secuencia; `ToArray` y `ToList` añaden almacenamiento del resultado. Reenumerar una consulta diferida puede repetir filtros y transformaciones, por lo que el benchmark debe fijar dónde comienza y termina el consumo.
 
 También cuenta qué hay debajo de ese `IEnumerable<T>`. La biblioteca puede tomar caminos especializados para arrays, listas, iteradores o determinados tipos, y cambiar las oportunidades de integrar código. Eso ayuda a entender por qué dos expresiones parecidas pueden comportarse de forma diferente. Para atribuir un porcentaje a uno de esos mecanismos habría que aislarlo; aquí no reconstruí cada biblioteca cambiando una sola pieza.
 
@@ -846,9 +805,7 @@ El [barrido de tamaños, con sus originales](https://raw.githubusercontent.com/j
 
 ### FullJoin: cuando también necesitas los que no coinciden
 
-Supón que reconcilias dos inventarios. Quieres saber qué productos coinciden, cuáles sólo están en el inventario local y cuáles sólo en el remoto. Una unión interna conserva las parejas que coinciden y deja fuera el resto. Una **unión externa completa**, o full outer join, conserva también los elementos de ambos lados que se han quedado sin pareja.
-
-.NET 11 incorpora `Enumerable.FullJoin`, que devuelve parejas. Para comprobar su comportamiento no basta con darle dos listas donde cada clave aparece una vez y todo encaja. El control incluye duplicados, diferencias de mayúsculas, ausencias y claves nulas. Este programa usa sus datos principales y muestra dos resultados fáciles de seguir:
+`Enumerable.FullJoin` de .NET 11 exige comprobar multiplicidad, comparador y tratamiento de ausencias, no sólo la coincidencia entre claves únicas. El control incluye duplicados, diferencias de mayúsculas, ausencias y claves nulas. Este programa usa sus datos principales:
 
 ```csharp
 // Ejemplo autónomo: full-join (C# 15, net11.0)
@@ -881,11 +838,7 @@ Recorrer menos veces y materializar sólo cuando hace falta son decisiones que p
 <a id="strings-span"></a>
 ## 10. Strings, Span y buffers: copiar también cuesta
 
-Llega una línea con un identificador, un nombre y un separador. Parece poca cosa: cortas el identificador, lo conviertes a número y sigues. Repite esa operación millones de veces y ya merece la pena mirar cuántas cadenas intermedias estás creando. Lo mismo sucede al montar respuestas, buscar texto o cambiar de codificación.
-
-### Qué estamos construyendo cuando construimos un string
-
-Un `string` es **inmutable**: si una operación produce otro texto, no modifica por dentro el objeto anterior. Compartirlo resulta más sencillo por eso, pero encadenar operaciones puede ir dejando resultados intermedios que también hay que almacenar.
+En los caminos de texto interesa separar construcción, parsing, búsqueda y codificación: cada uno puede introducir copias y resultados intermedios distintos. La inmutabilidad de `string` no elimina esos costes, y elegir una API de construcción diferente no implica haber cambiado sólo el runtime.
 
 Su representación habitual utiliza unidades UTF-16. Aquí hay una distinción que conviene tener presente: `Length` cuenta esas unidades, no necesariamente lo que una persona percibe como caracteres. Algunos símbolos necesitan más de una unidad, y un grafema puede combinar varias. Buscar posiciones y recortar texto requiere saber qué unidad estamos manejando.
 
@@ -901,11 +854,11 @@ Ojo con el parámetro `Count` de esa clase. **Las cuatro variantes construyen es
 
 ### Leer una parte sin fabricar una subcadena
 
-`Span<T>` y `ReadOnlySpan<T>` son vistas sobre una región de elementos. En vez de pedir otro objeto con una copia del contenido, podemos describir qué zona queremos mirar. Esa zona puede pertenecer a un array o a un string, por ejemplo.
+Un parser que acepta `ReadOnlySpan<T>` permite excluir una copia intermedia, pero desplaza la atención hacia la vida útil y la propiedad del almacenamiento subyacente.
 
 `ReadOnlySpan` no permite escribir a través de esa vista. Eso no vuelve inmutable al dueño de la memoria si ese dueño sí admite cambios. Y que estos tipos sean `ref struct` no significa que los datos estén necesariamente en el stack: sus restricciones de uso sirven para que la vista no sobreviva a la memoria de la que depende, no para cambiar dónde vive cualquier almacenamiento al que apunte.
 
-Para convertir los cinco primeros elementos del texto a un número podemos pasar directamente la vista al parser:
+El caso numérico pasa un tramo del texto directamente al parser:
 
 ```csharp
 // Ejemplo autónomo: span-parse (C# 14, net10.0)
@@ -955,19 +908,11 @@ A mí me interesa seguir el dato de principio a fin: si llega como bytes, lo con
 <a id="json"></a>
 ## 11. JSON: traducir objetos tiene un precio
 
-Tu aplicación tiene un pedido en memoria, pero el cliente que espera la respuesta no recibe un objeto .NET. Necesita un formato que pueda entender. **JSON** cumple ese papel con propiedades, listas, números y otros valores representados como texto estructurado.
-
-**Serializar** es producir esa representación; **deserializar** es leerla y construir el resultado. En medio hay que recorrer propiedades, formatear valores, escapar texto y conseguir almacenamiento. Un objeto que parece pequeño en C# puede multiplicar ese trabajo cuando devolvemos miles de registros.
-
-Para decidir qué sale de la aplicación usamos un **DTO**, un objeto de transferencia de datos. Puede contener sólo el identificador y el cliente de un pedido, por ejemplo. No tiene por qué arrastrar todas las entidades y relaciones que manejamos dentro de la base de datos. Elegir ese contenido ya condiciona cuánto habrá que serializar.
+En JSON, la comparación debe fijar payload, contrato, preparación de metadata y destino. Cambiar el DTO o pasar de reflection a source generation junto con el runtime altera factores independientes; una respuesta con menos datos puede ganar antes de que intervenga cualquier optimización nueva.
 
 ### Cómo sabe el serializador qué propiedades tiene un pedido
 
-El serializador necesita un contrato: las propiedades disponibles y la forma de leerlas o escribirlas. Con **reflection**, obtiene información de los tipos durante la ejecución y puede guardar metadata preparada para reutilizarla.
-
-La **source generation** adelanta parte de esa preparación a la construcción del proyecto, generando información o código. Puede reducir trabajo dinámico y dejar explícitos los tipos necesarios para trimming o AOT. Los bytes de la respuesta siguen teniendo que escribirse, y los valores recibidos siguen teniendo que interpretarse.
-
-Estas dos llamadas serializan el mismo pedido, una por cada camino:
+La comparación separa contratos resueltos mediante reflection y contratos generados durante build. La generación puede reducir preparación dinámica y explicitar tipos para trimming o AOT, pero conserva el trabajo de escribir bytes e interpretar valores. Las dos llamadas siguientes utilizan el mismo pedido:
 
 ```csharp
 // Ejemplo autónomo: json-sourcegen (C# 14, net10.0)
@@ -1006,7 +951,7 @@ Hay también escenarios de stream, pero trabajan con `MemoryStream`. Uno devuelv
 
 ### JSON Lines: entregar registros sin envolverlos en un array
 
-Para enviar registros de forma incremental puede interesar **JSON Lines**, o JSONL: cada línea contiene un valor JSON. Así no hace falta representar toda la secuencia como un único array JSON. Un salto de línea dentro de un string se escapa; no debe convertirse en una separación accidental entre registros.
+El contrato JSONL permite delimitar registros mediante LF sin envolver la secuencia en un array JSON. El escape de saltos dentro de strings debe preservar esa delimitación; es una propiedad del formato que el control comprueba.
 
 .NET 11 permite serializar una secuencia asíncrona con `topLevelValues: true`:
 
@@ -1038,7 +983,7 @@ En la consola del ejemplo guardamos todo en memoria para poder mostrarlo. Por ta
 
 ### Cuando el valor puede tener más de un tipo
 
-Una **union** representa un valor elegido entre varios tipos permitidos; volveremos a ella al hablar de C# 15. Al serializarla necesitamos reconocer qué alternativa contiene. El [probe de JSON y unions](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/JsonUnion.cs) comprueba una `Reading(int, string)` y otra union formada por `Dog` y `Cat`.
+El contrato JSON de las unions de C# 15 debe preservar la alternativa activa y definir los errores de clasificación. El [probe de JSON y unions](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/JsonUnion.cs) comprueba una `Reading(int, string)` y otra union formada por `Dog` y `Cat`.
 
 Para objetos, `JsonUnionTypeStructuralClassifier` usa la estructura de propiedades para clasificar el valor. Eso plantea una pregunta práctica: ¿qué ocurre si las propiedades no permiten distinguir un candidato, o si no hay ninguno válido? El control exige `JsonException`. Elegir un tipo a ojo sólo para conseguir un roundtrip ocultaría un problema del mensaje.
 
@@ -1051,17 +996,11 @@ Al producir mensajes uno detrás de otro podemos acabar generándolos más depri
 <a id="concurrencia"></a>
 ## 12. Concurrencia, ThreadPool y Channels
 
-Recibir varios trabajos a la vez no nos da más núcleos. Una aplicación puede mantener muchas operaciones pendientes y avanzar con ellas de forma solapada: eso es **concurrencia**. Si además ejecuta trabajo simultáneamente, hablamos de **paralelismo**. Separar las dos cosas evita esperar que cualquier `Task` convierta una operación en algo más rápido.
+La topología y el ciclo de vida importan tanto como la primitiva. En esta prueba, `Count` y `Workers` fijan un lote: cada invocación crea un canal acotado, arranca los consumidores, escribe todos los elementos y espera su cierre. El ThreadPool, las continuaciones y la sincronización forman parte de esa operación; no se está midiendo una cola ya establecida.
 
-El **ThreadPool** mantiene y coordina hilos reutilizables para ejecutar trabajo. Crear una tarea por elemento no añade capacidad ilimitada de CPU: también introduce colas, continuaciones y sincronización. Repartir un cálculo pesado puede compensar. Repartir una suma minúscula puede costar más que hacerla seguida. El número de workers, por sí solo, dice poco sin conocer cuánto trabajo recibe cada uno.
+### El contrato incluye crear, procesar y cerrar
 
-### Qué ocurre cuando el productor corre más que el consumidor
-
-Un **Channel** conecta a quien produce elementos con quien los consume. Podemos recibir mensajes por un lado y procesarlos por otro, o generar trabajos y dejar que varios consumidores los recojan. Separar esos ritmos resulta útil, pero hace falta decidir cuánto contenido puede quedarse esperando en memoria.
-
-Un canal acotado impone una capacidad máxima. Con `BoundedChannelFullMode.Wait`, el productor espera cuando no cabe más. Esa **backpressure** lleva el límite hacia el origen: si el consumidor no da abasto, el productor no puede seguir llenando indefinidamente esa cola.
-
-Esperar es una decisión, no la única posible. Rechazar, descartar o persistir tienen consecuencias distintas. Una cola que pierde mensajes puede aparentar más rendimiento que otra que los conserva, pero ya no está prestando el mismo servicio.
+Con `BoundedChannelFullMode.Wait`, la capacidad limita el avance del productor. Rechazar o descartar para elevar el throughput cambiaría el contrato de entrega y dejaría de ser una comparación equivalente.
 
 Este programa mantiene el cuerpo del escenario medido y quita sólo los atributos de BDN:
 
@@ -1106,6 +1045,20 @@ public sealed class ConcurrencyWorkload(int count, int workers)
 Devuelve **499500**, la suma de 0 a 999. Primero arrancan los consumidores, luego se escriben los elementos, se completa el writer y se espera a todos. La suma vuelve al harness; no estamos descartando el resultado de los consumidores.
 
 Fíjate en dónde empieza y termina el método de la [suite de concurrencia](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/AsyncAndConcurrencyBenchmarks.cs): cada operación crea el canal y las tareas, escribe, consume, cierra y espera. **No reutiliza una cola de larga vida para cronometrar sólo cada `Read` o `Write`.** La creación y la coordinación forman parte del trabajo que estamos comparando.
+
+### Instanciación y vida corta no son throughput sostenido
+
+El `GlobalSetup` de la [fixture real](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/AsyncAndConcurrencyBenchmarks.cs) sólo crea y reutiliza `ConcurrencyWorkload`; **el canal y sus tareas no se crean en ese setup**, sino dentro de `Channel()`. Es un test de presión de asignación y sincronización efímera: instanciación, continuaciones, backpressure, transferencia del lote y terminación. Los porcentajes siguientes pertenecen al tiempo completo de ese ciclo.
+
+Para separar el comportamiento de una cola persistente propondría otro tratamiento, **todavía no implementado ni medido aquí**:
+
+1. Crear el canal en `[GlobalSetup]`, con la misma capacidad, política y número de consumidores. Mantenerlo como campo de la fixture —no hace falta un `static` compartido entre jobs— y arrancar consumidores de larga vida una sola vez.
+2. En el método `[Benchmark]`, escribir el lote con `WriteAsync` y esperar una confirmación de que los consumidores han completado las lecturas y procesado todos sus elementos. Cronometrar sólo el encolado mediría aceptación, no throughput de extremo a extremo.
+3. Mantener checksum y cardinalidad equivalentes. No cerrar el writer por invocación ni permitir que una iteración deje trabajo pendiente para la siguiente.
+4. En `[GlobalCleanup]`, completar el writer y esperar la terminación de los consumidores, observando sus errores.
+5. Contabilizar el protocolo de confirmación: una puerta o señal por lote puede añadir sus propias asignaciones y sincronización. Incluso ese diseño mide un recorrido con harness, no el coste aislado de cada instrucción `ReadAsync`.
+
+No resto el tiempo de un tratamiento al otro para presentar un supuesto coste puro de construcción: sus estados de cola, calentamiento y planificación pueden diferir. La comparación útil conservaría los dos tratamientos y sus límites.
 
 ### El resultado de Channel que hubo que mirar con más cuidado
 
@@ -1158,9 +1111,7 @@ Un servicio no vive sólo de recorrer colecciones y serializar respuestas. Tambi
 
 ### Reflection: resolver una llamada y repetirla no cuestan lo mismo
 
-**Reflection** permite inspeccionar tipos, métodos y propiedades a partir de su metadata durante la ejecución. Es una herramienta útil para frameworks y código que no conoce todos los tipos al compilar. Esa flexibilidad puede exigir más preparación que una llamada directa.
-
-Un **delegate**, en cambio, representa una llamada con una firma conocida. Si podemos prepararlo una vez y conservarlo, evitamos parte de la resolución repetida. En este ejemplo las dos vías terminan sumando exactamente los mismos números:
+En reflection, preparación y llamada son fronteras distintas. El ejemplo conserva `MethodInfo`, argumentos y delegate antes de invocar; permite contrastar el dispatch preparado sin mezclarlo con descubrimiento de tipos o creación del delegate:
 
 ```csharp
 // Ejemplo autónomo: reflection (C# 14, net10.0)
@@ -1186,7 +1137,7 @@ Si repetimos una llamada cuyo destino conocemos, conservar la representación pr
 
 ### Al leer un archivo también estamos hablando con el sistema operativo
 
-**I/O**, entrada/salida, incluye las lecturas y escrituras de archivos. `FileStream` y las APIs asíncronas gestionan buffers, llamadas al sistema y finalización; el runtime no trabaja solo.
+En I/O hay que fijar la frontera entre buffers, llamadas al sistema y finalización. Una diferencia en ese recorrido de software no aísla el dispositivo físico ni la política de caché del sistema operativo.
 
 La [suite de I/O y criptografía](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/IoAndCryptoBenchmarks.cs) usa archivos reales y lectura secuencial con buffer de 64 KiB. Comprueba longitud, contenido y checksum. En las escrituras entran la creación del stream y su finalización según el contrato de cada método, no únicamente copiar a una instancia que ya estaba abierta.
 
@@ -1196,9 +1147,7 @@ Por eso usaría el resultado para comparar ese recorrido de software bajo la con
 
 ### Criptografía: hacer menos no siempre permite comparar mejor
 
-Un **hash** convierte una entrada en una huella de tamaño fijo. No es un cifrado que podamos deshacer para recuperar el original. SHA-256 se utiliza para identificar contenido en muchos protocolos; eso no lo convierte en un algoritmo apropiado para almacenar contraseñas.
-
-Podemos comprobar un resultado conocido con una entrada de tres letras:
+La comparación criptográfica debe conservar algoritmo, entrada y garantías; ni el contrato de un hash equivale al de cifrado, ni SHA-256 sustituye un esquema de almacenamiento de contraseñas. El control utiliza un vector conocido:
 
 ```csharp
 // Ejemplo autónomo: sha256 (C# 14, net10.0)
@@ -1220,7 +1169,7 @@ En estas comparaciones hay un límite que no negociaría: conservar las garantí
 
 ### Zstandard: comprobar el resultado antes de hablar de velocidad
 
-Comprimir permite representar los datos de forma reversible usando menos espacio, a cambio de CPU, memoria y complejidad. El intercambio varía según el formato y la entrada: dos algoritmos no tienen por qué producir el mismo tamaño ni ofrecer las mismas opciones.
+En compresión, ratio, CPU y memoria responden a compromisos distintos. Comparar codecs o niveles diferentes cambia el tratamiento, no sólo la versión del runtime.
 
 El [probe de Zstandard](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Net11Features/Cases/Zstandard.cs) utiliza los nuevos streams de .NET 11 junto con controles GZip y Brotli. Les da texto español, JSON completo y datos pseudoaleatorios deterministas, y comprueba que al descomprimir recuperamos los bytes originales.
 
@@ -1228,9 +1177,7 @@ Se guardan tamaños, ratios y hashes del roundtrip para esas entradas. No hay me
 
 ### Registrar lo que hace el programa también hace trabajo
 
-Los **logs** guardan eventos, las **métricas** agregan medidas y las **trazas** relacionan operaciones para seguir su recorrido. Dentro de una traza, un span representa una operación. No tiene la función del `Span<T>` de memoria, aunque coincidan en la palabra.
-
-Con `ActivitySource` podemos emitir esas operaciones para un consumidor que escuche. Este ejemplo instala un listener local para que la actividad tenga realmente a quién llegar:
+En observabilidad, el coste depende de listeners, muestreo, procesamiento y exportación. El ejemplo de `ActivitySource` instala un listener local para que la actividad tenga consumidor; no representa por sí solo un pipeline completo:
 
 ```csharp
 // Ejemplo autónomo: activity (C# 14, net10.0)
@@ -1288,18 +1235,17 @@ Me parece útil conservar ambas perspectivas: cuánto tarda una herramienta que 
 
 [Volver al índice](#indice)
 
+<a id="parte-iv"></a>
 **PARTE IV — APLICACIONES REALES**
 
 <a id="http"></a>
-## 14. ASP.NET Core: qué ocurre cuando llegan miles de peticiones
+## 14. ASP.NET Core: carga local compartida
 
-Hasta aquí hemos podido acercarnos mucho al código: una llamada, un bucle, una asignación. Ahora toca alejarse un poco. Si ese cálculo vive detrás de una API, antes de devolver el resultado hay que recibir la solicitud, encontrar la operación, ejecutarla y preparar la respuesta. Y mientras hacemos todo eso, siguen llegando peticiones.
+La campaña compara endpoints con k6 y Kestrel en el mismo portátil: **carga cerrada sobre loopback, no capacidad de producción con un generador aislado**. Runtime, ASP.NET Core y compilación por TFM cambian; el código de la API y EF Core 10.0.15 se mantienen.
 
-Para situarnos: **HTTP** es el protocolo con el que cliente y servidor intercambian solicitudes y respuestas. **ASP.NET Core** pone las piezas del framework web y **Kestrel** es el servidor que usa esta aplicación. Un **endpoint** une una ruta y un método HTTP con el código que debe atenderlos. GET `/processing`, por ejemplo, acaba ejecutando un cálculo.
+### La frontera de medida de /processing
 
-### Un endpoint pequeño para entender el recorrido
-
-Podemos ver ese recorrido sin cargar de golpe toda la configuración del laboratorio. Este programa es una Minimal API autónoma y necesita un proyecto con `Microsoft.NET.Sdk.Web`. Mantiene el cálculo y la respuesta de `/processing`, pero deja fuera configuración e instrumentación: **las cifras publicadas no salen de este ejemplo**.
+Esta Minimal API autónoma requiere `Microsoft.NET.Sdk.Web`. Conserva cálculo y respuesta de `/processing`, pero omite la configuración e instrumentación del laboratorio: **no es el ejecutable que produjo las cifras**.
 
 ```csharp
 // Ejemplo autónomo web: processing-api (C# 14, net10.0)
@@ -1323,7 +1269,7 @@ static long Compute(int count)
 }
 ```
 
-Al pedir esa ruta recibimos `count: 10000` y `checksum: 166616670000`. Fíjate en el cast: pasamos a `long` antes de multiplicar. El bucle forma parte del trabajo, pero también lo forman recibir la petición, serializar el objeto y devolver el JSON. Si aquí cambia el tiempo total, no podemos adjudicárselo sin más a la suma de cuadrados.
+La respuesta conserva `count: 10000` y `checksum: 166616670000`; la multiplicación se realiza en `long`. El tiempo del endpoint incluye pipeline y serialización, no sólo la suma de cuadrados.
 
 En el [Program.cs utilizado en las pruebas](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/WebApi/Program.cs) están HTTP/1.1, los límites, los payloads, la base de datos y el resto de rutas. El código es el mismo para los dos destinos, incluido EF Core 10.0.15.
 
@@ -1351,7 +1297,7 @@ Conviene tener presente qué estamos dejando fuera: no hay TLS, autenticación, 
 
 La carga la genera **k6 2.3.0**. Para cada caso hay cinco segundos de calentamiento y diez segundos de medida. La fase medida empieza con un proceso cliente nuevo.
 
-Se prueban 1, 10, 50 y 100 **usuarios virtuales**, o VU. Aquí un usuario virtual no se comporta como alguien que lee una pantalla y se toma un café: mantiene una petición en curso y, en cuanto termina, lanza otra. Es un circuito cerrado, sin pausa humana entre solicitudes. Tampoco hay que traducir VU directamente a conexiones TCP distintas; esa cifra no garantiza cuántas habrá.
+Se prueban 1, 10, 50 y 100 VU en un modelo closed-loop, sin think time y con una solicitud en curso por VU. Al terminar una, se lanza la siguiente. VU expresa concurrencia ofrecida, no un número garantizado de conexiones TCP; las condiciones de poca y mucha concurrencia no acreditan el mismo grado de saturación.
 
 El conjunto que he tomado para comparar reúne **144 celdas**: nueve endpoints × cuatro concurrencias × dos runtimes × dos repeticiones. Entre todas suman **15.287.645 peticiones**, sin errores HTTP ni checks fallidos dentro de esa selección.
 
@@ -1359,7 +1305,7 @@ Llegar a ese conjunto requirió separar lo que se había completado de lo que no
 
 El orden también cambia: r0 ejecuta 10 → 11 y r1 ejecuta 11 → 10. Así podemos detectar si los resultados se mueven entre bloques. Eso ayuda, pero seguimos trabajando en un portátil, no en una máquina aislada de todo lo demás.
 
-### Throughput: cuántas respuestas completamos
+### Throughput por endpoint y bloque
 
 [![Throughput por concurrencia de text y processing, con las dos repeticiones separadas](/blog/dotnet-10-vs-dotnet-11/09-http-throughput.png)](/blog/dotnet-10-vs-dotnet-11/09-http-throughput.png)
 
@@ -1373,9 +1319,9 @@ Los cuatro checksums son correctos: no hay un servidor ganando porque se haya ah
 
 El JSON complejo repite el problema. En r0 tenemos aproximadamente 5238/3439 peticiones/s para 10/11; en r1, 4214/5252. Los dos bloques están ahí, y elegir sólo el que encaja con lo que queramos contar no arreglaría la comparación.
 
-### Latencia: cuánto espera cada petición
+### Latencia y colas
 
-Además de cuántas respuestas caben en un segundo, al usuario le importa cuánto tarda la suya. Eso es la **latencia**. Puedes añadir más solicitudes y hacer crecer la cola de espera sin conseguir que el servidor complete muchas más por segundo. Mirar únicamente throughput dejaría fuera ese coste.
+Una meseta de throughput puede coexistir con más espera. Por eso los percentiles se conservan por ejecución, sin agregarlos entre bloques.
 
 [![P95 HTTP de text y processing por concurrencia y repetición independiente](/blog/dotnet-10-vs-dotnet-11/10-http-latency.png)](/blog/dotnet-10-vs-dotnet-11/10-http-latency.png)
 
@@ -1402,6 +1348,16 @@ Solemos mirar la CPU del servidor y olvidarnos de quién está mandando las peti
 
 ¿Queda margen porque no aparece un 100%? No necesariamente. Puedes agotar un núcleo sin ocupar todos los demás. Además de enviar tráfico, el cliente tiene que generar carga, parsear y validar respuestas. Todo eso cuesta recursos que, en este montaje, también necesita el servidor.
 
+### Por qué el montaje permite inversiones entre bloques
+
+El scheduler del SO reparte los mismos procesadores lógicos entre Kestrel, k6 y las demás tareas del host. Una variación en cuándo queda listo el trabajo puede cambiar las colas y los cambios de contexto. Los hilos también compiten por recursos de ejecución, L3 y ancho de banda de memoria; una migración entre núcleos puede modificar la localidad de caché. No se conservaron contadores de cache misses ni trazas del scheduler que permitan cuantificar aquí esos efectos.
+
+Loopback elimina la red física, no el trabajo de TCP, las copias y la coordinación cliente/kernel/servidor. Además, k6 genera solicitudes y valida respuestas mientras el servidor las produce. En closed-loop, un cambio en un lado modifica el ritmo de demanda del otro. El throughput observado pertenece al conjunto, aunque la ruta de Kestrel sea idéntica.
+
+El turbo y los límites de potencia o temperatura son otra fuente posible de deriva entre procesos. **No se midió thermal throttling ni frecuencia sostenida por núcleo**, así que no puedo atribuirles estas inversiones. Y el [i5-1135G7 documentado](https://raw.githubusercontent.com/jyeste94/.NET11vs.NET11/5c8a5419e8330afcd954d87be5547fc1fdf725b5/results/metadata/micro-full-20261112/environment.json) es Tiger Lake, con cuatro núcleos y ocho procesadores lógicos, **no una CPU híbrida P/E**. La migración entre P-cores y E-cores no es una explicación aplicable a este equipo; en otro hardware sí tendría que formar parte del control de afinidad y topología. [Ficha del procesador](https://www.intel.com/content/www/us/en/products/sku/208658/intel-core-i51135g7-processor-8m-cache-up-to-4-20-ghz/specifications.html).
+
+Estos mecanismos hacen plausible la sensibilidad al montaje, pero **no demuestran cuál causó cada inversión**. Lo medido es el comportamiento relativo de los endpoints bajo carga local compartida, incluidos posibles límites del generador o del scheduler. No se ha identificado un techo de servicio aislado ni demostrado que todas las celdas estén saturadas.
+
 La observación de recursos se hace cada 200 ms. Por tanto, no vemos de forma continua todo lo que pasa entre muestras. Tampoco se guardó por defecto cada latencia individual: hacerlo habría añadido serialización y escrituras a disco al generador. Tenemos resúmenes y checks, pero no los tiempos de todas las peticiones. A partir de ahí no se pueden reconstruir las muestras que faltan ni calcular intervalos bootstrap como si se hubiesen conservado.
 
 [![Captura histórica auténtica de la página HTTP generada a partir de los resultados canónicos](/blog/dotnet-10-vs-dotnet-11/16-http-evidence.png)](/blog/dotnet-10-vs-dotnet-11/16-http-evidence.png)
@@ -1410,7 +1366,7 @@ La observación de recursos se hace cada 200 ms. Por tanto, no vemos de forma co
 
 [Abrir la captura HTTP a tamaño completo para leer los paneles](/blog/dotnet-10-vs-dotnet-11/16-http-evidence.png).
 
-### Qué podemos hacer con estos millones de peticiones
+### Alcance: comparación local, no dimensionamiento
 
 No tiraría estos resultados porque no permitan proclamar un ganador. Sirven para comprobar contratos, comparar recorridos y detectar variación. También enseñan dónde conviene prestar atención: en pedidos, por ejemplo, la mediana no cuenta lo mismo que la cola. Lo que no dan es una capacidad de producción separada del generador, y mucho menos un SLA sostenido durante semanas.
 
@@ -1421,19 +1377,13 @@ Las 15.287.645 peticiones no resuelven por acumulación lo que el montaje no per
 <a id="ef-core"></a>
 ## 15. Entity Framework Core 10 frente a 11
 
-En el código hablamos de clientes y pedidos como objetos. En una base relacional tenemos tablas, filas y relaciones. Un **ORM**, *Object-Relational Mapper*, nos ayuda a trabajar entre ambos mundos; aquí ese papel lo tiene Entity Framework Core, o EF Core.
-
-Pero escribir la consulta en C# no hace desaparecer lo que hay debajo. El proveedor tiene que traducirla a operaciones que entienda el motor, la base debe ejecutarlas y las filas que vuelven tienen que convertirse en resultados utilizables por el programa. Una actualización puede afectar a distintas partes de ese recorrido.
+EF Core introduce una cadena de costes que no conviene atribuir en bloque al ORM: compilación de la consulta, proveedor, apertura de conexión, motor nativo y materialización. La comparación separa actualizar el runtime de actualizar EF y sus dependencias.
 
 ### Qué cuesta una consulta
 
-Piensa en lo que sucede al pedir una lista de pedidos. Hay que construir o recuperar la representación de la consulta, abrir o aprovechar una conexión, enviar SQL, esperar al motor, leer las filas y crear los valores u objetos de salida. A ese último paso lo llamamos **materialización**. El tiempo total incluye bastante más que traducir una expresión.
+La frontera medida determina si entran preparación de consulta, conexión, ejecución SQL, lectura y materialización. Con tracking también intervienen identidad y detección de cambios; `DbContext` no actúa como una caché general de resultados.
 
-`DbContext` coordina esa unidad de trabajo. Cuando usamos tracking, conserva información sobre las entidades para mantener su identidad y detectar cambios. Eso no lo convierte en una caché que nos libre automáticamente de volver a consultar la base de datos.
-
-Para muchas lecturas que no van a modificar las entidades, `AsNoTracking` encaja bien. Aun así, quitar tracking puede alterar identidad, navegaciones y comportamiento. Antes de aplicarlo por todas partes hay que comprobar qué espera el código que consume esos resultados.
-
-Otra decisión es cuánto pedimos. Una **proyección** obtiene la forma de salida que necesitamos en vez de cargar un grafo completo de entidades. Esta es la consulta real del proyecto; el fragmento depende de `ShopContext`, `OrderDto` y las referencias de [Workload.cs](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/EfCore/Shared/Workload.cs):
+`AsNoTracking` puede cambiar identidad, navegaciones y expectativas del consumidor. Una proyección, por su parte, reduce la forma de salida frente a un grafo de entidades. Son decisiones de contrato que deben conservarse entre tratamientos. Esta es la consulta real del proyecto; el fragmento depende de `ShopContext`, `OrderDto` y las referencias de [Workload.cs](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/EfCore/Shared/Workload.cs):
 
 ```csharp
 // Fragmento real de Queries; no es un programa autónomo.
@@ -1444,7 +1394,7 @@ public static IQueryable<OrderDto> Projection(ShopContext db) =>
             o.Id, o.Customer.Name, o.TotalCents, o.Lines.Count));
 ```
 
-Ese `IQueryable` guarda una expresión para que el proveedor la traduzca. No estamos recorriendo con un `foreach` todos los pedidos que ya hubiese en memoria. Al consumirla con `ToList` o `ToListAsync` se ejecuta la consulta y se materializa la lista.
+La expresión `IQueryable` se traduce y ejecuta al consumirse con `ToList` o `ToListAsync`; esa frontera incluye la materialización, no un recorrido LINQ sobre pedidos ya cargados.
 
 Si en su lugar usamos `Include` y `ThenInclude`, estamos pidiendo entidades relacionadas. Pueden llegar más filas y construirse un grafo mayor. Que un DTO pequeño tarde menos que ese grafo no probaría una mejora interna de EF: antes de medir ya le hemos encargado menos trabajo.
 
@@ -1501,11 +1451,7 @@ Ya hemos separado el runtime del ORM y del motor nativo. Todavía podemos manten
 <a id="native-aot"></a>
 ## 16. Native AOT: compilar antes de ejecutar
 
-El JIT genera código máquina mientras se ejecuta el programa. Con **AOT**, *Ahead-Of-Time*, adelantamos la compilación a la construcción de la aplicación. Esa decisión mueve trabajo de un sitio a otro y también cambia lo que podemos distribuir.
-
-**Native AOT** produce un ejecutable nativo autocontenido que no usa JIT. Puede venir bien para arrancar instancias, lanzar herramientas o distribuir una aplicación. A cambio, el build tiene que resolver más cosas y nos encontramos restricciones si el programa pretende descubrir tipos o generar comportamiento dinámicamente.
-
-No te fíes de la extensión del archivo. Un `.exe` también puede ser el apphost de una aplicación framework-dependent: arranca una DLL administrada y utiliza un runtime instalado. Ver un ejecutable en la carpeta no nos dice si hemos publicado con AOT.
+La decisión de Native AOT cambia el artefacto distribuido y sus restricciones dinámicas, no sólo el momento de compilar. Interesa contrastar tamaño, readiness y compatibilidad por separado. El ejecutable nativo autocontenido no usa JIT; un apphost framework-dependent también puede tener extensión `.exe`, pero delega en la DLL administrada y en un runtime instalado.
 
 ### Cuatro formas de publicar
 
@@ -1516,7 +1462,7 @@ No te fíes de la extensión del archivo. Un `.exe` también puede ser el apphos
 | ReadyToRun, R2R | En este experimento, distribución autocontenida con código precompilado e IL | Adelanta parte del trabajo y conserva caminos JIT. |
 | Native AOT | Ejecutable nativo autocontenido, con trimming | No usa JIT; hay que resolver requisitos dinámicos y compatibilidad al publicar. |
 
-En estas publicaciones aparece el **RID**, el identificador que combina sistema y arquitectura; `win-x64` es uno de ellos. Compilar para Windows x64 no produce de paso un binario que podamos ejecutar en Linux o Arm64.
+El RID fija el sistema y la arquitectura de estas publicaciones (`win-x64`); sus resultados no acreditan compatibilidad ni rendimiento en Linux o Arm64.
 
 También aparece **trimming**: se elimina código que el análisis considera prescindible. Si tu aplicación busca un tipo por su nombre o usa reflexión dinámica, el análisis puede necesitar información adicional o encontrarse con una limitación real. Dejar de mirar el warning no recupera el código que hace falta.
 
@@ -1595,20 +1541,19 @@ Y esa elección se puede mantener aparte de otra muy distinta. Podemos cambiar c
 
 [Volver al índice](#indice)
 
+<a id="parte-v"></a>
 **PARTE V — NUEVAS POSIBILIDADES Y DECISIONES**
 
 <a id="csharp"></a>
 ## 17. C# 14 frente a C# 15
 
-Parte de lo que hemos visto puede beneficiar al código que ya tienes sin que cambies una línea. Las novedades del lenguaje funcionan de otra manera: hay que usarlas al escribir para aprovechar lo que permiten expresar.
+Las novedades de C# 15 se evalúan aquí por expresividad del contrato y reglas de compilación, no como tratamientos de rendimiento. Unions, jerarquías cerradas o control de flujo más explícito pueden mejorar la revisión del código sin acelerar su ejecución.
 
-A mí me interesa especialmente lo que ayudan a dejar claro. Si podemos representar mejor los estados válidos o conseguir que el compilador nos avise al olvidar un caso, hay menos cosas que recordar a mano. Eso tiene valor por sí mismo. **De una sintaxis más clara no sale automáticamente una mejora de rendimiento**: estas muestras comprueban resultados y reglas de compilación, no miden porcentajes de velocidad.
-
-Los pares que siguen son programas didácticos completos, salvo los dos archivos de biblioteca que se indican expresamente. Parten de [Before14](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/Before14/Program.cs), [After15](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/After15/Program.cs) y las muestras específicas enlazadas. He separado las características para que no haga falta entenderlas todas a la vez.
+Los pares son programas completos, salvo los dos archivos de biblioteca indicados. Parten de [Before14](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/Before14/Program.cs), [After15](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/LanguageSamples/After15/Program.cs) y las muestras específicas enlazadas. Cada par aísla un contrato; **no son benchmarks de velocidad**.
 
 ### Unions: expresar «uno de estos tipos»
 
-Imagina una operación que puede devolver un pago aceptado o uno rechazado. O un mensaje que admite varios tipos, o una lectura numérica o textual. Queremos decir «una de estas alternativas». Con C# 14 podemos organizarlo mediante una jerarquía de clases:
+La comparación contrasta una jerarquía abierta de C# 14 con un conjunto explícito de alternativas de C# 15, atendiendo especialmente a exhaustividad y evolución del modelo:
 
 **Antes, C# 14:**
 
@@ -1792,9 +1737,7 @@ Si hacemos muchos accesos por índice a una secuencia que empieza a recorrer des
 
 ### Break y continue con etiqueta: salir del bucle correcto
 
-En un par de bucles anidados, un `break` normal sale del más cercano. Pero hay búsquedas en las que necesitamos abandonar ambos, o descartar lo que queda de la fila actual y pasar a la siguiente del exterior.
-
-La muestra hace justo eso: al encontrar un negativo descarta la fila; en las filas válidas busca un `9`. Por tanto, en `[-1, 9]` no vale aceptar el `9` que viene después. Ya habíamos descartado la fila.
+El contrato exige descartar una fila al encontrar un negativo y terminar toda la búsqueda al encontrar un `9` válido. En `[-1, 9]` no se acepta el `9` posterior al negativo. La comparación cambia la expresión del destino de control, no esa precedencia:
 
 **Antes, con destinos `goto`:**
 
@@ -1903,7 +1846,7 @@ Lo comprobado es que la biblioteca compila y puede consumirse en los runtimes mo
 
 ### Memory safety: preview distinta de C# 15 estable
 
-Cuando trabajamos con un puntero, estamos manejando una dirección. Desreferenciarlo significa acceder a esa memoria. El lugar donde escribimos la marca de código inseguro puede cambiar, pero la validez de la dirección no se resuelve con una sintaxis distinta.
+La preview cambia dónde se exige marcar operaciones inseguras, no las obligaciones de validez, vida útil y límites del almacenamiento al que acceden.
 
 Con el modelo anterior, este ejemplo pide un contexto `unsafe`:
 
@@ -2156,7 +2099,7 @@ Si vas a migrar, empieza por comprobar que funciona. Después perfila, mide y ca
 <a id="reproduccion"></a>
 ## 22. Código fuente y reproducción
 
-He dejado el [laboratorio completo en GitHub](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5): código, scripts, resultados originales, entorno y documentación. Los enlaces del artículo apuntan al commit [5c8a5419e833](https://github.com/jyeste94/.NET11vs.NET11/commit/5c8a5419e8330afcd954d87be5547fc1fdf725b5), para que una actualización posterior del repositorio no cambie lo que estás consultando. El [README](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/README.md) incluye los requisitos y el clonado.
+He dejado el [laboratorio .NET 10 vs .NET 11 en GitHub](https://github.com/jyeste94/.NET11vs.NET11/tree/5c8a5419e8330afcd954d87be5547fc1fdf725b5): código, scripts, resultados originales, entorno y documentación. Los enlaces del artículo apuntan al commit [5c8a5419e833](https://github.com/jyeste94/.NET11vs.NET11/commit/5c8a5419e8330afcd954d87be5547fc1fdf725b5), para que una actualización posterior del repositorio no cambie lo que estás consultando. El [README](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/README.md) incluye los requisitos y el clonado.
 
 | Quiero contrastar… | Punto de entrada |
 |---|---|
@@ -2376,7 +2319,41 @@ Las siglas y términos del artículo, reunidos para volver a ellos cuando haga f
 | Union | Valor representado por una de varias alternativas de tipos declaradas. |
 | VU | Usuario virtual del generador; no equivale a persona real ni a una conexión TCP garantizada. |
 | Working set | Páginas residentes del proceso en el momento observado; no allocations acumuladas. |
+| Array | Secuencia de longitud fijada al crearla, con acceso por índice. |
+| C# | Lenguaje utilizado para expresar los programas; su versión no identifica por sí sola el compilador ni el runtime. |
+| Console.WriteLine | Escribe un valor y un terminador de línea en la salida de consola; las salidas de los ejemplos no son medidas de rendimiento. |
+| Foreach | Construcción de C# para enumerar los elementos de una secuencia. |
+| HTTP | Protocolo de solicitudes y respuestas entre cliente y servidor. |
+| I/O | Entrada/salida: operaciones de lectura y escritura, con intervención del sistema operativo. |
+| JSON: fundamentos | Texto estructurado que representa objetos, arrays, strings, números, booleanos y null. Serializar produce esa representación; deserializar la interpreta para construir un resultado. |
+| Logs / métricas / trazas | Eventos registrados, medidas agregadas y relaciones entre operaciones, respectivamente. |
+| Método / variable | Operación con nombre y referencia a un valor o a un objeto dentro del programa, respectivamente. |
+| ORM: fundamentos | Mapeo entre el modelo de objetos y los datos relacionales; no elimina la traducción, ejecución SQL ni materialización. |
+| Reference assemblies | Ensamblados que exponen contratos para compilar, distintos de las implementaciones cargadas al ejecutar. |
+| Roslyn | Compilador y plataforma de análisis de C#; fijar LangVersion no recupera una versión anterior del compilador. |
 
+<details>
+<summary>Referencia rápida de C#: array, foreach y salida de consola</summary>
+
+C# es el lenguaje; un método agrupa una operación y una variable permite referirse a un valor o referencia. Este ejemplo autónomo, compatible con C# 14, suma tres cantidades:
+
+```csharp
+// Ejemplo autónomo: fundamentos (C# 14, net10.0)
+using System;
+
+int[] cantidades = [2, 3, 5];
+int total = 0;
+foreach (int cantidad in cantidades)
+{
+    total += cantidad;
+}
+Console.WriteLine(total);
+```
+
+Imprime `10`. `int[]` declara un array de enteros, `foreach` recorre sus elementos y `Console.WriteLine` escribe el total. Lo utilizo para explicar el funcionamiento; no es la entrada del benchmark de arrays. Los datos y la operación de aquella prueba están en [CollectionsBenchmarks.cs](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/src/Benchmarks/CollectionsBenchmarks.cs).
+
+
+</details>
 
 <a id="referencias"></a>
 ## 24. Referencias

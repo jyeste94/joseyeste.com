@@ -73,7 +73,7 @@ const studySchemaJSON = JSON.stringify(studySchema).replace(/[<>&\u2028\u2029]/g
     {studySchema && <script is:inline type="application/ld+json" set:html={studySchemaJSON} />}
   </Fragment>
   <main class="px-4">
-    <SectionContainer id="blog" class="py-16 md:py-24 space-y-10">
+    <SectionContainer id="blog" class={`py-16 md:py-24 space-y-10${isDotnetStudy ? " dotnet-study-container" : ""}`}>
       <div class="space-y-4">
         <a
           href="/blog"
@@ -111,14 +111,20 @@ const studySchemaJSON = JSON.stringify(studySchema).replace(/[<>&\u2028\u2029]/g
         </p>}
       </div>
 
-      <article
-        class:list={[
-          "prose prose-lg mx-auto mt-6 text-gray-800 prose-headings:text-gray-900 prose-a:text-yellow-600 dark:prose-invert dark:text-gray-50 dark:prose-headings:text-white dark:prose-a:text-yellow-300",
-          { "dotnet-study": isDotnetStudy },
-        ]}
-      >
-        <Content />
-      </article>
+      {isDotnetStudy ? (
+        <div class="dotnet-study-layout">
+          <aside class="study-sidebar" hidden>
+            <nav aria-label="Índice del estudio .NET 10 frente a .NET 11" data-study-toc-slot />
+          </aside>
+          <article class="dotnet-study prose prose-lg mx-auto mt-6 text-gray-800 prose-headings:text-gray-900 prose-a:text-yellow-600 dark:prose-invert dark:text-gray-50 dark:prose-headings:text-white dark:prose-a:text-yellow-300">
+            <Content />
+          </article>
+        </div>
+      ) : (
+        <article class="prose prose-lg mx-auto mt-6 text-gray-800 prose-headings:text-gray-900 prose-a:text-yellow-600 dark:prose-invert dark:text-gray-50 dark:prose-headings:text-white dark:prose-a:text-yellow-300">
+          <Content />
+        </article>
+      )}
 
       <div
         class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-dashed border-gray-300 bg-white/70 p-6 dark:border-gray-800 dark:bg-gray-900/60"

@@ -2,10 +2,121 @@
 const instances = new Map();
 let nextDialogId = 0;
 
+function setupNavigation(root, layout, signal) {
+  const toc = root.querySelector('details#indice');
+  const slot = layout.querySelector('[data-study-toc-slot]');
+  const sidebar = slot?.closest('.study-sidebar');
+  if (!toc || !slot || !sidebar) return;
+
+  const originalOpen = toc.open;
+  let mobileOpen = originalOpen;
+  let desktop = false;
+  let frame = 0;
+  let activePart = null;
+  const placeholder = document.createComment('Original study index position');
+  toc.before(placeholder);
+
+  const partIds = ['parte-i', 'parte-ii', 'parte-iii', 'parte-iv', 'parte-v'];
+  const labels = [...toc.querySelectorAll('strong')]
+    .filter((label) => /^Parte\s+[IVX]+\s*[—–-]/i.test(label.textContent.trim()));
+  const parts = partIds.flatMap((id, index) => {
+    const boundary = root.querySelector(`#${id}`);
+    const label = labels[index];
+    if (!boundary || !label) return [];
+    const link = document.createElement('a');
+    link.href = `#${id}`;
+    label.before(link);
+    link.append(label);
+    const group = link.closest('p');
+    group?.classList.add('study-toc-part');
+    return [{ boundary, label, link, group }];
+  });
+
+  // Read all five boundaries, not intersection ratios of potentially huge parts.
+  // This also handles reverse jumps and leaves the executive introduction inactive.
+  function updateActivePart() {
+    frame = 0;
+    const offset = parts.length
+      ? parseFloat(getComputedStyle(parts[0].boundary).scrollMarginBlockStart) || 0
+      : 0;
+    let nextPart = null;
+    for (const part of parts) {
+      if (part.boundary.getBoundingClientRect().top <= offset + 1) nextPart = part;
+    }
+    if (nextPart === activePart) return;
+    activePart?.link.removeAttribute('aria-current');
+    activePart?.group?.classList.remove('study-toc-active');
+    nextPart?.link.setAttribute('aria-current', 'location');
+    nextPart?.group?.classList.add('study-toc-active');
+    activePart = nextPart;
+    if (desktop && nextPart && !sidebar.contains(document.activeElement)) {
+      const bounds = sidebar.getBoundingClientRect();
+      const current = nextPart.link.getBoundingClientRect();
+      if (current.top < bounds.top || current.bottom > bounds.bottom) {
+        sidebar.scrollTop += current.top - bounds.top - 16;
+      }
+    }
+  }
+
+  function scheduleActivePart() {
+    if (!frame) frame = requestAnimationFrame(updateActivePart);
+  }
+
+  const media = window.matchMedia('(min-width: 1024px)');
+  function placeIndex() {
+    if (media.matches !== desktop) {
+      const focused = toc.contains(document.activeElement) ? document.activeElement : null;
+      desktop = media.matches;
+      if (desktop) {
+        mobileOpen = toc.open;
+        sidebar.hidden = false;
+        slot.append(toc);
+        toc.open = true;
+        layout.dataset.studyToc = 'desktop';
+      } else {
+        placeholder.after(toc);
+        toc.open = mobileOpen;
+        sidebar.hidden = true;
+        delete layout.dataset.studyToc;
+      }
+      if (focused) {
+        const focusTarget = toc.open ? focused : toc.querySelector('summary');
+        focusTarget?.focus({ preventScroll: true });
+      }
+    }
+    scheduleActivePart();
+  }
+
+  media.addEventListener('change', placeIndex, { signal });
+  window.addEventListener('scroll', scheduleActivePart, { passive: true, signal });
+  window.addEventListener('resize', scheduleActivePart, { passive: true, signal });
+  root.addEventListener('load', scheduleActivePart, { capture: true, signal });
+  const resizeObserver = new ResizeObserver(scheduleActivePart);
+  resizeObserver.observe(root);
+  placeIndex();
+
+  return () => {
+    if (frame) cancelAnimationFrame(frame);
+    resizeObserver.disconnect();
+    placeholder.replaceWith(toc);
+    toc.open = originalOpen;
+    sidebar.hidden = true;
+    delete layout.dataset.studyToc;
+    for (const { label, link, group } of parts) {
+      link.replaceWith(label);
+      group?.classList.remove('study-toc-part', 'study-toc-active');
+      if (group?.getAttribute('class') === '') group.removeAttribute('class');
+    }
+  };
+}
+
 function setup(root) {
   const abort = new AbortController();
   const { signal } = abort;
   const changes = [];
+  const layout = root.closest('.dotnet-study-layout') ?? root;
+  const disposeNavigation = setupNavigation(root, layout, signal);
+  if (disposeNavigation) changes.push(disposeNavigation);
   let dialog;
   let opener;
   let disposing = false;
@@ -118,18 +229,18 @@ function setup(root) {
     close.focus();
   }, { signal });
 
-  // Reveal the native TOC or pending-evidence catalogue before fragment scrolling.
+  // Reveal the native TOC or evidence catalogue before fragment scrolling.
   function revealFragment(hash) {
     let id;
     try { id = decodeURIComponent(hash.slice(1)); } catch { return; }
     const target = document.getElementById(id);
-    if (!target || !root.contains(target)) return;
+    if (!target || !layout.contains(target)) return;
     for (let details = target.closest('details'); details; details = details.parentElement?.closest('details')) {
       details.open = true;
     }
     if (target.matches('.study-evidence-row')) target.focus({ preventScroll: true });
   }
-  root.addEventListener('click', (event) => {
+  layout.addEventListener('click', (event) => {
     const link = event.target instanceof Element ? event.target.closest('a[href^="#"]') : null;
     if (link) revealFragment(link.hash);
   }, { signal });
