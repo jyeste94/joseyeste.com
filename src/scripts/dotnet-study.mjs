@@ -3,37 +3,20 @@ const instances = new Map();
 let nextDialogId = 0;
 
 function setupNavigation(root, layout, signal) {
-  const toc = root.querySelector('details#indice');
-  const slot = layout.querySelector('[data-study-toc-slot]');
-  const sidebar = slot?.closest('.study-sidebar');
-  if (!toc || !slot || !sidebar) return;
+  const toc = layout.querySelector('[data-study-toc]');
+  const sidebar = toc?.closest('.study-sidebar');
+  if (!toc || !sidebar) return;
 
-  const originalOpen = toc.open;
-  let mobileOpen = originalOpen;
-  let desktop = false;
+  const media = window.matchMedia('(min-width: 1024px)');
+  const parts = [...toc.querySelectorAll('.study-toc-part a')].flatMap((link) => {
+    const boundary = root.querySelector(link.hash);
+    return boundary ? [{ boundary, link, group: link.closest('.study-toc-part') }] : [];
+  });
   let frame = 0;
   let activePart = null;
-  const placeholder = document.createComment('Original study index position');
-  toc.before(placeholder);
+  let focusedLink = null;
 
-  const partIds = ['parte-i', 'parte-ii', 'parte-iii', 'parte-iv', 'parte-v'];
-  const labels = [...toc.querySelectorAll('strong')]
-    .filter((label) => /^Parte\s+[IVX]+\s*[—–-]/i.test(label.textContent.trim()));
-  const parts = partIds.flatMap((id, index) => {
-    const boundary = root.querySelector(`#${id}`);
-    const label = labels[index];
-    if (!boundary || !label) return [];
-    const link = document.createElement('a');
-    link.href = `#${id}`;
-    label.before(link);
-    link.append(label);
-    const group = link.closest('p');
-    group?.classList.add('study-toc-part');
-    return [{ boundary, label, link, group }];
-  });
-
-  // Read all five boundaries, not intersection ratios of potentially huge parts.
-  // This also handles reverse jumps and leaves the executive introduction inactive.
+  // CSS and prerendered links supply navigation; JavaScript only enhances it.
   function updateActivePart() {
     frame = 0;
     const offset = parts.length
@@ -49,7 +32,7 @@ function setupNavigation(root, layout, signal) {
     nextPart?.link.setAttribute('aria-current', 'location');
     nextPart?.group?.classList.add('study-toc-active');
     activePart = nextPart;
-    if (desktop && nextPart && !sidebar.contains(document.activeElement)) {
+    if (media.matches && nextPart && !sidebar.contains(document.activeElement)) {
       const bounds = sidebar.getBoundingClientRect();
       const current = nextPart.link.getBoundingClientRect();
       if (current.top < bounds.top || current.bottom > bounds.bottom) {
@@ -62,51 +45,38 @@ function setupNavigation(root, layout, signal) {
     if (!frame) frame = requestAnimationFrame(updateActivePart);
   }
 
-  const media = window.matchMedia('(min-width: 1024px)');
-  function placeIndex() {
-    if (media.matches !== desktop) {
-      const focused = toc.contains(document.activeElement) ? document.activeElement : null;
-      desktop = media.matches;
-      if (desktop) {
-        mobileOpen = toc.open;
-        sidebar.hidden = false;
-        slot.append(toc);
-        toc.open = true;
-        layout.dataset.studyToc = 'desktop';
-      } else {
-        placeholder.after(toc);
-        toc.open = mobileOpen;
-        sidebar.hidden = true;
-        delete layout.dataset.studyToc;
+  // CSS may blur a hidden link before dispatching the media-query change.
+  sidebar.addEventListener('focusin', (event) => {
+    focusedLink = event.target instanceof HTMLAnchorElement ? event.target : null;
+  }, { signal });
+  sidebar.addEventListener('focusout', (event) => {
+    if (media.matches && !sidebar.contains(event.relatedTarget)) focusedLink = null;
+  }, { signal });
+  function handleViewportChange() {
+    if (!media.matches && focusedLink) {
+      const hash = focusedLink.hash;
+      const mobileIndex = root.querySelector('details#indice');
+      if (mobileIndex) {
+        mobileIndex.open = true;
+        [...mobileIndex.querySelectorAll('a')].find((link) => link.hash === hash)?.focus({ preventScroll: true });
       }
-      if (focused) {
-        const focusTarget = toc.open ? focused : toc.querySelector('summary');
-        focusTarget?.focus({ preventScroll: true });
-      }
+      focusedLink = null;
     }
     scheduleActivePart();
   }
-
-  media.addEventListener('change', placeIndex, { signal });
+  media.addEventListener('change', handleViewportChange, { signal });
   window.addEventListener('scroll', scheduleActivePart, { passive: true, signal });
   window.addEventListener('resize', scheduleActivePart, { passive: true, signal });
   root.addEventListener('load', scheduleActivePart, { capture: true, signal });
   const resizeObserver = new ResizeObserver(scheduleActivePart);
   resizeObserver.observe(root);
-  placeIndex();
+  scheduleActivePart();
 
   return () => {
     if (frame) cancelAnimationFrame(frame);
     resizeObserver.disconnect();
-    placeholder.replaceWith(toc);
-    toc.open = originalOpen;
-    sidebar.hidden = true;
-    delete layout.dataset.studyToc;
-    for (const { label, link, group } of parts) {
-      link.replaceWith(label);
-      group?.classList.remove('study-toc-part', 'study-toc-active');
-      if (group?.getAttribute('class') === '') group.removeAttribute('class');
-    }
+    activePart?.link.removeAttribute('aria-current');
+    activePart?.group?.classList.remove('study-toc-active');
   };
 }
 

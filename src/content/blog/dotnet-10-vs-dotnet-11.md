@@ -47,19 +47,14 @@ El resto obliga a separar factores. Channel empeora en un lote que crea y destru
 | Área / Subsistema | Qué se midió | Resultado (.NET 10 vs .NET 11) | Impacto / Nivel de confianza |
 |---|---|---|---|
 | JIT: GVM / objeto no escapante | Kernel con receptor conocido, ASM y asignación por operación | 69 → 3 bytes de kernel; 24 → 0 B/op; wrapper de 19 bytes en ambos | Eliminación local contrastada con IL, ASM y consumidor. No describe todo el polimorfismo ni el ejecutable. |
-| GC y memoria | Asignación frente a ArrayPool caliente; control LOH separado | Allocate: 100.059 B/op en ambos; ArrayPool: 21/20 B/op. La compactación reduce huecos en ambos runtimes | Reutilización frente a creación, no una mejora general del GC. El control LOH tiene un proceso por celda. |
-| Runtime Async | Cuatro tratamientos recompilados; lowering, asignaciones y tiempos | Dentro de .NET 11, Default11 → opt-in preview: SuspendedTask 184 → 256 B/op; AsyncChain 408 → 368 B/op | Cambios de lowering y memoria observados; tiempos exploratorios. El opt-in de la aplicación no es el predeterminado GA. |
+| GC y memoria | Asignación frente a ArrayPool caliente; control LOH separado | Allocate: 100.059 B/op en ambos; ArrayPool: 21/20 B/op. La compactación reduce huecos en ambos runtimes | Reutilización frente a creación, no una mejora general del GC. El control LOH ejecuta un proceso aislado por prueba. |
+| Runtime Async | Cuatro configuraciones recompiladas; lowering, asignaciones y tiempos | Dentro de .NET 11, Default11 → opt-in preview: SuspendedTask 184 → 256 B/op; AsyncChain 408 → 368 B/op | Cambios de lowering y memoria observados; tiempos exploratorios. El opt-in de la aplicación no es el predeterminado GA. |
 | Channels | Crear canal y tareas, procesar un lote y cerrar | Históricos +55,20% / +98,14%; controles +54,71% / +54,80% de tiempo | Signo adverso local repetido en un ciclo de vida corto. No mide throughput sostenido de una cola reutilizada ni aísla una causa del runtime. |
-| HTTP / ASP.NET Core | Endpoints con carga cerrada; cliente y servidor en el mismo portátil | 144 celdas canónicas; algunas comparaciones se invierten entre r0 y r1 | Comportamiento relativo bajo carga local compartida. No es capacidad aislada de Kestrel ni dimensionamiento de producción. |
-| EF Core | EF10/runtime10 → EF10/runtime11 → EF11/runtime11, SQLite local | Consulta simple con 1000 clientes: 2,871 → 4,048 → 2,915 ms; proyección: 3,231 → 2,861 → 2,809 ms | Medias de tres procesos por tratamiento. Separar runtime, ORM y SQLite; no hay una mejora uniforme. |
-| Native AOT | Tamaño del EXE y cinco arranques del mismo artefacto | Consola: 2.455.040 → 2.507.264 bytes; API: 10.780.160 → 10.946.560 bytes | Tamaños contrastados en archivos; una publicación por tratamiento. No se aisló el origen del aumento ni una distribución de builds. |
+| HTTP / ASP.NET Core | Endpoints con carga cerrada; cliente y servidor en el mismo portátil | 144 combinaciones medidas; algunas comparaciones se invierten entre repeticiones (r0 y r1) | Comportamiento relativo bajo carga local compartida. No es capacidad aislada de Kestrel ni dimensionamiento de producción. |
+| EF Core | EF10/runtime10 → EF10/runtime11 → EF11/runtime11, SQLite local | Consulta simple con 1000 clientes: 2,871 → 4,048 → 2,915 ms; proyección: 3,231 → 2,861 → 2,809 ms | Medias de tres ejecuciones independientes por configuración. Separar runtime, ORM y SQLite; no hay una mejora uniforme. |
+| Native AOT | Tamaño del EXE y cinco arranques del mismo artefacto | Consola: 2.455.040 → 2.507.264 bytes; API: 10.780.160 → 10.946.560 bytes | Tamaños contrastados en archivos; una compilación/publicación por versión. No se aisló el origen del aumento ni una distribución de builds. |
 
 Las filas no tienen el mismo diseño experimental ni el mismo grado de atribución. La [auditoría crítica](https://github.com/jyeste94/.NET11vs.NET11/blob/5c8a5419e8330afcd954d87be5547fc1fdf725b5/docs/final-audit.md) conserva los controles y sus límites. Mi criterio de migración sigue siendo validar contratos y dependencias primero, y medir después los caminos calientes de la aplicación.
-
-<figure class="study-cover">
-<a href="/blog/dotnet-10-vs-dotnet-11/cover-dotnet-study.png"><img src="/blog/dotnet-10-vs-dotnet-11/cover-dotnet-study.png" width="1200" height="630" alt="Portada conceptual: .NET 10 y .NET 11 recorren las capas de compilador, runtime y bibliotecas; no representa mediciones" /></a>
-<figcaption>Ilustración conceptual original para este artículo. Las capas ayudan a interpretar los resultados; no representan diferencias medidas de rendimiento. <a href="/blog/dotnet-10-vs-dotnet-11/cover-dotnet-study.png">Abrir portada PNG a tamaño completo</a>.</figcaption>
-</figure>
 
 <a id="rutas-lectura"></a>
 ## Por dónde empezar
@@ -141,6 +136,11 @@ Antes de tocar los números, conviene aclarar una confusión bastante común: ac
 
 <a id="que-es-dotnet"></a>
 ## 2. C#, SDK, CoreCLR y BCL: qué cambia en cada capa
+
+<figure class="study-cover">
+<a href="/blog/dotnet-10-vs-dotnet-11/cover-dotnet-study.png"><img src="/blog/dotnet-10-vs-dotnet-11/cover-dotnet-study.png" width="1200" height="630" alt="Portada conceptual: .NET 10 y .NET 11 recorren las capas de compilador, runtime y bibliotecas; no representa mediciones" /></a>
+<figcaption>Ilustración conceptual original para este artículo. Las capas ayudan a interpretar los resultados; no representan diferencias medidas de rendimiento. <a href="/blog/dotnet-10-vs-dotnet-11/cover-dotnet-study.png">Abrir portada PNG a tamaño completo</a>.</figcaption>
+</figure>
 
 Para atribuir una diferencia de rendimiento hay que separar cuatro ejes: versión del lenguaje, toolchain de construcción, runtime efectivo e implementaciones de biblioteca. Actualizar el SDK no equivale a actualizar todos ellos, y conservar los archivos C# no garantiza conservar el IL.
 

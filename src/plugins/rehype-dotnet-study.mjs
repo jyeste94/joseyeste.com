@@ -11,6 +11,43 @@ const text = (node) => node.value ?? (node.children ?? []).map(text).join('');
 export default function rehypeDotnetStudy() {
   return (tree, file) => {
     if (file.data.astro?.frontmatter?.title !== title) return;
+    // Derive both responsive TOCs from the canonical Markdown index at build time.
+    const parts = [];
+    let collectingIndex = false;
+    let chapterCount = 0;
+    for (const node of tree.children) {
+      if (node.type === 'raw' && /<details\s+id="indice">/.test(node.value)) {
+        collectingIndex = true;
+        continue;
+      }
+      if (!collectingIndex) continue;
+      if (node.type === 'raw' && /<\/details>/.test(node.value)) break;
+      if (node.type !== 'element') continue;
+      const label = node.tagName === 'p'
+        ? node.children.find((child) => child.tagName === 'strong' && /^Parte\s+[IVX]+\s+—/.test(text(child)))
+        : null;
+      if (label) {
+        const id = `parte-${text(label).match(/^Parte\s+([IVX]+)/)[1].toLowerCase()}`;
+        parts.push({ id, label: text(label), start: chapterCount + 1, chapters: [] });
+        node.properties ??= {};
+        node.properties.className = ['study-toc-part'];
+        node.children = node.children.map((child) => child === label
+          ? { type: 'element', tagName: 'a', properties: { href: `#${id}` }, children: [label] }
+          : child);
+      }
+      if (node.tagName === 'ol' && parts.length) {
+        for (const item of node.children.filter((child) => child.tagName === 'li')) {
+          const link = item.children.find((child) => child.tagName === 'a');
+          if (!link?.properties?.href?.startsWith('#')) file.fail('Invalid study chapter link.');
+          parts.at(-1).chapters.push({ href: link.properties.href, label: text(link) });
+          chapterCount++;
+        }
+      }
+    }
+    if (parts.map((part) => part.id).join(',') !== 'parte-i,parte-ii,parte-iii,parte-iv,parte-v' || chapterCount !== 24) {
+      file.fail('The study index must contain five parts and 24 chapters.');
+    }
+    file.data.astro.frontmatter.studyToc = parts;
     let section = title;
     let tableIndex = 0;
     function visit(parent) {

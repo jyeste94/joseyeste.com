@@ -14,7 +14,7 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content } = await post.render();
+const { Content, remarkPluginFrontmatter } = await post.render();
 
 if (!post) {
   return Astro.redirect("/blog");
@@ -28,6 +28,16 @@ const formatDate = (date: string) =>
   });
 
 const isDotnetStudy = post.slug === "dotnet-10-vs-dotnet-11";
+type StudyTocPart = {
+  id: string;
+  label: string;
+  start: number;
+  chapters: { href: string; label: string }[];
+};
+const studyToc: StudyTocPart[] = isDotnetStudy ? remarkPluginFrontmatter.studyToc : [];
+if (isDotnetStudy && !studyToc?.length) {
+  throw new Error("The .NET study requires its prerendered table of contents.");
+}
 const publicationDate = post.data.date.toISOString().slice(0, 10);
 const articleURL = new URL(Astro.url.pathname, Astro.site);
 if (isDotnetStudy && (!post.data.image || !post.data.imageAlt)) {
@@ -113,8 +123,18 @@ const studySchemaJSON = JSON.stringify(studySchema).replace(/[<>&\u2028\u2029]/g
 
       {isDotnetStudy ? (
         <div class="dotnet-study-layout">
-          <aside class="study-sidebar" hidden>
-            <nav aria-label="Índice del estudio .NET 10 frente a .NET 11" data-study-toc-slot />
+          <aside class="study-sidebar">
+            <nav aria-label="Índice del estudio .NET 10 frente a .NET 11" data-study-toc>
+              <p><strong>Índice de los 24 capítulos</strong></p>
+              {studyToc.map((part) => (
+                <>
+                  <p class="study-toc-part"><a href={`#${part.id}`}><strong>{part.label}</strong></a></p>
+                  <ol start={part.start}>
+                    {part.chapters.map((chapter) => <li><a href={chapter.href}>{chapter.label}</a></li>)}
+                  </ol>
+                </>
+              ))}
+            </nav>
           </aside>
           <article class="dotnet-study prose prose-lg mx-auto mt-6 text-gray-800 prose-headings:text-gray-900 prose-a:text-yellow-600 dark:prose-invert dark:text-gray-50 dark:prose-headings:text-white dark:prose-a:text-yellow-300">
             <Content />

@@ -3,7 +3,7 @@
 </script>
 
 <style is:global>
-  /* The study alone can grow into a two-column reader after TOC enhancement. */
+  /* CSS supplies the responsive reader even when JavaScript is unavailable. */
   .dotnet-study-layout,
   article.dotnet-study {
     --study-paper: #fff;
@@ -28,7 +28,7 @@
     outline: 3px solid var(--study-focus);
     outline-offset: 4px;
   }
-  .dotnet-study-layout #indice,
+  .dotnet-study-layout :is(#indice, [data-study-toc]),
   article.dotnet-study #evidencias-investigacion {
     padding: 1rem;
     border: 1px solid var(--study-line);
@@ -49,22 +49,23 @@
   .dotnet-study-layout .study-toc-active + ol {
     border-inline-start: 2px solid var(--study-focus);
   }
-  .study-sidebar[hidden] { display: none; }
+  .dotnet-study-layout .study-sidebar { display: none; }
   @media (min-width: 1024px) {
-    #blog.dotnet-study-container:has(.dotnet-study-layout[data-study-toc="desktop"]) {
+    #blog.dotnet-study-container:has(.dotnet-study-layout) {
       max-width: 80rem;
     }
-    .dotnet-study-layout[data-study-toc="desktop"] {
+    .dotnet-study-layout {
       display: grid;
       grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
       align-items: start;
       gap: clamp(1.5rem, 3vw, 3rem);
     }
-    .dotnet-study-layout[data-study-toc="desktop"] > article {
+    .dotnet-study-layout > article {
       inline-size: 100%;
       margin-block: 0;
     }
     .dotnet-study-layout .study-sidebar {
+      display: block;
       position: sticky;
       top: var(--study-offset);
       min-inline-size: 0;
@@ -78,8 +79,7 @@
       line-height: 1.6;
       overflow-wrap: anywhere;
     }
-    .study-sidebar #indice { padding: 1rem; }
-    .study-sidebar summary { font-size: 1rem; }
+    .study-sidebar [data-study-toc] { padding: 1rem; }
     .study-sidebar p { margin-block: 1rem 0.5rem; }
     .study-sidebar ol { margin-block: 0.5rem 1rem; padding-inline-start: 1.5rem; list-style: decimal; }
     .study-sidebar li { padding-inline-start: 0.125rem; margin-block: 0.375rem; }
